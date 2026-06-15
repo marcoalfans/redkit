@@ -2758,6 +2758,7 @@ const severityFromScore = (s) => {
   if (s < 9) return ['high', 'High'];
   return ['critical', 'Critical'];
 };
+const SEV_COLOR = { none: '#8b949e', low: '#22c55e', medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
 
 // ----- CVSS per-option icons: AV keeps chandanbn sprite; the rest are clean inline SVGs -----
 const G = '#23a34a', PG = '#cdeed7', D = '#1f2328';  // deep green (High), pale green (Low), dark outline
@@ -2859,7 +2860,9 @@ TOOLS['cvss31'] = {
     const update = () => {
       const score = calcCVSS31(sel);
       const [cls, label] = severityFromScore(score);
-      $('#cvss31-score').textContent = score == null ? '-' : score.toFixed(1);
+      const scoreEl = $('#cvss31-score');
+      scoreEl.textContent = score == null ? '-' : score.toFixed(1);
+      scoreEl.style.color = SEV_COLOR[cls] || 'var(--text-mute)';
       const sev = $('#cvss31-sev');
       sev.className = `severity-badge sev-${cls}`;
       sev.textContent = label;
@@ -2961,7 +2964,9 @@ TOOLS['cvss40'] = {
     const update = () => {
       const score = calcCVSS40(sel);
       const [cls, label] = severityFromScore(score);
-      $('#cvss40-score').textContent = score == null ? '-' : score.toFixed(1);
+      const scoreEl = $('#cvss40-score');
+      scoreEl.textContent = score == null ? '-' : score.toFixed(1);
+      scoreEl.style.color = SEV_COLOR[cls] || 'var(--text-mute)';
       const sev = $('#cvss40-sev');
       sev.className = `severity-badge sev-${cls}`;
       sev.textContent = label;
@@ -3133,9 +3138,10 @@ TOOLS['report-template'] = {
       raw.replace(/^CVSS:[0-9.]+\//i, '').split('/').forEach(p => { const a = p.split(':'); if (a[0] && a[1]) sel[a[0].trim().toUpperCase()] = a[1].trim().toUpperCase(); });
       const score = ver === '4.0' ? calcCVSS40(sel) : calcCVSS31(sel);
       const scoreEl = $('#rt-score'), badge = $('#rt-sevbadge');
-      if (score == null) { scoreEl.textContent = '—'; badge.className = 'severity-badge sev-none'; badge.textContent = '—'; return; }
+      if (score == null || isNaN(score)) { scoreEl.textContent = '—'; scoreEl.style.color = 'var(--text-mute)'; badge.className = 'severity-badge sev-none'; badge.textContent = '—'; return; }
       const [cls, label] = severityFromScore(score);
       scoreEl.textContent = score.toFixed(1);
+      scoreEl.style.color = SEV_COLOR[cls] || 'var(--text-mute)';
       badge.className = 'severity-badge sev-' + cls;
       badge.textContent = label;
     };
@@ -3269,19 +3275,28 @@ TOOLS['notationer'] = {
       ['NOSPACEUPPER',         w => w.map(up).join('')],
     ];
     const out = $('#not-out');
+    let cur = 0;
     const render = () => {
       const lines = $('#not-in').value.split('\n').map(l => l.trim()).filter(Boolean);
       if (!lines.length) { out.innerHTML = ''; return; }
       const words = lines.map(toWords);
-      out.innerHTML = FORMATS.map(([name, fn]) => {
+      out.innerHTML = `
+        <div class="card">
+          <div class="not-formats">${FORMATS.map(([name], i) => `<button class="not-fmt" data-i="${i}">${escapeHtml(name)}</button>`).join('')}</div>
+          <div class="result-header"><h4 class="not-fmt-title"></h4><button class="btn btn-ghost" id="not-copy">Copy</button></div>
+          <pre class="not-pre mono" id="not-result"></pre>
+        </div>`;
+      const show = (i) => {
+        cur = i;
+        const [name, fn] = FORMATS[i];
         const conv = words.map(fn);
-        return `
-          <div class="card">
-            <div class="result-header"><h4>${name}</h4><button class="btn btn-ghost" data-copy="${encodeURIComponent(conv.join('\n'))}">Copy</button></div>
-            <pre class="not-pre mono">${conv.map(escapeHtml).join('\n')}</pre>
-          </div>`;
-      }).join('');
-      $$('[data-copy]', out).forEach(b => b.addEventListener('click', () => copy(decodeURIComponent(b.dataset.copy))));
+        $('#not-result', out).textContent = conv.join('\n');
+        $('.not-fmt-title', out).textContent = name;
+        $$('.not-fmt', out).forEach((b, j) => b.classList.toggle('active', j === i));
+      };
+      $$('.not-fmt', out).forEach(b => b.addEventListener('click', () => show(+b.dataset.i)));
+      $('#not-copy', out).addEventListener('click', () => copy($('#not-result', out).textContent));
+      show(Math.min(cur, FORMATS.length - 1));
     };
     $('#not-in').addEventListener('input', render);
     render();

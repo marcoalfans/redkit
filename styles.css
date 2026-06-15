@@ -1017,3 +1017,9 @@ textarea {
 .rt-url-rm:hover { border-color: var(--danger); color: var(--danger); }
 .rt-url-add { font-size: 12px; padding: 7px 12px; }
 @media (max-width: 880px) { .rt-cvss-row { grid-template-columns: 1fr 1fr; } }
+
+/* ===== Notationer format chips ===== */
+.not-formats { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.not-fmt { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 11px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); cursor: pointer; transition: 0.12s; }
+.not-fmt:hover { border-color: var(--accent); color: var(--text); }
+.not-fmt.active { background: var(--accent); border-color: var(--accent); color: #fff; }

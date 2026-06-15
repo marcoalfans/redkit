@@ -718,7 +718,8 @@ function macroVector(cvssSelected) {
 
   return function (sel) {
     var baseKeys = ['AV','AC','AT','PR','UI','VC','VI','VA','SC','SI','SA'];
-    if (!baseKeys.every(function (k) { return sel[k]; })) return null;
+    var ALLOWED = { AV:'NALP', AC:'LH', AT:'NP', PR:'NLH', UI:'NPA', VC:'HLN', VI:'HLN', VA:'HLN', SC:'HLN', SI:'HLN', SA:'HLN' };
+    if (!baseKeys.every(function (k) { return sel[k] && ALLOWED[k].indexOf(sel[k]) !== -1; })) return null;
     var all = baseKeys.concat(['E','CR','IR','AR','MAV','MAC','MAT','MPR','MUI','MVC','MVI','MVA','MSC','MSI','MSA','S','AU','R','V','RE','U']);
     var full = {}; all.forEach(function (k) { full[k] = 'X'; }); baseKeys.forEach(function (k) { full[k] = sel[k]; });
     try {
