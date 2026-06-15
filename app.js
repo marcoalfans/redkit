@@ -2764,9 +2764,9 @@ const G = '#23a34a', PG = '#cdeed7', D = '#1f2328';  // deep green (High), pale 
 const CVSS_SVG = {
   bolt: `<svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   puzzle: `<svg viewBox="0 0 24 24"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
-  ban: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M6 6l12 12" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  ban: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M6 6l12 12" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
   flag: `<svg viewBox="0 0 24 24"><path d="M6 21V4" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M6 4h11l-2 4 2 4H6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
-  unlock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 0 1 7-2.6" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  unlock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 0 1 7-2.6" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
   user: `<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   usershield: `<svg viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.3" fill="none" stroke="${D}" stroke-width="1.6"/><path d="M3.5 20.5a6.5 6.5 0 0 1 10-5" fill="none" stroke="${D}" stroke-width="1.6"/><path d="M18 12.5l3.2 1.1v2.9c0 2.1-1.6 3.2-3.2 3.7-1.6-.5-3.2-1.6-3.2-3.7v-2.9z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   pointer: `<svg viewBox="0 0 24 24"><path d="M5 3l6 18 2-7 7-2z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
@@ -2774,9 +2774,9 @@ const CVSS_SVG = {
   boxshift: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="10" height="10" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M11 18h8M19 18l-3-3M19 18l-3 3" fill="none" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   lock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 1 1 8 0v3" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
   pencil: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
-  penciloff: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 3l18 18" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  penciloff: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${PG}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 3l18 18" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   power: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-  poweroff: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M4 4l16 16" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  poweroff: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M4 4l16 16" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   lockLow: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 1 1 8 0v3" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
   pencilLow: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${PG}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   powerLow: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
@@ -3042,18 +3042,30 @@ TOOLS['report-template'] = {
             <label>Vulnerability Name</label>
             <input type="text" id="rt-name" placeholder="e.g. Stored XSS in user profile bio">
           </div>
+          <div class="field">
+            <label>Vulnerability Type</label>
+            <select id="rt-type">
+              ${VULN_TYPES.map(t => `<option>${t}</option>`).join('')}
+            </select>
+          </div>
           <div class="field-row">
             <div class="field">
-              <label>Vulnerability Type</label>
-              <select id="rt-type">
-                ${VULN_TYPES.map(t => `<option>${t}</option>`).join('')}
+              <label>CVSS Version</label>
+              <select id="rt-cvssver">
+                <option value="3.1">CVSS 3.1</option>
+                <option value="4.0">CVSS 4.0</option>
               </select>
             </div>
             <div class="field">
-              <label>Severity</label>
-              <select id="rt-sev">
-                <option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option><option>Informational</option>
-              </select>
+              <label>CVSS Vector <span style="color:var(--text-mute);font-weight:400">(paste)</span></label>
+              <input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">
+            </div>
+          </div>
+          <div class="field">
+            <label>Score &amp; Severity <span style="color:var(--text-mute);font-weight:400">(auto)</span></label>
+            <div class="rt-cvss-out">
+              <span class="rt-score" id="rt-score">—</span>
+              <span class="severity-badge sev-none" id="rt-sevbadge">—</span>
             </div>
           </div>
           <div class="field">
@@ -3099,12 +3111,34 @@ TOOLS['report-template'] = {
     `;
   },
   init() {
+    const computeCvss = () => {
+      const raw = $('#rt-vector').value.trim();
+      const vm = raw.match(/CVSS:(3\.1|3\.0|4\.0)/i);
+      if (vm) $('#rt-cvssver').value = vm[1].charAt(0) === '4' ? '4.0' : '3.1';
+      const ver = $('#rt-cvssver').value;
+      const sel = {};
+      raw.replace(/^CVSS:[0-9.]+\//i, '').split('/').forEach(p => { const a = p.split(':'); if (a[0] && a[1]) sel[a[0].trim().toUpperCase()] = a[1].trim().toUpperCase(); });
+      const score = ver === '4.0' ? calcCVSS40(sel) : calcCVSS31(sel);
+      const scoreEl = $('#rt-score'), badge = $('#rt-sevbadge');
+      if (score == null) { scoreEl.textContent = '—'; badge.className = 'severity-badge sev-none'; badge.textContent = '—'; return; }
+      const [cls, label] = severityFromScore(score);
+      scoreEl.textContent = score.toFixed(1);
+      badge.className = 'severity-badge sev-' + cls;
+      badge.textContent = label;
+    };
+    $('#rt-vector').addEventListener('input', computeCvss);
+    $('#rt-cvssver').addEventListener('change', computeCvss);
+
     $('#rt-gen').addEventListener('click', () => {
+      const score = $('#rt-score').textContent;
+      const severity = $('#rt-sevbadge').textContent;
+      const ver = $('#rt-cvssver').value;
+      const vector = $('#rt-vector').value.trim();
+      const sevLine = (severity && severity !== '—') ? `${severity}${score !== '—' ? ` — CVSS ${ver} ${score}` : ''}` : 'N/A';
       const fields = {
         name: $('#rt-name').value,
         type: $('#rt-type').value,
         url: $('#rt-url').value,
-        sev: $('#rt-sev').value,
         desc: $('#rt-desc').value,
         impact: $('#rt-impact').value,
         rem: $('#rt-rem').value,
@@ -3119,11 +3153,14 @@ ${fields.name}
 ## Vulnerability Type
 ${fields.type}
 
+## Severity
+${sevLine}
+
+## CVSS Vector
+${vector ? '`' + vector + '`' : 'N/A'}
+
 ## Affected URL
 ${fields.url}
-
-## Severity
-${fields.sev}
 
 ## Description
 ${fields.desc}
@@ -3144,7 +3181,10 @@ ${fields.poc}
       $('#rt-results').style.display = 'block';
     });
     $('#rt-clear').addEventListener('click', () => {
-      ['rt-name','rt-url','rt-desc','rt-impact','rt-rem','rt-ref','rt-poc'].forEach(id => $(`#${id}`).value = '');
+      ['rt-name','rt-url','rt-vector','rt-desc','rt-impact','rt-rem','rt-ref','rt-poc'].forEach(id => $(`#${id}`).value = '');
+      $('#rt-score').textContent = '—';
+      $('#rt-sevbadge').className = 'severity-badge sev-none';
+      $('#rt-sevbadge').textContent = '—';
     });
     $('#rt-copy').addEventListener('click', () => copy($('#rt-output').textContent));
     $('#rt-dl').addEventListener('click', () => {
