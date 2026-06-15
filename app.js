@@ -3048,9 +3048,9 @@ TOOLS['report-template'] = {
               ${VULN_TYPES.map(t => `<option>${t}</option>`).join('')}
             </select>
           </div>
-          <div class="field-row">
+          <div class="rt-cvss-row">
             <div class="field">
-              <label>CVSS Version</label>
+              <label>CVSS Ver.</label>
               <select id="rt-cvssver">
                 <option value="3.1">CVSS 3.1</option>
                 <option value="4.0">CVSS 4.0</option>
@@ -3060,17 +3060,24 @@ TOOLS['report-template'] = {
               <label>CVSS Vector <span style="color:var(--text-mute);font-weight:400">(paste)</span></label>
               <input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">
             </div>
-          </div>
-          <div class="field">
-            <label>Score &amp; Severity <span style="color:var(--text-mute);font-weight:400">(auto)</span></label>
-            <div class="rt-cvss-out">
-              <span class="rt-score" id="rt-score">—</span>
-              <span class="severity-badge sev-none" id="rt-sevbadge">—</span>
+            <div class="field">
+              <label>Score</label>
+              <div class="rt-out-box"><span class="rt-score" id="rt-score">—</span></div>
+            </div>
+            <div class="field">
+              <label>Severity</label>
+              <div class="rt-out-box"><span class="severity-badge sev-none" id="rt-sevbadge">—</span></div>
             </div>
           </div>
           <div class="field">
-            <label>Affected URL</label>
-            <input type="text" id="rt-url" placeholder="https://target.com/affected/endpoint">
+            <label>Affected URL(s)</label>
+            <div id="rt-urls">
+              <div class="rt-url-row">
+                <input type="text" class="rt-url" placeholder="https://target.com/affected/endpoint">
+                <button type="button" class="rt-url-rm" title="Remove">&times;</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary rt-url-add" id="rt-url-add">+ Add URL</button>
           </div>
           <div class="field">
             <label>Description</label>
@@ -3129,16 +3136,33 @@ TOOLS['report-template'] = {
     $('#rt-vector').addEventListener('input', computeCvss);
     $('#rt-cvssver').addEventListener('change', computeCvss);
 
+    // Affected URL(s): one or more, add/remove rows
+    const urlsBox = $('#rt-urls');
+    const wireRm = (btn) => btn.addEventListener('click', () => {
+      if (urlsBox.children.length > 1) btn.closest('.rt-url-row').remove();
+      else btn.closest('.rt-url-row').querySelector('.rt-url').value = '';
+    });
+    $$('.rt-url-rm', urlsBox).forEach(wireRm);
+    $('#rt-url-add').addEventListener('click', () => {
+      const row = document.createElement('div');
+      row.className = 'rt-url-row';
+      row.innerHTML = '<input type="text" class="rt-url" placeholder="https://target.com/affected/endpoint"><button type="button" class="rt-url-rm" title="Remove">&times;</button>';
+      urlsBox.appendChild(row);
+      wireRm(row.querySelector('.rt-url-rm'));
+      row.querySelector('.rt-url').focus();
+    });
+
     $('#rt-gen').addEventListener('click', () => {
       const score = $('#rt-score').textContent;
       const severity = $('#rt-sevbadge').textContent;
       const ver = $('#rt-cvssver').value;
       const vector = $('#rt-vector').value.trim();
       const sevLine = (severity && severity !== '—') ? `${severity}${score !== '—' ? ` — CVSS ${ver} ${score}` : ''}` : 'N/A';
+      const urls = $$('.rt-url').map(i => i.value.trim()).filter(Boolean);
+      const urlOut = urls.length === 0 ? 'N/A' : urls.length === 1 ? urls[0] : urls.map(u => '- ' + u).join('\n');
       const fields = {
         name: $('#rt-name').value,
         type: $('#rt-type').value,
-        url: $('#rt-url').value,
         desc: $('#rt-desc').value,
         impact: $('#rt-impact').value,
         rem: $('#rt-rem').value,
@@ -3160,7 +3184,7 @@ ${sevLine}
 ${vector ? '`' + vector + '`' : 'N/A'}
 
 ## Affected URL
-${fields.url}
+${urlOut}
 
 ## Description
 ${fields.desc}
@@ -3181,7 +3205,9 @@ ${fields.poc}
       $('#rt-results').style.display = 'block';
     });
     $('#rt-clear').addEventListener('click', () => {
-      ['rt-name','rt-url','rt-vector','rt-desc','rt-impact','rt-rem','rt-ref','rt-poc'].forEach(id => $(`#${id}`).value = '');
+      ['rt-name','rt-vector','rt-desc','rt-impact','rt-rem','rt-ref','rt-poc'].forEach(id => $(`#${id}`).value = '');
+      $$('.rt-url-row').slice(1).forEach(r => r.remove());
+      $$('.rt-url').forEach(i => i.value = '');
       $('#rt-score').textContent = '—';
       $('#rt-sevbadge').className = 'severity-badge sev-none';
       $('#rt-sevbadge').textContent = '—';
