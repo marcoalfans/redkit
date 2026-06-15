@@ -958,3 +958,7 @@ textarea {
 .welcome-item { cursor: pointer; width: 100%; text-align: left; font-family: inherit; }
 .welcome-info h3 { font-size: 15px; margin-bottom: 4px; color: var(--text); }
 .welcome-info p { font-size: 12px; color: var(--text-mute); }
+
+/* ===== Footer ===== */
+.rk-footer { flex-shrink: 0; padding: 12px 24px; border-top: 1px solid var(--border); background: var(--bg-elev); display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
+.rk-footer .muted { opacity: 0.8; }
