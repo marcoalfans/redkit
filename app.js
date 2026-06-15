@@ -2875,28 +2875,12 @@ const CVSS40_METRICS = {
   SA: { name: 'Subsequent Availability', opts: [['H','High'],['L','Low'],['N','None']] },
 };
 
-// Simplified CVSS 4.0 scoring approximation (rough - official requires full lookup table)
-const calcCVSS40 = (sel) => {
-  const required = Object.keys(CVSS40_METRICS);
-  if (!required.every(k => sel[k])) return null;
-  const v = (m, h, l, n) => sel[m] === 'H' ? h : sel[m] === 'L' ? l : n;
-  const av = { N: 1.0, A: 0.7, L: 0.5, P: 0.2 }[sel.AV];
-  const ac = sel.AC === 'L' ? 1.0 : 0.5;
-  const at = sel.AT === 'N' ? 1.0 : 0.5;
-  const pr = { N: 1.0, L: 0.7, H: 0.4 }[sel.PR];
-  const ui = { N: 1.0, P: 0.7, A: 0.5 }[sel.UI];
-  const vImpact = (v('VC',1,0.5,0) + v('VI',1,0.5,0) + v('VA',1,0.5,0)) / 3;
-  const sImpact = (v('SC',1,0.5,0) + v('SI',1,0.5,0) + v('SA',1,0.5,0)) / 3;
-  const impact = Math.max(vImpact, sImpact * 0.85);
-  const exploit = av * ac * at * pr * ui;
-  let score = (impact * 6.5 + exploit * 3.5);
-  if (impact === 0) score = 0;
-  return Math.min(10, Math.round(score * 10) / 10);
-};
+// CVSS 4.0 — official FIRST.org base scoring (bundled in cvss4.js from FIRSTdotorg/cvss-v4-calculator)
+const calcCVSS40 = (sel) => (window.calcCVSS40Official ? window.calcCVSS40Official(sel) : null);
 
 TOOLS['cvss40'] = {
   title: 'CVSS 4.0 Calculator',
-  desc: 'Calculate CVSS 4.0 base score (simplified)',
+  desc: 'Calculate CVSS 4.0 base score (official FIRST.org scoring)',
   render() {
     const renderMetric = (key) => {
       const m = CVSS40_METRICS[key];
@@ -2936,7 +2920,7 @@ TOOLS['cvss40'] = {
               <button class="btn btn-secondary" id="cvss40-copy-vec">Copy Vector</button>
               <button class="btn btn-secondary" id="cvss40-copy-score">Copy Score</button>
             </div>
-            <p style="margin-top:14px;color:var(--text-mute);font-size:11px">Note: This is a simplified approximation. For authoritative scoring, use the official FIRST.org CVSS 4.0 calculator.</p>
+            <p style="margin-top:14px;color:var(--text-mute);font-size:11px">Official FIRST.org CVSS 4.0 base scoring (MacroVector lookup).</p>
           </div>
         </div>
       </div>
@@ -3137,6 +3121,68 @@ ${fields.poc}
       const name = ($('#rt-name').value || 'report').toLowerCase().replace(/[^a-z0-9]+/g, '-');
       download(`${name}.md`, $('#rt-output').textContent, 'text/markdown');
     });
+  }
+};
+
+// ===== NOTATIONER (code naming-convention converter) =====
+TOOLS['notationer'] = {
+  title: 'Notationer',
+  desc: 'Convert identifiers between naming conventions — camelCase, snake_case, kebab-case, and more',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Input</div>
+          <div class="field">
+            <label>One identifier or phrase per line</label>
+            <textarea id="not-in" placeholder="userProfileId\nmax retry count\nHTTP-Response-Code"></textarea>
+          </div>
+        </div>
+        <div id="not-out"></div>
+      </div>
+    `;
+  },
+  init() {
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+    const up = s => s.toUpperCase();
+    const toWords = s => s
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .replace(/[_\-.\/\\\s]+/g, ' ')
+      .trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const FORMATS = [
+      ['camelCase',            w => w.map((x, i) => i ? cap(x) : x).join('')],
+      ['PascalCase',           w => w.map(cap).join('')],
+      ['snake_case',           w => w.join('_')],
+      ['SCREAMING_SNAKE_CASE', w => w.map(up).join('_')],
+      ['kebab-case',           w => w.join('-')],
+      ['Train-Case',           w => w.map(cap).join('-')],
+      ['dot.case',             w => w.join('.')],
+      ['path/case',            w => w.join('/')],
+      ['Title Case',           w => w.map(cap).join(' ')],
+      ['Sentence case',        w => w.length ? cap(w[0]) + (w.length > 1 ? ' ' + w.slice(1).join(' ') : '') : ''],
+      ['lower case',           w => w.join(' ')],
+      ['UPPER CASE',           w => w.map(up).join(' ')],
+      ['nospacelower',         w => w.join('')],
+      ['NOSPACEUPPER',         w => w.map(up).join('')],
+    ];
+    const out = $('#not-out');
+    const render = () => {
+      const lines = $('#not-in').value.split('\n').map(l => l.trim()).filter(Boolean);
+      if (!lines.length) { out.innerHTML = ''; return; }
+      const words = lines.map(toWords);
+      out.innerHTML = FORMATS.map(([name, fn]) => {
+        const conv = words.map(fn);
+        return `
+          <div class="card">
+            <div class="result-header"><h4>${name}</h4><button class="btn btn-ghost" data-copy="${encodeURIComponent(conv.join('\n'))}">Copy</button></div>
+            <pre class="not-pre mono">${conv.map(escapeHtml).join('\n')}</pre>
+          </div>`;
+      }).join('');
+      $$('[data-copy]', out).forEach(b => b.addEventListener('click', () => copy(decodeURIComponent(b.dataset.copy))));
+    };
+    $('#not-in').addEventListener('input', render);
+    render();
   }
 };
 

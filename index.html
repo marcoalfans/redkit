@@ -17,7 +17,6 @@
     <a href="#" class="rk-brand"><span class="accent">~/</span>redkit<span class="muted">.kac0</span></a>
     <nav class="rk-tabs" id="rkTabs">
         <button class="rk-tab" data-cat="recon">Recon</button>
-        <button class="rk-tab" data-cat="encoding">Encoding</button>
         <button class="rk-tab" data-cat="crypto">Crypto</button>
         <button class="rk-tab" data-cat="payloads">Payloads</button>
         <button class="rk-tab" data-cat="reporting">Reporting</button>
@@ -48,7 +47,7 @@
           <button class="nav-item" data-tool="url-parser">URL Parser</button>
           <button class="nav-item" data-tool="ip-info">IP / Domain Info</button>
         </div>
-        <div class="nav-section" data-cat="encoding">
+        <div class="nav-section" data-cat="crypto">
           <div class="nav-title">Encoding</div>
           <button class="nav-item" data-tool="base64">Base64 Encode/Decode</button>
           <button class="nav-item" data-tool="url-encode">URL Encode/Decode</button>
@@ -61,7 +60,7 @@
           <button class="nav-item" data-tool="morse">Morse Code</button>
         </div>
         <div class="nav-section" data-cat="crypto">
-          <div class="nav-title">Crypto & Hash</div>
+          <div class="nav-title">Hashing</div>
           <button class="nav-item" data-tool="hash">Hash Generator</button>
           <button class="nav-item" data-tool="hash-id">Hash Identifier</button>
           <button class="nav-item" data-tool="jwt">JWT Decoder / Editor</button>
@@ -84,6 +83,7 @@
           <button class="nav-item" data-tool="cvss31">CVSS 3.1 Calculator</button>
           <button class="nav-item" data-tool="cvss40">CVSS 4.0 Calculator</button>
           <button class="nav-item" data-tool="report-template">Report Template</button>
+          <button class="nav-item" data-tool="notationer">Notationer</button>
         </div>
       </nav>
     </aside>
@@ -113,6 +113,7 @@
     </div>
   </div>
 
+  <script src="cvss4.js"></script>
   <script src="app.js"></script>
   <script>
     (function () {
@@ -136,11 +137,11 @@
 
       // ----- landing / home -----
       function homeHTML() {
-        const cards = sections.map(s => {
-          const cat = s.dataset.cat;
-          const title = s.querySelector('.nav-title').textContent;
-          const n = s.querySelectorAll('.nav-item').length;
-          return '<button class="welcome-item" data-go="' + cat + '"><div class="welcome-info"><h3>' + title + '</h3><p>' + n + ' tools</p></div></button>';
+        const cards = tabs.map(t => {
+          const cat = t.dataset.cat;
+          const label = t.textContent.trim();
+          const n = sections.filter(s => s.dataset.cat === cat).reduce((a, s) => a + s.querySelectorAll('.nav-item').length, 0);
+          return '<button class="welcome-item" data-go="' + cat + '"><div class="welcome-info"><h3>' + label + '</h3><p>' + n + ' tools</p></div></button>';
         }).join('');
         return '<div class="welcome"><div class="welcome-card"><h1>RedKit</h1><p>Pentest &amp; Red Team Toolkit — pick a category to get started.</p><div class="welcome-grid">' + cards + '</div></div></div>';
       }

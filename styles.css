@@ -968,3 +968,6 @@ textarea {
 /* ===== Footer ===== */
 .rk-footer { flex-shrink: 0; padding: 12px 24px; border-top: 1px solid var(--border); background: var(--bg-elev); display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
 .rk-footer .muted { opacity: 0.8; }
+
+/* ===== Notationer output ===== */
+.not-pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; line-height: 1.7; color: var(--text); }
