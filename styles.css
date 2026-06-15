@@ -46,6 +46,7 @@
 
 html, body {
   height: 100%;
+  overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -206,7 +207,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 }
 
 .content {
-  flex: 0 0 auto;
+  flex: 1 0 auto;
   padding: 28px 32px;
 }
 
