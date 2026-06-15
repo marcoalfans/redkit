@@ -113,6 +113,7 @@
     </div>
   </div>
 
+  <script src="cvss_tips.js"></script>
   <script src="cvss4.js"></script>
   <script src="app.js"></script>
   <script>
@@ -201,6 +202,28 @@
 
       const ham = document.getElementById('rkHamburger');
       if (ham) ham.addEventListener('click', () => sidebar && sidebar.classList.toggle('open'));
+
+      // floating tooltips (CVSS metric/option descriptions)
+      const tipEl = document.createElement('div');
+      tipEl.className = 'rk-tip';
+      document.body.appendChild(tipEl);
+      const showTip = (el) => {
+        const txt = el.getAttribute('data-tip');
+        if (!txt) return;
+        tipEl.textContent = txt;
+        tipEl.style.display = 'block';
+        const r = el.getBoundingClientRect();
+        const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+        let left = r.left + r.width / 2 - tw / 2;
+        left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+        let top = r.top - th - 10;
+        if (top < 8) top = r.bottom + 10;
+        tipEl.style.left = left + 'px';
+        tipEl.style.top = top + 'px';
+      };
+      const hideTip = () => { tipEl.style.display = 'none'; };
+      document.addEventListener('mouseover', (e) => { const el = e.target.closest('[data-tip]'); if (el && el.getAttribute('data-tip')) showTip(el); });
+      document.addEventListener('mouseout', (e) => { if (e.target.closest('[data-tip]')) hideTip(); });
 
       // ----- search (Cmd/Ctrl + K) -----
       const INDEX = items.map(it => ({ key: it.dataset.tool, title: it.textContent.trim(), cat: it.closest('.nav-section').querySelector('.nav-title').textContent }));

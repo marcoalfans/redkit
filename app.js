@@ -2801,6 +2801,9 @@ const optIcon = (key, val) => {
   const t = cvssOptToken(key, val);
   return t && CVSS_SVG[t] ? '<span class="cvico-wrap cvico-svg">' + CVSS_SVG[t] + '</span>' : '';
 };
+const TT_ALIAS = { C: 'VC', I: 'VI', A: 'VA' };
+const ttMetric = (k) => { const t = window.CVSS_TT || {}; return t[k] || t[TT_ALIAS[k]] || ''; };
+const ttOption = (k, v) => { const t = window.CVSS_TT || {}; return t[k + ':' + v] || t[(TT_ALIAS[k] || k) + ':' + v] || ''; };
 const readCvssHash = (ver, keys) => {
   const m = location.hash.match(new RegExp('CVSS:' + ver.replace('.', '\\.') + '/([^#?]*)'));
   const out = {};
@@ -2820,9 +2823,9 @@ TOOLS['cvss31'] = {
       const m = CVSS31_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label">${m.name} (${key})</div>
+          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})<span class="tip-i">?</span></div>
           <div class="metric-options" data-key="${key}">
-            ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}">${optIcon(key, v)}${l}</button>`).join('')}
+            ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}" data-tip="${escapeHtml(ttOption(key, v))}">${optIcon(key, v)}${l}</button>`).join('')}
           </div>
         </div>
       `;
@@ -2914,9 +2917,9 @@ TOOLS['cvss40'] = {
       const m = CVSS40_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label">${m.name} (${key})</div>
+          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})<span class="tip-i">?</span></div>
           <div class="metric-options" data-key="${key}">
-            ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}">${optIcon(key, v)}${l}</button>`).join('')}
+            ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}" data-tip="${escapeHtml(ttOption(key, v))}">${optIcon(key, v)}${l}</button>`).join('')}
           </div>
         </div>
       `;
@@ -2948,7 +2951,6 @@ TOOLS['cvss40'] = {
               <button class="btn btn-secondary" id="cvss40-copy-vec">Copy Vector</button>
               <button class="btn btn-secondary" id="cvss40-copy-score">Copy Score</button>
             </div>
-            <p style="margin-top:14px;color:var(--text-mute);font-size:11px">Official FIRST.org CVSS 4.0 base scoring (MacroVector lookup).</p>
           </div>
         </div>
       </div>
