@@ -2759,6 +2759,31 @@ const severityFromScore = (s) => {
   return ['critical', 'Critical'];
 };
 
+// ----- CVSS metric icons + shareable URL-hash sync (shared by 3.1 & 4.0) -----
+const CVSS_ICONS = {
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>',
+  gauge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19a8 8 0 1 1 16 0"/><path d="M12 19l4-5"/></svg>',
+  puzzle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="4"/><path d="M11 11l9 9M16 16l2-2"/></svg>',
+  pointer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3l6 18 2-7 7-2z"/></svg>',
+  scope: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 7h4l11 10h3M3 17h4L18 7h3"/><path d="M18 4l3 3-3 3M18 14l3 3-3 3"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>',
+};
+const CVSS_ICON_MAP = { AV:'globe', AC:'gauge', AT:'puzzle', PR:'key', UI:'pointer', S:'scope', C:'lock', I:'pencil', A:'bolt', VC:'lock', VI:'pencil', VA:'bolt', SC:'lock', SI:'pencil', SA:'bolt' };
+const cvssIcon = (k) => '<span class="metric-ico">' + (CVSS_ICONS[CVSS_ICON_MAP[k]] || '') + '</span>';
+const readCvssHash = (ver, keys) => {
+  const m = location.hash.match(new RegExp('CVSS:' + ver.replace('.', '\\.') + '/([^#?]*)'));
+  const out = {};
+  if (m) m[1].split('/').forEach(p => { const a = p.split(':'); if (a[0] && a[1] && keys.includes(a[0])) out[a[0]] = a[1]; });
+  return out;
+};
+const writeCvssHash = (toolKey, ver, sel, order) => {
+  const pairs = order.filter(k => sel[k]).map(k => k + ':' + sel[k]);
+  history.replaceState(null, '', pairs.length ? ('#/' + toolKey + '/CVSS:' + ver + '/' + pairs.join('/')) : ('#/' + toolKey));
+};
+
 TOOLS['cvss31'] = {
   title: 'CVSS 3.1 Calculator',
   desc: 'Calculate Common Vulnerability Scoring System 3.1 base score',
@@ -2767,7 +2792,7 @@ TOOLS['cvss31'] = {
       const m = CVSS31_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label">${m.name} (${key})</div>
+          <div class="metric-label">${cvssIcon(key)}${m.name} (${key})</div>
           <div class="metric-options" data-key="${key}">
             ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}">${l}</button>`).join('')}
           </div>
@@ -2810,6 +2835,7 @@ TOOLS['cvss31'] = {
       const order = ['AV','AC','PR','UI','S','C','I','A'];
       const v = 'CVSS:3.1/' + order.map(k => `${k}:${sel[k] || '?'}`).join('/');
       $('#cvss31-vector').textContent = v;
+      writeCvssHash('cvss31', '3.1', sel, order);
     };
     $$('.metric-options').forEach(group => {
       const key = group.dataset.key;
@@ -2827,6 +2853,9 @@ TOOLS['cvss31'] = {
     });
     $('#cvss31-copy-vec').addEventListener('click', () => copy($('#cvss31-vector').textContent));
     $('#cvss31-copy-score').addEventListener('click', () => copy($('#cvss31-score').textContent));
+    const preOrder = ['AV','AC','PR','UI','S','C','I','A'];
+    Object.assign(sel, readCvssHash('3.1', preOrder));
+    $$('.metric-options').forEach(group => { const k = group.dataset.key; const btn = sel[k] && $(`.metric-btn[data-val="${sel[k]}"]`, group); if (btn) btn.classList.add('active'); });
     update();
   }
 };
@@ -2873,7 +2902,7 @@ TOOLS['cvss40'] = {
       const m = CVSS40_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label">${m.name} (${key})</div>
+          <div class="metric-label">${cvssIcon(key)}${m.name} (${key})</div>
           <div class="metric-options" data-key="${key}">
             ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}">${l}</button>`).join('')}
           </div>
@@ -2925,6 +2954,7 @@ TOOLS['cvss40'] = {
       const order = ['AV','AC','AT','PR','UI','VC','VI','VA','SC','SI','SA'];
       const v = 'CVSS:4.0/' + order.map(k => `${k}:${sel[k] || '?'}`).join('/');
       $('#cvss40-vector').textContent = v;
+      writeCvssHash('cvss40', '4.0', sel, order);
     };
     $$('.metric-options').forEach(group => {
       const key = group.dataset.key;
@@ -2942,6 +2972,9 @@ TOOLS['cvss40'] = {
     });
     $('#cvss40-copy-vec').addEventListener('click', () => copy($('#cvss40-vector').textContent));
     $('#cvss40-copy-score').addEventListener('click', () => copy($('#cvss40-score').textContent));
+    const preOrder = ['AV','AC','AT','PR','UI','VC','VI','VA','SC','SI','SA'];
+    Object.assign(sel, readCvssHash('4.0', preOrder));
+    $$('.metric-options').forEach(group => { const k = group.dataset.key; const btn = sel[k] && $(`.metric-btn[data-val="${sel[k]}"]`, group); if (btn) btn.classList.add('active'); });
     update();
   }
 };

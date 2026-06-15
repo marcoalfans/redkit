@@ -506,7 +506,12 @@ textarea {
   font-size: 12px;
   color: var(--text-dim);
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+.metric-ico { display: inline-flex; flex-shrink: 0; color: var(--accent); }
+.metric-ico svg { width: 15px; height: 15px; }
 
 .metric-options {
   display: flex;

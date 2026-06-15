@@ -170,7 +170,8 @@
       // ----- deep-link routing (#/<tool>) -----
       items.forEach(it => it.addEventListener('click', () => {
         const key = it.dataset.tool;
-        if (location.hash !== '#/' + key) location.hash = '#/' + key;
+        const want = '#/' + key;
+        if (location.hash !== want && !location.hash.startsWith(want + '/')) location.hash = want;
         setTimeout(syncCat, 0);
       }));
       function hashKey() { const m = location.hash.match(/^#\/([\w-]+)/); return m ? m[1] : null; }
