@@ -487,55 +487,72 @@ textarea {
 
 .metric-group {
   margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .metric-group h4 {
+  width: 100%;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-dim);
-  margin-bottom: 10px;
+  margin-bottom: 2px;
   font-weight: 600;
 }
 
 .metric {
-  margin-bottom: 12px;
+  flex: 1 1 160px;
+  max-width: 230px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .metric-label {
-  font-size: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
   color: var(--text-dim);
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  background: var(--bg-elev2);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 10px;
+  margin: 0;
 }
-.metric-ico { display: inline-flex; flex-shrink: 0; color: var(--accent); }
-.metric-ico svg { width: 15px; height: 15px; }
 
 .metric-options {
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
 }
 
 .metric-btn {
-  padding: 6px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 11.5px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  background: var(--bg-elev);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 12.5px;
   color: var(--text-dim);
   cursor: pointer;
   font-family: inherit;
   transition: all 0.1s;
 }
 
-.metric-btn:hover { border-color: var(--accent); color: var(--text); }
+.metric-btn:hover { background: var(--bg-elev2); color: var(--text); }
 .metric-btn.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: white;
+  color: #fff;
 }
 
 .cvss-grid {
@@ -973,9 +990,8 @@ textarea {
 .not-pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 0; white-space: pre-wrap; word-break: break-word; font-size: 12.5px; line-height: 1.7; color: var(--text); }
 
 /* ===== CVSS per-option icons (chandanbn cvssicons.png sprite) ===== */
-.metric-btn { display: inline-flex; align-items: center; }
-.cvico-wrap { display: inline-flex; align-items: center; justify-content: center; background: #eceef0; border-radius: 5px; padding: 2px; margin-right: 7px; flex-shrink: 0; }
-.cvico { width: 1em; height: 1em; font-size: 18px; display: inline-block; background: url("cvssicons.png") 0 0 no-repeat; background-size: 21em 1em; }
+.cvico-wrap { display: inline-flex; align-items: center; justify-content: center; background: #eceef0; border-radius: 6px; padding: 3px; flex-shrink: 0; }
+.cvico { width: 1em; height: 1em; font-size: 26px; display: inline-block; background: url("cvssicons.png") 0 0 no-repeat; background-size: 21em 1em; }
 .cvico.AVP{background-position:0 0}.cvico.AVL{background-position:-1em 0}.cvico.AVA{background-position:-2em 0}.cvico.AVN{background-position:-3em 0}
 .cvico.ACL{background-position:-4em 0}.cvico.ACH{background-position:-5em 0}
 .cvico.PRN{background-position:-6em 0}.cvico.PRL{background-position:-7em 0}.cvico.PRH{background-position:-8em 0}
