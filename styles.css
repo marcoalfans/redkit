@@ -171,8 +171,10 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 
 .nav-item.active {
   background: var(--accent-dim);
-  color: var(--accent);
-  font-weight: 500;
+  color: var(--accent-hover);
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--accent);
+  padding-left: 16px;
 }
 
 /* ===== Main ===== */
@@ -1038,6 +1040,8 @@ textarea {
 /* ===== Fill vs Copy field distinction (global, all tools) ===== */
 /* editable fields the user fills get a pencil hint */
 .field > label::before { font-family: "Font Awesome 6 Free"; font-weight: 900; content: "\f304"; color: var(--text-mute); font-size: 9.5px; margin-right: 6px; opacity: 0.75; vertical-align: middle; }
+/* read-only / computed fields (no input control) get no pencil — e.g. report Score & Severity */
+.field:not(:has(input, textarea, select)) > label::before { content: none; }
 /* copyable output panels (any header with a Copy button) get a copy icon + accent stripe */
 .result-header:has(button[id*="copy" i]) h4::before { font-family: "Font Awesome 6 Free"; font-weight: 900; content: "\f0c5"; color: var(--accent); font-size: 11px; margin-right: 8px; vertical-align: middle; }
 .result-header:has(button[id*="copy" i]) + .result-box,

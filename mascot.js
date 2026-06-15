@@ -48,6 +48,19 @@
   const FRAME_REST=HEAD_BODY.concat(LEGS_STAND), FRAME_ANGRY=ANGRY_HEAD.concat(LEGS_STAND);
   const SPR_W=16, SPR_H=17;
 
+  // ---------- laptop held while resting (open laptop, terminal on screen) ----------
+  const LAPTOP = [
+    ".FFFFFFF.",
+    ".FsssssF.",
+    ".FsCCCsF.",
+    ".FsCsssF.",
+    ".FsCCCsF.",
+    "KKKKKKKKK",
+    ".KKKKKKK.",
+  ];
+  const LAP_PAL = { F:"#15171c", s:"#0a0c10", C:"#5ef08a", K:"#3a3d44" };
+  const LAP_W = 9, LAP_H = LAPTOP.length;
+
   function init() {
     const host = document.querySelector(CONFIG.mount);
     if (!host) { console.warn("[redkit-mascot] mount not found:", CONFIG.mount); return; }
@@ -130,6 +143,17 @@
         if (blink && ch === "g") ch = "k";
         ctx.fillStyle = CONFIG.palette[ch] || "#f0f";
         ctx.fillRect(c*SCALE, r*SCALE, SCALE, SCALE);
+      }
+      ctx.restore();
+    }
+
+    function drawLaptop(px, py) {
+      // soft glow under the screen
+      ctx.save();
+      for (let r=0; r<LAPTOP.length; r++) for (let c=0; c<LAPTOP[r].length; c++) {
+        const ch = LAPTOP[r][c]; if (ch === ".") continue;
+        ctx.fillStyle = LAP_PAL[ch] || "#f0f";
+        ctx.fillRect(px + c*SCALE, py + r*SCALE, SCALE, SCALE);
       }
       ctx.restore();
     }
@@ -234,6 +258,12 @@
       ctx.beginPath(); ctx.moveTo(0, floorY+SPR_H*SCALE+1.5); ctx.lineTo(cv.width, floorY+SPR_H*SCALE+1.5); ctx.stroke();
 
       if (frame) drawSprite(frame, Math.round(x+xShake), Math.round(floorY+yOff), flip, blink);
+      // while resting at a corner, hold a laptop in front (bobbing with the body)
+      if (mode==="rest") {
+        const lx = Math.round(x + ((SPR_W - LAP_W)/2)*SCALE);
+        const ly = Math.round(floorY + yOff + 8*SCALE);
+        drawLaptop(lx, ly);
+      }
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
