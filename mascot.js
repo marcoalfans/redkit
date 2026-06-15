@@ -174,10 +174,17 @@
     function endRest() { think.classList.remove("show"); mode="walk"; dir=-dir; }
     function placeShout() {
       const m = metrics();
-      let left = m.left + (PW*m.sx)/2 - 24;
-      left = Math.max(2, Math.min(left, wrap.clientWidth - 60));
+      const sw = shout.offsetWidth || 140;
+      const center = m.left + (PW*m.sx)/2;
+      const onRight = x > (minX+maxX)/2;
+      const tail = shout.querySelector(".rk-tail");
+      let left, tailLeft;
+      if (onRight) { left = center - sw + 18; tailLeft = sw - 22; }   // extend left, tail on the right (near mascot)
+      else         { left = center - 18;      tailLeft = 14;      }   // extend right, tail on the left
+      left = Math.max(2, Math.min(left, wrap.clientWidth - sw - 2));
       shout.style.left = left + "px";
       shout.style.top  = (m.top - 36) + "px";
+      if (tail) tail.style.left = Math.max(8, Math.min(tailLeft, sw - 18)) + "px";
     }
     function triggerAngry(now) {
       if (mode==="angry") return;
