@@ -1,7 +1,7 @@
 /* ============================================================
    RedKit Agent — drop-in pixel mascot for the sidebar
    Usage:
-     1) Put a container below your <nav>:  <div id="rk-agent"></div>
+     1) Put a container below your <nav>:  <div id="rk-mascot"></div>
      2) Load this file:  <script src="agent.js" defer></script>
    Everything else (canvas, bubbles, styles) is built by this script.
    Tweak the CONFIG block below to taste.
@@ -10,7 +10,7 @@
   "use strict";
 
   const CONFIG = {
-    mount: "#rk-agent",      // container element (placed right after </nav>)
+    mount: "#rk-mascot",      // container element (placed right after </nav>)
     scale: 5,                // pixel size of the sprite
     speed: 0.08,             // walking speed (px per ms)
     restMultiplier: 2,       // pause time at a corner = this × one round trip
@@ -50,17 +50,17 @@
 
   function init() {
     const host = document.querySelector(CONFIG.mount);
-    if (!host) { console.warn("[redkit-agent] mount not found:", CONFIG.mount); return; }
+    if (!host) { console.warn("[redkit-mascot] mount not found:", CONFIG.mount); return; }
 
     const T = CONFIG.theme, SCALE = CONFIG.scale, PW = SPR_W * SCALE;
 
     // ---------- inject scoped CSS once ----------
-    if (!document.getElementById("rk-agent-style")) {
+    if (!document.getElementById("rk-mascot-style")) {
       const st = document.createElement("style");
-      st.id = "rk-agent-style";
+      st.id = "rk-mascot-style";
       st.textContent = `
-        #rk-agent-host { position: relative; overflow: visible; width: 100%; }
-        #rk-agent-host canvas { display:block; width:100%; image-rendering:pixelated; image-rendering:crisp-edges; cursor:pointer; }
+        #rk-mascot-host { position: relative; overflow: visible; width: 100%; }
+        #rk-mascot-host canvas { display:block; width:100%; image-rendering:pixelated; image-rendering:crisp-edges; cursor:pointer; }
         .rk-think { position:absolute; width:184px; pointer-events:none; z-index:60;
           background:${T.bubble}; border:1px solid ${T.redDim}; border-radius:10px; padding:8px 11px;
           opacity:0; transition:opacity .22s ease; box-shadow:0 8px 24px rgba(0,0,0,.5);
@@ -85,12 +85,12 @@
     }
 
     // ---------- build DOM ----------
-    host.id = host.id || "rk-agent";
+    host.id = host.id || "rk-mascot";
     host.setAttribute("id", host.id);
     host.classList.add("rk-host");
     host.style.position = host.style.position || "relative";
     // mark host for CSS hook
-    const styleHostId = "rk-agent-host";
+    const styleHostId = "rk-mascot-host";
     host.setAttribute("data-rk", "1");
     // use an inner wrapper carrying the canvas styles
     const wrap = document.createElement("div");
