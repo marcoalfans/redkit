@@ -2760,7 +2760,7 @@ const severityFromScore = (s) => {
 };
 
 // ----- CVSS per-option icons: AV keeps chandanbn sprite; the rest are clean inline SVGs -----
-const G = '#58d177', PG = '#aee5bd', D = '#1f2328';  // strong green (High), pale green (Low), dark outline
+const G = '#23a34a', PG = '#cdeed7', D = '#1f2328';  // deep green (High), pale green (Low), dark outline
 const CVSS_SVG = {
   bolt: `<svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   puzzle: `<svg viewBox="0 0 24 24"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
