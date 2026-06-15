@@ -3319,29 +3319,37 @@ TOOLS['revshell'] = {
     const shells = D.shells || [];
     return `
       <div class="tool">
+        <div class="rsg-top">
+          <div class="card">
+            <div class="card-title">Connection</div>
+            <div class="field-row">
+              <div class="field"><label>IP / Interface</label><input type="text" id="rsg-ip" value="10.10.14.1"></div>
+              <div class="field"><label>Port</label><input type="text" id="rsg-port" value="9001"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Listener</div>
+            <div class="field"><select id="rsg-listener">${(D.listenerCommands || []).map((l, i) => `<option value="${i}">${escapeHtml(l[0])}</option>`).join('')}</select></div>
+            <div class="result-header"><h4>Command</h4><button class="btn btn-ghost" id="rsg-lcopy">Copy</button></div>
+            <pre class="not-pre mono" id="rsg-lout"></pre>
+          </div>
+        </div>
         <div class="card">
+          <div class="card-title">Payload</div>
           <div class="rsg-cfg">
-            <div class="field"><label>IP / Interface</label><input type="text" id="rsg-ip" value="10.10.14.1"></div>
-            <div class="field"><label>Port</label><input type="text" id="rsg-port" value="9001"></div>
             <div class="field"><label>Shell</label><select id="rsg-shell">${shells.map(s => `<option${s === 'bash' ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
             <div class="field"><label>Encoding</label><select id="rsg-enc"><option value="none">None</option><option value="b64">Base64</option><option value="url">URL Encode</option><option value="url2">Double URL</option></select></div>
             <div class="field"><label>OS</label><select id="rsg-os"><option value="all">All</option><option value="linux">Linux</option><option value="windows">Windows</option><option value="mac">Mac</option></select></div>
           </div>
           <div class="rsg-tabs" id="rsg-tabs">${RSG_TYPES.map((t, i) => `<button class="rsg-tab${i === 0 ? ' active' : ''}" data-type="${t[0]}">${t[1]}</button>`).join('')}</div>
-          <input type="text" id="rsg-search" placeholder="Filter payloads..." autocomplete="off" style="margin-top:10px">
-        </div>
-        <div class="rsg-grid">
-          <div class="card rsg-listcard"><div class="rsg-list" id="rsg-list"></div></div>
-          <div class="card">
-            <div class="result-header"><h4 id="rsg-name">—</h4><button class="btn btn-ghost" id="rsg-copy">Copy</button></div>
-            <pre class="not-pre mono" id="rsg-out"></pre>
+          <input type="text" id="rsg-search" placeholder="Filter payloads..." autocomplete="off" style="margin:10px 0 16px">
+          <div class="rsg-grid">
+            <div class="rsg-list" id="rsg-list"></div>
+            <div class="rsg-outwrap">
+              <div class="result-header"><h4 id="rsg-name">—</h4><button class="btn btn-ghost" id="rsg-copy">Copy</button></div>
+              <pre class="not-pre mono" id="rsg-out"></pre>
+            </div>
           </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Listener</div>
-          <div class="field"><select id="rsg-listener">${(D.listenerCommands || []).map((l, i) => `<option value="${i}">${escapeHtml(l[0])}</option>`).join('')}</select></div>
-          <div class="result-header"><h4>Command</h4><button class="btn btn-ghost" id="rsg-lcopy">Copy</button></div>
-          <pre class="not-pre mono" id="rsg-lout"></pre>
         </div>
       </div>`;
   },
