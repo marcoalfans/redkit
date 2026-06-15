@@ -8,9 +8,9 @@
   --text: #e6e8ee;
   --text-dim: #9aa3b2;
   --text-mute: #6b7383;
-  --accent: #7c5cff;
-  --accent-hover: #9277ff;
-  --accent-dim: rgba(124, 92, 255, 0.12);
+  --accent: #ff4444;
+  --accent-hover: #ff6666;
+  --accent-dim: rgba(255, 68, 68, 0.12);
   --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -73,10 +73,11 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 }
 
 .brand-logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--accent);
+  letter-spacing: -0.5px;
 }
 
 .brand-meta {
