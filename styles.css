@@ -185,7 +185,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 .main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 
 .topbar {
-  padding: 22px 32px;
+  padding: 12px 32px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-elev);
   position: sticky;
@@ -194,15 +194,15 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 }
 
 .topbar-title h2 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.3px;
 }
 
 .topbar-title p {
   color: var(--text-mute);
-  font-size: 13px;
-  margin-top: 2px;
+  font-size: 12px;
+  margin-top: 1px;
 }
 
 .content {
