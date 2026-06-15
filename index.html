@@ -182,7 +182,8 @@
         const target = document.querySelector('.nav-item[data-tool="' + key + '"]');
         if (!target) return false;
         const active = document.querySelector('.nav-item.active');
-        if (!active || active.dataset.tool !== key) target.click(); else syncCat();
+        const hasSub = location.hash.startsWith('#/' + key + '/');
+        if (!active || active.dataset.tool !== key || hasSub) target.click(); else syncCat();
         return true;
       }
       window.addEventListener('hashchange', () => { if (!route()) showHome(); });
