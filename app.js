@@ -2816,7 +2816,7 @@ const writeCvssHash = (toolKey, ver, sel, order) => {
   history.replaceState(null, '', pairs.length ? ('#/' + toolKey + '/CVSS:' + ver + '/' + pairs.join('/')) : ('#/' + toolKey));
 };
 
-TOOLS['cvss31'] = {
+TOOLS['3.1'] = {
   title: 'CVSS 3.1 Calculator',
   desc: 'Calculate Common Vulnerability Scoring System 3.1 base score',
   render() {
@@ -2869,7 +2869,7 @@ TOOLS['cvss31'] = {
       const order = ['AV','AC','PR','UI','S','C','I','A'];
       const v = 'CVSS:3.1/' + order.map(k => `${k}:${sel[k] || '?'}`).join('/');
       $('#cvss31-vector').textContent = v;
-      writeCvssHash('cvss31', '3.1', sel, order);
+      writeCvssHash('3.1', '3.1', sel, order);
     };
     $$('.metric-options').forEach(group => {
       const key = group.dataset.key;
@@ -2912,9 +2912,9 @@ const CVSS40_METRICS = {
 // CVSS 4.0 — official FIRST.org base scoring (bundled in cvss4.js from FIRSTdotorg/cvss-v4-calculator)
 const calcCVSS40 = (sel) => (window.calcCVSS40Official ? window.calcCVSS40Official(sel) : null);
 
-TOOLS['cvss40'] = {
+TOOLS['4.0'] = {
   title: 'CVSS 4.0 Calculator',
-  desc: 'Calculate CVSS 4.0 base score (official FIRST.org scoring)',
+  desc: 'Calculate Common Vulnerability Scoring System 4.0 base metrics',
   render() {
     const renderMetric = (key) => {
       const m = CVSS40_METRICS[key];
@@ -2973,7 +2973,7 @@ TOOLS['cvss40'] = {
       const order = ['AV','AC','AT','PR','UI','VC','VI','VA','SC','SI','SA'];
       const v = 'CVSS:4.0/' + order.map(k => `${k}:${sel[k] || '?'}`).join('/');
       $('#cvss40-vector').textContent = v;
-      writeCvssHash('cvss40', '4.0', sel, order);
+      writeCvssHash('4.0', '4.0', sel, order);
     };
     $$('.metric-options').forEach(group => {
       const key = group.dataset.key;
@@ -3049,9 +3049,8 @@ TOOLS['report-template'] = {
           </div>
           <div class="field">
             <label>Vulnerability Type</label>
-            <select id="rt-type">
-              ${VULN_TYPES.map(t => `<option>${t}</option>`).join('')}
-            </select>
+            <input type="text" id="rt-type" list="rt-type-list" placeholder="Select or type a vulnerability type" autocomplete="off">
+            <datalist id="rt-type-list">${VULN_TYPES.map(t => `<option value="${escapeHtml(t)}"></option>`).join('')}</datalist>
           </div>
           <div class="rt-cvss-row">
             <div class="field">
@@ -3242,7 +3241,10 @@ TOOLS['notationer'] = {
         <div class="card">
           <div class="card-title">Input</div>
           <div class="field">
-            <label>One identifier or phrase per line</label>
+            <div class="not-label-row">
+              <label>One identifier or phrase per line</label>
+              <button type="button" class="btn btn-ghost" id="not-example">Generate example</button>
+            </div>
             <textarea id="not-in" placeholder="userProfileId\nmax retry count\nHTTP-Response-Code"></textarea>
           </div>
         </div>
@@ -3299,6 +3301,10 @@ TOOLS['notationer'] = {
       show(Math.min(cur, FORMATS.length - 1));
     };
     $('#not-in').addEventListener('input', render);
+    $('#not-example').addEventListener('click', () => {
+      $('#not-in').value = ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n');
+      render();
+    });
     render();
   }
 };

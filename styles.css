@@ -206,7 +206,7 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
 }
 
 .content {
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   padding: 28px 32px;
 }
 
@@ -982,7 +982,7 @@ textarea {
 .welcome-info p { font-size: 12px; color: var(--text-mute); }
 
 /* ===== Footer ===== */
-.rk-footer { flex-shrink: 0; padding: 12px 24px; border-top: 1px solid var(--border); background: var(--bg-elev); display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
+.rk-footer { flex-shrink: 0; padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg-elev); display: flex; flex-direction: column; gap: 3px; align-items: center; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
 .rk-footer .muted { opacity: 0.8; }
 
 /* ===== Notationer output ===== */
@@ -1023,3 +1023,7 @@ textarea {
 .not-fmt { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 11px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); cursor: pointer; transition: 0.12s; }
 .not-fmt:hover { border-color: var(--accent); color: var(--text); }
 .not-fmt.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ===== Notationer input label row ===== */
+.not-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.not-label-row label { margin-bottom: 0; }

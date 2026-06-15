@@ -80,8 +80,8 @@
         </div>
         <div class="nav-section" data-cat="reporting">
           <div class="nav-title">Reporting</div>
-          <button class="nav-item" data-tool="cvss31">CVSS 3.1 Calculator</button>
-          <button class="nav-item" data-tool="cvss40">CVSS 4.0 Calculator</button>
+          <button class="nav-item" data-tool="3.1">CVSS 3.1 Calculator</button>
+          <button class="nav-item" data-tool="4.0">CVSS 4.0 Calculator</button>
           <button class="nav-item" data-tool="report-template">Report Template</button>
           <button class="nav-item" data-tool="notationer">Notationer</button>
         </div>
@@ -176,7 +176,7 @@
         if (location.hash !== want && !location.hash.startsWith(want + '/')) location.hash = want;
         setTimeout(syncCat, 0);
       }));
-      function hashKey() { const m = location.hash.match(/^#\/([\w-]+)/); return m ? m[1] : null; }
+      function hashKey() { const m = location.hash.match(/^#\/([\w.-]+)/); return m ? m[1] : null; }
       function route() {
         const key = hashKey();
         if (!key) return false;
