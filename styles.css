@@ -1008,11 +1008,11 @@ textarea {
 .metric-btn { cursor: pointer; }
 
 /* ===== Report Template: CVSS row + auto score/severity + multi-URL ===== */
-.rt-cvss-row { display: grid; grid-template-columns: 15fr 50fr 15fr 20fr; gap: 12px; align-items: start; }
+.rt-cvss-row { display: grid; grid-template-columns: 15fr 55fr 13fr 17fr; gap: 12px; align-items: start; }
 .rt-out-box { display: flex; align-items: center; min-height: 40px; }
 .rt-score { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--accent); }
 .rt-url-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.rt-url-row .rt-url { flex: 1; }
+.rt-url-row input { flex: 1; }
 .rt-url-rm { flex-shrink: 0; width: 40px; background: var(--bg-elev2); border: 1px solid var(--border); color: var(--text-dim); border-radius: 8px; cursor: pointer; font-size: 16px; line-height: 1; }
 .rt-url-rm:hover { border-color: var(--danger); color: var(--danger); }
 .rt-url-add { font-size: 12px; padding: 7px 12px; }

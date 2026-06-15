@@ -3057,7 +3057,7 @@ TOOLS['report-template'] = {
               </select>
             </div>
             <div class="field">
-              <label>CVSS Vector <span style="color:var(--text-mute);font-weight:400">(paste)</span></label>
+              <label>CVSS Vector</label>
               <input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">
             </div>
             <div class="field">
@@ -3093,7 +3093,13 @@ TOOLS['report-template'] = {
           </div>
           <div class="field">
             <label>References</label>
-            <textarea id="rt-ref" rows="3" placeholder="OWASP, CWE, CVE links..."></textarea>
+            <div id="rt-refs">
+              <div class="rt-url-row">
+                <input type="text" class="rt-ref" placeholder="OWASP / CWE / CVE link...">
+                <button type="button" class="rt-url-rm" title="Remove">&times;</button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-secondary rt-url-add" id="rt-ref-add">+ Add Reference</button>
           </div>
           <div class="field">
             <label>Proof of Concept</label>
@@ -3136,21 +3142,22 @@ TOOLS['report-template'] = {
     $('#rt-vector').addEventListener('input', computeCvss);
     $('#rt-cvssver').addEventListener('change', computeCvss);
 
-    // Affected URL(s): one or more, add/remove rows
-    const urlsBox = $('#rt-urls');
+    // Affected URL(s) + References: dynamic add/remove rows
     const wireRm = (btn) => btn.addEventListener('click', () => {
-      if (urlsBox.children.length > 1) btn.closest('.rt-url-row').remove();
-      else btn.closest('.rt-url-row').querySelector('.rt-url').value = '';
+      const row = btn.closest('.rt-url-row'), box = row.parentElement;
+      if (box.children.length > 1) row.remove(); else row.querySelector('input').value = '';
     });
-    $$('.rt-url-rm', urlsBox).forEach(wireRm);
-    $('#rt-url-add').addEventListener('click', () => {
+    const addRow = (box, cls, ph) => {
       const row = document.createElement('div');
       row.className = 'rt-url-row';
-      row.innerHTML = '<input type="text" class="rt-url" placeholder="https://target.com/affected/endpoint"><button type="button" class="rt-url-rm" title="Remove">&times;</button>';
-      urlsBox.appendChild(row);
+      row.innerHTML = '<input type="text" class="' + cls + '" placeholder="' + ph + '"><button type="button" class="rt-url-rm" title="Remove">&times;</button>';
+      box.appendChild(row);
       wireRm(row.querySelector('.rt-url-rm'));
-      row.querySelector('.rt-url').focus();
-    });
+      row.querySelector('input').focus();
+    };
+    $$('.rt-url-rm').forEach(wireRm);
+    $('#rt-url-add').addEventListener('click', () => addRow($('#rt-urls'), 'rt-url', 'https://target.com/affected/endpoint'));
+    $('#rt-ref-add').addEventListener('click', () => addRow($('#rt-refs'), 'rt-ref', 'OWASP / CWE / CVE link...'));
 
     $('#rt-gen').addEventListener('click', () => {
       const score = $('#rt-score').textContent;
@@ -3158,15 +3165,15 @@ TOOLS['report-template'] = {
       const ver = $('#rt-cvssver').value;
       const vector = $('#rt-vector').value.trim();
       const sevLine = (severity && severity !== '—') ? `${severity}${score !== '—' ? ` — CVSS ${ver} ${score}` : ''}` : 'N/A';
-      const urls = $$('.rt-url').map(i => i.value.trim()).filter(Boolean);
-      const urlOut = urls.length === 0 ? 'N/A' : urls.length === 1 ? urls[0] : urls.map(u => '- ' + u).join('\n');
+      const multi = (cls) => { const a = $$(cls).map(i => i.value.trim()).filter(Boolean); return a.length === 0 ? 'N/A' : a.length === 1 ? a[0] : a.map(x => '- ' + x).join('\n'); };
+      const urlOut = multi('.rt-url');
+      const refOut = multi('.rt-ref');
       const fields = {
         name: $('#rt-name').value,
         type: $('#rt-type').value,
         desc: $('#rt-desc').value,
         impact: $('#rt-impact').value,
         rem: $('#rt-rem').value,
-        ref: $('#rt-ref').value,
         poc: $('#rt-poc').value,
       };
       const md = `# ${fields.name || 'Vulnerability Report'}
@@ -3196,7 +3203,7 @@ ${fields.impact}
 ${fields.rem}
 
 ## References
-${fields.ref}
+${refOut}
 
 ## Proof of Concept
 ${fields.poc}
@@ -3205,9 +3212,8 @@ ${fields.poc}
       $('#rt-results').style.display = 'block';
     });
     $('#rt-clear').addEventListener('click', () => {
-      ['rt-name','rt-vector','rt-desc','rt-impact','rt-rem','rt-ref','rt-poc'].forEach(id => $(`#${id}`).value = '');
-      $$('.rt-url-row').slice(1).forEach(r => r.remove());
-      $$('.rt-url').forEach(i => i.value = '');
+      ['rt-name','rt-vector','rt-desc','rt-impact','rt-rem','rt-poc'].forEach(id => $(`#${id}`).value = '');
+      ['#rt-urls','#rt-refs'].forEach(sel => { const box = $(sel); Array.from(box.children).slice(1).forEach(r => r.remove()); box.querySelector('input').value = ''; });
       $('#rt-score').textContent = '—';
       $('#rt-sevbadge').className = 'severity-badge sev-none';
       $('#rt-sevbadge').textContent = '—';
