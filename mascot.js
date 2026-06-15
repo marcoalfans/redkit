@@ -58,7 +58,7 @@
     "EEEEEEEEE",
     "bbbbbbbbb",
   ];
-  const LAP_PAL = { E:"#14161b", K:"#2c2f36", a:"#e0312f", b:"#3a3d44" };
+  const LAP_PAL = { E:"#14161b", K:"#2c2f36", a:"#c4c8cf", b:"#3a3d44" };
   const LAP_W = 9, LAP_H = LAPTOP.length;
 
   function init() {
@@ -161,7 +161,8 @@
     // ---------- state ----------
     const speed = CONFIG.speed;
     let x = minX, dir = 1, mode = "walk", last = performance.now();
-    let restEndsAt=0, angryEndsAt=0, prevMode="walk", restRemaining=0;
+    let restEndsAt=0, restStartedAt=0, angryEndsAt=0, prevMode="walk", restRemaining=0;
+    const LAP_DELAY=850, LAP_RISE=300;   // pause at corner, then pull the laptop out
     let restSide="left", currentTh=null, nextBlink=last+2500, blinkUntil=0;
     fit();
 
@@ -190,10 +191,10 @@
       thtail.style.left = (restSide==="left") ? "16px" : (bw-32) + "px";
     }
     function startRest(now) {
-      mode="rest"; restEndsAt = now + REST_MS;
+      mode="rest"; restEndsAt = now + REST_MS; restStartedAt = now;
       restSide = (x <= (minX+maxX)/2) ? "left" : "right";
       currentTh = CONFIG.thoughts[(Math.random()*CONFIG.thoughts.length)|0];
-      buildThought(currentTh); placeThink(); think.classList.add("show");
+      buildThought(currentTh); placeThink();   // positioned but hidden until the pause ends
     }
     function endRest() { think.classList.remove("show"); mode="walk"; dir=-dir; }
     function placeShout() {
@@ -258,11 +259,19 @@
       ctx.beginPath(); ctx.moveTo(0, floorY+SPR_H*SCALE+1.5); ctx.lineTo(cv.width, floorY+SPR_H*SCALE+1.5); ctx.stroke();
 
       if (frame) drawSprite(frame, Math.round(x+xShake), Math.round(floorY+yOff), flip, blink);
-      // while resting at a corner, hold a laptop in front (bobbing with the body)
+      // at a corner: pause briefly, then pull the laptop out (rises + fades in) and start thinking
       if (mode==="rest") {
-        const lx = Math.round(x + ((SPR_W - LAP_W)/2)*SCALE);
-        const ly = Math.round(floorY + yOff + 8*SCALE);
-        drawLaptop(lx, ly);
+        const since = t - restStartedAt;
+        if (since > LAP_DELAY) {
+          if (!think.classList.contains("show")) think.classList.add("show");
+          const prog = Math.min(1, (since - LAP_DELAY) / LAP_RISE);
+          const ease = 1 - Math.pow(1 - prog, 3);   // easeOutCubic
+          const lx = Math.round(x + ((SPR_W - LAP_W)/2)*SCALE);
+          const ly = Math.round(floorY + yOff + 8*SCALE + (1 - ease)*5*SCALE);
+          ctx.save(); ctx.globalAlpha = ease;
+          drawLaptop(lx, ly);
+          ctx.restore();
+        }
       }
       requestAnimationFrame(loop);
     }
