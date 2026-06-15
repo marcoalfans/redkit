@@ -1049,6 +1049,31 @@ textarea {
 .result-header:has(button[id*="copy" i]) + pre,
 .result-header:has(button[id*="copy" i]) + .dork-list { border-left: 3px solid var(--accent); }
 
+/* ===== Two-pane transcoder (Google-Translate style) ===== */
+.tc-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.tc-bar select { max-width: 220px; }
+.tc-typelabel { font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+.tc-panes { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: stretch; }
+.tc-pane { display: flex; flex-direction: column; min-width: 0; }
+.tc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; min-height: 28px; }
+.tc-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+.tc-area { width: 100%; min-height: 230px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
+.tc-out { background: var(--bg-elev2); }
+.tc-out.tc-err { color: var(--accent); }
+.tc-swap { align-self: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-elev2); color: var(--text-dim); cursor: pointer; transition: transform 0.25s, border-color 0.15s, color 0.15s; }
+.tc-swap:hover { border-color: var(--accent); color: var(--accent); transform: rotate(180deg); }
+@media (max-width: 760px) { .tc-panes { grid-template-columns: 1fr; } .tc-swap { transform: rotate(90deg); margin: 2px auto; } .tc-swap:hover { transform: rotate(270deg); } }
+
+/* ===== Magic detector ===== */
+.mg-cand { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: var(--bg); }
+.mg-top { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+.mg-chain { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 8px; }
+.mg-op { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: var(--accent-dim); color: var(--accent); padding: 3px 8px; border-radius: 6px; }
+.mg-arr { color: var(--text-mute); }
+.mg-conf { margin-left: auto; font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+.mg-result { margin: 0; max-height: 170px; overflow: auto; }
+.mg-empty { color: var(--text-mute); font-size: 13px; padding: 8px 2px; }
+
 /* ===== Reverse Shell Generator (revshells-style) ===== */
 .rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
 .rsg-conn-fields { display: flex; flex-direction: column; gap: 12px; }

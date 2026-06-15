@@ -1054,89 +1054,50 @@ TOOLS['ip-info'] = {
 // CRYPTOGRAPHY TOOLS
 // ============================================================
 
-const encDecTemplate = (id, label) => `
+// ===== Two-pane transcoder (Google-Translate style: type left → result right, swap ⇄) =====
+const transcoderTemplate = (id, opts = {}) => `
   <div class="tool">
     <div class="card">
-      <div class="card-title">${label}</div>
-      <div class="field">
-        <label>Input</label>
-        <textarea id="${id}-input" placeholder="enter text..."></textarea>
+      ${opts.typeSelect ? `<div class="tc-bar"><span class="tc-typelabel">Scheme</span>${opts.typeSelect}</div>` : ''}
+      <div class="tc-panes">
+        <div class="tc-pane">
+          <div class="tc-head"><span class="tc-label" id="${id}-llabel">Text</span></div>
+          <textarea id="${id}-src" class="tc-area" placeholder="type or paste…" autocomplete="off" spellcheck="false"></textarea>
+        </div>
+        <button class="tc-swap" id="${id}-swap" title="Swap direction"><i class="fas fa-right-left"></i></button>
+        <div class="tc-pane">
+          <div class="tc-head"><span class="tc-label" id="${id}-rlabel">—</span><button class="btn btn-ghost tc-copy" id="${id}-copy">Copy</button></div>
+          <textarea id="${id}-dst" class="tc-area tc-out" readonly placeholder="result…" spellcheck="false"></textarea>
+        </div>
       </div>
-      <div class="btn-row">
-        <button class="btn" id="${id}-encode">Encode</button>
-        <button class="btn btn-secondary" id="${id}-decode">Decode</button>
-      </div>
-    </div>
-    <div class="card" id="${id}-results" style="display:none">
-      <div class="result-header">
-        <h4>Output</h4>
-        <button class="btn btn-ghost" id="${id}-copy">Copy</button>
-      </div>
-      <div class="result-box" id="${id}-output"></div>
     </div>
   </div>
 `;
 
-const wireEncDec = (id, encFn, decFn) => {
-  const showOut = (text) => {
-    $(`#${id}-output`).textContent = text;
-    $(`#${id}-results`).style.display = 'block';
+const wireTranscoder = (id, getCodec) => {
+  const src = $(`#${id}-src`), dst = $(`#${id}-dst`), ll = $(`#${id}-llabel`), rl = $(`#${id}-rlabel`);
+  let dir = 'enc';   // 'enc' = left(Text) → right(encoded);  'dec' = left(encoded) → right(Text)
+  const relabel = () => {
+    const cl = getCodec().codeLabel;
+    ll.textContent = dir === 'enc' ? 'Text' : cl;
+    rl.textContent = dir === 'enc' ? cl : 'Text';
   };
-  $(`#${id}-encode`).addEventListener('click', () => {
-    try { showOut(encFn($(`#${id}-input`).value)); }
-    catch (e) { showOut('Error: ' + e.message); }
+  const convert = () => {
+    const c = getCodec(), fn = dir === 'enc' ? c.enc : c.dec, input = src.value;
+    if (input === '') { dst.value = ''; dst.classList.remove('tc-err'); return; }
+    try { dst.value = fn(input) ?? ''; dst.classList.remove('tc-err'); }
+    catch (e) { dst.value = '⚠ ' + (e.message || 'invalid input'); dst.classList.add('tc-err'); }
+  };
+  src.addEventListener('input', convert);
+  $(`#${id}-swap`).addEventListener('click', () => {
+    if (dst.value && !dst.classList.contains('tc-err')) src.value = dst.value;
+    dir = dir === 'enc' ? 'dec' : 'enc';
+    relabel(); convert();
   });
-  $(`#${id}-decode`).addEventListener('click', () => {
-    try { showOut(decFn($(`#${id}-input`).value)); }
-    catch (e) { showOut('Error: ' + e.message); }
-  });
-  $(`#${id}-copy`).addEventListener('click', () => copy($(`#${id}-output`).textContent));
-};
-
-TOOLS['base64'] = {
-  title: 'Base64 Encode/Decode',
-  desc: 'Standard Base64 encoding and decoding',
-  render: () => encDecTemplate('b64', 'Base64'),
-  init: () => wireEncDec('b64',
-    s => btoa(unescape(encodeURIComponent(s))),
-    s => decodeURIComponent(escape(atob(s.trim())))
-  )
-};
-
-TOOLS['url-encode'] = {
-  title: 'URL Encode/Decode',
-  desc: 'Percent-encode and decode URL-safe characters',
-  render: () => encDecTemplate('urlc', 'URL Encoding'),
-  init: () => wireEncDec('urlc', encodeURIComponent, decodeURIComponent)
-};
-
-TOOLS['html-encode'] = {
-  title: 'HTML Encode/Decode',
-  desc: 'HTML entity encode and decode',
-  render: () => encDecTemplate('htm', 'HTML Entities'),
-  init: () => wireEncDec('htm',
-    s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),
-    s => {
-      const ta = document.createElement('textarea');
-      ta.innerHTML = s;
-      return ta.value;
-    }
-  )
-};
-
-TOOLS['hex'] = {
-  title: 'Hex Encode/Decode',
-  desc: 'Hex encoding and decoding for text',
-  render: () => encDecTemplate('hex', 'Hex'),
-  init: () => wireEncDec('hex',
-    s => Array.from(new TextEncoder().encode(s)).map(b => b.toString(16).padStart(2, '0')).join(''),
-    s => {
-      const cleaned = s.replace(/[^0-9a-fA-F]/g, '');
-      const bytes = new Uint8Array(cleaned.length / 2);
-      for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(cleaned.substr(i*2, 2), 16);
-      return new TextDecoder().decode(bytes);
-    }
-  )
+  $(`#${id}-copy`).addEventListener('click', () => copy(dst.value));
+  const typeSel = $(`#${id}-type`);
+  if (typeSel) typeSel.addEventListener('change', () => { relabel(); convert(); });
+  relabel(); convert();
 };
 
 // ===== BASE32 (RFC 4648) =====
@@ -1167,12 +1128,6 @@ const base32Decode = (str) => {
     bytes.push(parseInt(bits.slice(i, i + 8), 2));
   }
   return new TextDecoder().decode(new Uint8Array(bytes));
-};
-TOOLS['base32'] = {
-  title: 'Base32 Encode/Decode',
-  desc: 'RFC 4648 Base32 encoding (A-Z, 2-7)',
-  render: () => encDecTemplate('b32', 'Base32'),
-  init: () => wireEncDec('b32', base32Encode, base32Decode),
 };
 
 // ===== BASE58 (Bitcoin alphabet) =====
@@ -1208,12 +1163,6 @@ const base58Decode = (str) => {
   // Restore leading zero bytes
   for (const c of str) { if (c === '1') bytes.unshift(0); else break; }
   return new TextDecoder().decode(new Uint8Array(bytes));
-};
-TOOLS['base58'] = {
-  title: 'Base58 Encode/Decode',
-  desc: 'Bitcoin-style Base58 (no 0, O, I, l)',
-  render: () => encDecTemplate('b58', 'Base58'),
-  init: () => wireEncDec('b58', base58Encode, base58Decode),
 };
 
 // ===== BASE85 / ASCII85 =====
@@ -1255,12 +1204,6 @@ const base85Decode = (str) => {
   }
   return new TextDecoder().decode(new Uint8Array(bytes));
 };
-TOOLS['base85'] = {
-  title: 'Base85 / ASCII85',
-  desc: 'Adobe ASCII85 encoding (used in PDFs, common in CTFs)',
-  render: () => encDecTemplate('b85', 'Base85 / ASCII85'),
-  init: () => wireEncDec('b85', base85Encode, base85Decode),
-};
 
 // ===== BINARY =====
 const binaryEncode = (str) =>
@@ -1273,12 +1216,6 @@ const binaryDecode = (str) => {
   const bytes = [];
   for (let i = 0; i < bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
   return new TextDecoder().decode(new Uint8Array(bytes));
-};
-TOOLS['binary'] = {
-  title: 'Binary Encode/Decode',
-  desc: 'Convert text to/from 8-bit binary',
-  render: () => encDecTemplate('bin', 'Binary'),
-  init: () => wireEncDec('bin', binaryEncode, binaryDecode),
 };
 
 // ===== MORSE CODE =====
@@ -1306,11 +1243,149 @@ const morseDecode = (s) =>
     if (token === '/') return ' ';
     return MORSE_REV[token] || '';
   }).join('').replace(/\s+/g, ' ').trim();
-TOOLS['morse'] = {
-  title: 'Morse Code',
-  desc: 'Encode/decode International Morse Code (use / for word separator)',
-  render: () => encDecTemplate('morse', 'Morse Code'),
-  init: () => wireEncDec('morse', morseEncode, morseDecode),
+
+// ===== Codec registry (shared by transcoder tools + Magic) =====
+const b64Enc = s => btoa(unescape(encodeURIComponent(s)));
+const b64Dec = s => decodeURIComponent(escape(atob(s.replace(/\s+/g, ''))));
+const htmlEnc = s => s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const htmlDec = s => { const ta = document.createElement('textarea'); ta.innerHTML = s; return ta.value; };
+const hexEnc = s => Array.from(new TextEncoder().encode(s)).map(b => b.toString(16).padStart(2, '0')).join('');
+const hexDec = s => {
+  const cleaned = s.replace(/[^0-9a-fA-F]/g, '');
+  if (cleaned.length % 2) throw new Error('odd number of hex digits');
+  const bytes = new Uint8Array(cleaned.length / 2);
+  for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(cleaned.substr(i * 2, 2), 16);
+  return new TextDecoder().decode(bytes);
+};
+
+const CODECS = {
+  base64: { codeLabel: 'Base64', enc: b64Enc, dec: b64Dec },
+  base32: { codeLabel: 'Base32', enc: base32Encode, dec: base32Decode },
+  base58: { codeLabel: 'Base58', enc: base58Encode, dec: base58Decode },
+  base85: { codeLabel: 'Base85 / ASCII85', enc: base85Encode, dec: base85Decode },
+  url:    { codeLabel: 'URL', enc: encodeURIComponent, dec: decodeURIComponent },
+  html:   { codeLabel: 'HTML Entities', enc: htmlEnc, dec: htmlDec },
+  hex:    { codeLabel: 'Hex', enc: hexEnc, dec: hexDec },
+  binary: { codeLabel: 'Binary', enc: binaryEncode, dec: binaryDecode },
+  morse:  { codeLabel: 'Morse', enc: morseEncode, dec: morseDecode },
+};
+
+// ----- Combined Base tool (Base64/32/58/85 in one) -----
+const BASE_TYPES = [['base64', 'Base64'], ['base32', 'Base32'], ['base58', 'Base58'], ['base85', 'Base85 / ASCII85']];
+TOOLS['base'] = {
+  title: 'Base Encoding',
+  desc: 'Base64 / Base32 / Base58 / Base85 — pick a scheme, type to encode, ⇄ to decode',
+  render: () => transcoderTemplate('base', {
+    typeSelect: `<select id="base-type">${BASE_TYPES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`,
+  }),
+  init: () => wireTranscoder('base', () => CODECS[$('#base-type').value] || CODECS.base64),
+};
+
+// ----- Single-scheme transcoder tools -----
+TOOLS['url-encode']  = { title: 'URL Encode/Decode',  desc: 'Percent-encoding — type to encode, ⇄ to decode',       render: () => transcoderTemplate('urlc'),  init: () => wireTranscoder('urlc', () => CODECS.url) };
+TOOLS['html-encode'] = { title: 'HTML Encode/Decode', desc: 'HTML entities — type to encode, ⇄ to decode',           render: () => transcoderTemplate('htm'),   init: () => wireTranscoder('htm', () => CODECS.html) };
+TOOLS['hex']         = { title: 'Hex Encode/Decode',  desc: 'Hex (UTF-8 bytes) — type to encode, ⇄ to decode',       render: () => transcoderTemplate('hex'),   init: () => wireTranscoder('hex', () => CODECS.hex) };
+TOOLS['binary']      = { title: 'Binary Encode/Decode', desc: '8-bit binary — type to encode, ⇄ to decode',          render: () => transcoderTemplate('bin'),   init: () => wireTranscoder('bin', () => CODECS.binary) };
+TOOLS['morse']       = { title: 'Morse Code',         desc: 'International Morse (/ = word gap) — type to encode, ⇄ to decode', render: () => transcoderTemplate('morse'), init: () => wireTranscoder('morse', () => CODECS.morse) };
+
+// ===== MAGIC — auto-detect encoding(s), CyberChef-style =====
+const rot13 = s => s.replace(/[a-zA-Z]/g, c => { const b = c <= 'Z' ? 65 : 97; return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b); });
+const printableScore = (s) => {
+  const arr = [...s], n = arr.length;
+  if (!n) return -1;
+  let printable = 0, ctrl = 0, letters = 0, spaces = 0;
+  for (const ch of arr) {
+    const c = ch.codePointAt(0);
+    if (c === 9 || c === 10 || c === 13) { printable++; spaces++; continue; }
+    if (c < 32 || c === 127) { ctrl++; continue; }
+    if (c < 127) { printable++; if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) letters++; else if (c === 32) spaces++; }
+    else if (c === 0xFFFD) { ctrl++; }       // replacement char → bad decode
+    else printable += 0.7;
+  }
+  let score = printable / n - (ctrl / n) * 2;
+  const low = s.toLowerCase();
+  const words = ['the ', 'and ', 'for ', 'http', 'flag', 'www.', '://', 'password', 'admin', 'user', 'login', 'token', 'secret', 'https', 'select', 'union'];
+  let hits = 0; for (const w of words) if (low.includes(w)) hits++;
+  score += Math.min(hits, 4) * 0.08;
+  if (/^https?:\/\//i.test(s.trim())) score += 0.25;
+  if (/[a-z0-9_]+\{[^}]{2,}\}/i.test(s)) score += 0.4;   // flag{...}
+  const sp = spaces / n; if (sp > 0.04 && sp < 0.25) score += 0.05;
+  if (letters / n > 0.5) score += 0.05;
+  return score;
+};
+const MAGIC_OPS = [
+  { label: 'From Base64', test: s => { const t = s.replace(/\s+/g, ''); return /^[A-Za-z0-9+/]{8,}={0,2}$/.test(t) && t.length % 4 === 0; }, run: b64Dec },
+  { label: 'From Hex',    test: s => { const t = s.replace(/\s+/g, ''); return /^[0-9a-fA-F]{4,}$/.test(t) && t.length % 2 === 0; }, run: hexDec },
+  { label: 'From Base32', test: s => /^[A-Z2-7]{8,}=*$/i.test(s.replace(/\s+/g, '')), run: base32Decode },
+  { label: 'From Binary', test: s => /^[01\s]{8,}$/.test(s) && s.replace(/[^01]/g, '').length % 8 === 0, run: binaryDecode },
+  { label: 'URL Decode',  test: s => /%[0-9a-fA-F]{2}/.test(s), run: decodeURIComponent },
+  { label: 'HTML Decode', test: s => /&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/.test(s), run: htmlDec },
+  { label: 'From Base58', test: s => /^[1-9A-HJ-NP-Za-km-z]{6,}$/.test(s.replace(/\s+/g, '')), run: base58Decode },
+  { label: 'From Base85', test: s => { const t = s.replace(/\s+/g, ''); return /^[\x21-\x75]{5,}$/.test(t) && /[a-z]/i.test(t) && /[!-/:-@[-`]/.test(t); }, run: base85Decode },
+  { label: 'From Morse',  test: s => /^[.\-/\s]{3,}$/.test(s) && /[.\-]/.test(s), run: morseDecode },
+  { label: 'ROT13',       test: s => { const a = (s.match(/[a-z]/gi) || []).length; return a >= 3 && a / s.length > 0.6; }, run: rot13 },
+];
+const magicSearch = (input) => {
+  const results = [], seen = new Set();
+  const walk = (str, depth, chain) => {
+    if (depth > 3 || results.length > 150) return;
+    for (const op of MAGIC_OPS) {
+      let out;
+      try { if (!op.test(str)) continue; out = op.run(str); } catch (e) { continue; }
+      if (out == null || out === '' || out === str || out.length > 50000) continue;
+      const chain2 = [...chain, op.label];
+      const key = chain2.join('>') + '|' + out.slice(0, 80);
+      if (seen.has(key)) continue; seen.add(key);
+      const score = printableScore(out);
+      results.push({ chain: chain2, output: out, score, depth: chain2.length });
+      if (score < 2.6) walk(out, depth + 1, chain2);
+    }
+  };
+  walk(input, 1, []);
+  results.sort((a, b) => b.score - a.score || a.depth - b.depth);
+  const uniq = [], outs = new Set();
+  for (const r of results) { const k = r.output.slice(0, 200); if (outs.has(k)) continue; outs.add(k); uniq.push(r); if (uniq.length >= 8) break; }
+  return uniq;
+};
+TOOLS['magic'] = {
+  title: 'Magic — Encoding Detector',
+  desc: 'Auto-detect the encoding(s) and decode — à la CyberChef Magic (recursive, depth 3)',
+  render: () => `
+    <div class="tool">
+      <div class="card">
+        <div class="card-title">Input</div>
+        <div class="field">
+          <label>Paste encoded / obfuscated data</label>
+          <textarea id="magic-in" class="tc-area" placeholder="e.g. ZmxhZ3tyZWRraXRfbWFnaWN9" autocomplete="off" spellcheck="false"></textarea>
+        </div>
+      </div>
+      <div class="card">
+        <div class="result-header"><h4>Detected candidates</h4></div>
+        <div id="magic-out"></div>
+      </div>
+    </div>`,
+  init() {
+    const box = $('#magic-out');
+    const run = () => {
+      const v = $('#magic-in').value.trim();
+      if (!v) { box.innerHTML = '<div class="mg-empty">Waiting for input…</div>'; return; }
+      const res = magicSearch(v);
+      if (!res.length) { box.innerHTML = '<div class="mg-empty">No known encoding detected — try the Base / Hex tools manually.</div>'; return; }
+      box.innerHTML = res.map((r, i) => {
+        const conf = Math.max(4, Math.min(100, Math.round(r.score * 55)));
+        const out = escapeHtml(r.output.length > 600 ? r.output.slice(0, 600) + '…' : r.output);
+        return `<div class="mg-cand${i === 0 ? ' mg-top' : ''}">
+          <div class="mg-chain">${r.chain.map(c => `<span class="mg-op">${escapeHtml(c)}</span>`).join('<span class="mg-arr">→</span>')}
+            <span class="mg-conf">${conf}% confidence</span>
+            <button class="btn btn-ghost mg-copy" data-i="${i}">Copy</button></div>
+          <pre class="not-pre mono mg-result">${out}</pre>
+        </div>`;
+      }).join('');
+      $$('.mg-copy', box).forEach(b => b.addEventListener('click', () => copy(res[+b.dataset.i].output)));
+    };
+    let t; $('#magic-in').addEventListener('input', () => { clearTimeout(t); t = setTimeout(run, 160); });
+    run();
+  },
 };
 
 // ===== HASH GENERATOR =====
@@ -3518,15 +3593,13 @@ const EXAMPLES = {
   'url-parser': () => { exFill('up-input', 'https://user:p%40ss@admin.example.com:8443/dashboard/report?id=42&redirect=https%3A%2F%2Fevil.com%2Fsteal#settings'); exClick('up-parse'); },
 
   // ---- Crypto / Encoding ----
-  'base64': () => { exFill('b64-input', 'admin:S3cr3tP@ss!'); exClick('b64-encode'); },
-  'url-encode': () => { exFill('urlc-input', "https://x.com/search?q=<script>alert(1)</script>&next=a b"); exClick('urlc-encode'); },
-  'html-encode': () => { exFill('htm-input', '<img src=x onerror=alert(document.cookie)>'); exClick('htm-encode'); },
-  'hex': () => { exFill('hex-input', 'PWNED'); exClick('hex-encode'); },
-  'base32': () => { exFill('b32-input', 'otpauth-secret'); exClick('b32-encode'); },
-  'base58': () => { exFill('b58-input', '1BoatSLRHtKNngkdXEeobR76b53LETtpyT'); exClick('b58-encode'); },
-  'base85': () => { exFill('b85-input', 'payload-data'); exClick('b85-encode'); },
-  'binary': () => { exFill('bin-input', 'Hi!'); exClick('bin-encode'); },
-  'morse': () => { exFill('morse-input', 'SOS HELP'); exClick('morse-encode'); },
+  'base': () => { exFill('base-type', 'base64'); exFill('base-src', 'admin:S3cr3tP@ss!'); },
+  'url-encode': () => { exFill('urlc-src', "https://x.com/search?q=<script>alert(1)</script>&next=a b"); },
+  'html-encode': () => { exFill('htm-src', '<img src=x onerror=alert(document.cookie)>'); },
+  'hex': () => { exFill('hex-src', 'PWNED'); },
+  'binary': () => { exFill('bin-src', 'Hi!'); },
+  'morse': () => { exFill('morse-src', 'SOS HELP'); },
+  'magic': () => { exFill('magic-in', 'ZmxhZ3tyZWRraXRfbWFnaWN9'); },
   'hash': () => { exFill('hash-input', 'P@ssw0rd!2024'); exClick('hash-gen'); },
   'hash-id': () => { exFill('hid-input', '5f4dcc3b5aa765d61d8327deb882cf99'); exClick('hid-id'); },
   'jwt': () => { exFill('jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwibmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); exClick('jwt-decode'); },
