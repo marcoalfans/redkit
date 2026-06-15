@@ -1029,17 +1029,22 @@ textarea {
 .not-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
 .not-label-row label { margin-bottom: 0; }
 
+/* ===== Fill vs Copy field distinction (global, all tools) ===== */
+/* editable fields the user fills get a pencil hint */
+.field > label::before { font-family: "Font Awesome 6 Free"; font-weight: 900; content: "\f304"; color: var(--text-mute); font-size: 9.5px; margin-right: 6px; opacity: 0.75; vertical-align: middle; }
+/* copyable output panels (any header with a Copy button) get a copy icon + accent stripe */
+.result-header:has(button[id*="copy" i]) h4::before { font-family: "Font Awesome 6 Free"; font-weight: 900; content: "\f0c5"; color: var(--accent); font-size: 11px; margin-right: 8px; vertical-align: middle; }
+.result-header:has(button[id*="copy" i]) + .result-box,
+.result-header:has(button[id*="copy" i]) + .not-pre,
+.result-header:has(button[id*="copy" i]) + pre,
+.result-header:has(button[id*="copy" i]) + .dork-list { border-left: 3px solid var(--accent); }
+
 /* ===== Reverse Shell Generator (revshells-style) ===== */
 .rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
 .rsg-conn-fields { display: flex; flex-direction: column; gap: 12px; }
 .rsg-listener-row { display: grid; grid-template-columns: 170px 1fr; gap: 16px; align-items: start; }
 .rsg-cfg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-/* fill vs copy field distinction */
-.fld-edit label i { color: var(--text-mute); font-size: 10px; margin-right: 2px; }
-.rsg-copyhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; min-height: 22px; }
-.rsg-copyhead > span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
-.rsg-copyhead i { color: var(--accent); font-size: 11px; }
-.rsg-copyout { border-left: 3px solid var(--accent); background: var(--bg-elev2); }
+.rsg-listener-row .result-header { margin-top: 0; }
 .rsg-tabs { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
 .rsg-tab { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); cursor: pointer; transition: 0.12s; }
 .rsg-tab:hover { border-color: var(--accent); color: var(--text); }
