@@ -2760,7 +2760,7 @@ const severityFromScore = (s) => {
 };
 
 // ----- CVSS per-option icons: AV keeps chandanbn sprite; the rest are clean inline SVGs -----
-const G = '#58d177', D = '#1f2328';  // green fill + dark outline (matches AV sprite vibe)
+const G = '#58d177', PG = '#aee5bd', D = '#1f2328';  // strong green (High), pale green (Low), dark outline
 const CVSS_SVG = {
   bolt: `<svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
   puzzle: `<svg viewBox="0 0 24 24"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
@@ -2777,6 +2777,9 @@ const CVSS_SVG = {
   penciloff: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 3l18 18" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
   power: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
   poweroff: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M4 4l16 16" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  lockLow: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 1 1 8 0v3" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  pencilLow: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${PG}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  powerLow: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${PG}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
 };
 const cvssOptToken = (key, val) => {
   const map = {
@@ -2788,9 +2791,9 @@ const cvssOptToken = (key, val) => {
   }[key];
   if (map) return map[val] || '';
   const dim = { C: 'c', VC: 'c', SC: 'c', I: 'i', VI: 'i', SI: 'i', A: 'a', VA: 'a', SA: 'a' }[key];
-  if (dim === 'c') return val === 'N' ? 'unlock' : 'lock';
-  if (dim === 'i') return val === 'N' ? 'penciloff' : 'pencil';
-  if (dim === 'a') return val === 'N' ? 'poweroff' : 'power';
+  if (dim === 'c') return val === 'N' ? 'unlock' : val === 'L' ? 'lockLow' : 'lock';
+  if (dim === 'i') return val === 'N' ? 'penciloff' : val === 'L' ? 'pencilLow' : 'pencil';
+  if (dim === 'a') return val === 'N' ? 'poweroff' : val === 'L' ? 'powerLow' : 'power';
   return '';
 };
 const optIcon = (key, val) => {
