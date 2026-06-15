@@ -1005,5 +1005,4 @@ textarea {
 /* ===== Tooltips (CVSS metric/option descriptions) ===== */
 .rk-tip { position: fixed; z-index: 400; display: none; max-width: 340px; background: var(--bg-elev2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; font-size: 12px; line-height: 1.55; box-shadow: 0 12px 34px rgba(0,0,0,.55); pointer-events: none; }
 .metric-label { cursor: help; }
-.tip-i { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; margin-left: 6px; border-radius: 50%; border: 1px solid var(--text-mute); color: var(--text-mute); font-size: 9px; font-weight: 700; line-height: 1; }
 .metric-btn { cursor: pointer; }

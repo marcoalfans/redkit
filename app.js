@@ -2823,7 +2823,7 @@ TOOLS['cvss31'] = {
       const m = CVSS31_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})<span class="tip-i">?</span></div>
+          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})</div>
           <div class="metric-options" data-key="${key}">
             ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}" data-tip="${escapeHtml(ttOption(key, v))}">${optIcon(key, v)}${l}</button>`).join('')}
           </div>
@@ -2917,7 +2917,7 @@ TOOLS['cvss40'] = {
       const m = CVSS40_METRICS[key];
       return `
         <div class="metric">
-          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})<span class="tip-i">?</span></div>
+          <div class="metric-label" data-tip="${escapeHtml(ttMetric(key))}">${m.name} (${key})</div>
           <div class="metric-options" data-key="${key}">
             ${m.opts.map(([v, l]) => `<button class="metric-btn" data-val="${v}" data-tip="${escapeHtml(ttOption(key, v))}">${optIcon(key, v)}${l}</button>`).join('')}
           </div>
