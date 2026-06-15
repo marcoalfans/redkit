@@ -11,17 +11,24 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="rk-header">
+    <button class="rk-hamburger" id="rkHamburger" aria-label="Menu">☰</button>
+    <a href="#" class="rk-brand"><span class="accent">~/</span>redkit<span class="muted">.kac0</span></a>
+    <nav class="rk-tabs" id="rkTabs">
+        <button class="rk-tab" data-cat="recon">Recon</button>
+        <button class="rk-tab" data-cat="encoding">Encoding</button>
+        <button class="rk-tab" data-cat="crypto">Crypto</button>
+        <button class="rk-tab" data-cat="payloads">Payloads</button>
+        <button class="rk-tab" data-cat="reporting">Reporting</button>
+    </nav>
+    <div class="rk-header-right">
+      <a href="https://marcoalfans.github.io/" class="rk-back">← portfolio</a>
+    </div>
+  </header>
   <div class="app">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-logo-wrap"><span class="brand-logo">RK</span></div>
-        <div class="brand-meta">
-          <div class="brand-title">RedKit</div>
-          <div class="brand-subtitle">Pentest & Red Team Toolkit</div>
-        </div>
-      </div>
       <nav class="nav">
-        <div class="nav-section">
+        <div class="nav-section" data-cat="recon">
           <div class="nav-title">Recon & OSINT</div>
           <button class="nav-item" data-tool="google-dork">Google Dork Generator</button>
           <button class="nav-item" data-tool="shodan-dork">Shodan Dork Generator</button>
@@ -32,7 +39,7 @@
           <button class="nav-item" data-tool="url-parser">URL Parser</button>
           <button class="nav-item" data-tool="ip-info">IP / Domain Info</button>
         </div>
-        <div class="nav-section">
+        <div class="nav-section" data-cat="encoding">
           <div class="nav-title">Encoding</div>
           <button class="nav-item" data-tool="base64">Base64 Encode/Decode</button>
           <button class="nav-item" data-tool="url-encode">URL Encode/Decode</button>
@@ -44,14 +51,14 @@
           <button class="nav-item" data-tool="binary">Binary Encode/Decode</button>
           <button class="nav-item" data-tool="morse">Morse Code</button>
         </div>
-        <div class="nav-section">
+        <div class="nav-section" data-cat="crypto">
           <div class="nav-title">Crypto & Hash</div>
           <button class="nav-item" data-tool="hash">Hash Generator</button>
           <button class="nav-item" data-tool="hash-id">Hash Identifier</button>
           <button class="nav-item" data-tool="jwt">JWT Decoder / Editor</button>
           <button class="nav-item" data-tool="cipher">Classic Ciphers</button>
         </div>
-        <div class="nav-section">
+        <div class="nav-section" data-cat="payloads">
           <div class="nav-title">Payloads & Web Exploitation</div>
           <button class="nav-item" data-tool="csrf-poc">CSRF PoC Generator</button>
           <button class="nav-item" data-tool="dos-gen">DoS Payload Generator</button>
@@ -63,7 +70,7 @@
           <button class="nav-item" data-tool="graphql-helper">GraphQL Helper</button>
           <button class="nav-item" data-tool="ssrf-helper">SSRF Helper</button>
         </div>
-        <div class="nav-section">
+        <div class="nav-section" data-cat="reporting">
           <div class="nav-title">Reporting</div>
           <button class="nav-item" data-tool="cvss31">CVSS 3.1 Calculator</button>
           <button class="nav-item" data-tool="cvss40">CVSS 4.0 Calculator</button>
@@ -75,12 +82,39 @@
       <div class="topbar">
         <div class="topbar-title">
           <h2 id="currentToolTitle">RedKit</h2>
-          <p id="currentToolDesc">Select a tool from the sidebar</p>
+          <p id="currentToolDesc">Select a tool</p>
         </div>
       </div>
       <div class="content" id="content"></div>
     </main>
   </div>
   <script src="app.js"></script>
+  <script>
+    (function () {
+      const tabs = Array.from(document.querySelectorAll('.rk-tab'));
+      const sections = Array.from(document.querySelectorAll('.nav-section[data-cat]'));
+      const sidebar = document.querySelector('.sidebar');
+      function show(cat) {
+        sections.forEach(s => { s.style.display = s.dataset.cat === cat ? '' : 'none'; });
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
+      }
+      tabs.forEach(t => t.addEventListener('click', () => {
+        show(t.dataset.cat);
+        const sec = sections.find(s => s.dataset.cat === t.dataset.cat);
+        const first = sec && sec.querySelector('.nav-item');
+        if (first) first.click();
+        if (sidebar) sidebar.classList.remove('open');
+      }));
+      function sync() {
+        const active = document.querySelector('.nav-item.active');
+        const sec = active && active.closest('.nav-section[data-cat]');
+        show(sec ? sec.dataset.cat : 'recon');
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(sync, 0));
+      else setTimeout(sync, 0);
+      const ham = document.getElementById('rkHamburger');
+      if (ham) ham.addEventListener('click', () => sidebar && sidebar.classList.toggle('open'));
+    })();
+  </script>
 </body>
 </html>
