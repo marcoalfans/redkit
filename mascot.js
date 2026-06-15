@@ -62,24 +62,24 @@
         #rk-mascot-host { position: relative; overflow: visible; width: 100%; }
         #rk-mascot-host canvas { display:block; width:100%; image-rendering:pixelated; image-rendering:crisp-edges; cursor:pointer; }
         .rk-think { position:absolute; width:184px; pointer-events:none; z-index:60;
-          background:${T.bubble}; border:1px solid ${T.redDim}; border-radius:10px; padding:8px 11px;
-          opacity:0; transition:opacity .22s ease; box-shadow:0 8px 24px rgba(0,0,0,.5);
+          background:var(--bg-elev2,${T.bubble}); border:1px solid var(--border,${T.redDim}); border-radius:10px; padding:8px 11px;
+          opacity:0; transition:opacity .22s ease; box-shadow:var(--shadow,0 8px 24px rgba(0,0,0,.5));
           font:11px ui-monospace,Menlo,Consolas,monospace; }
         .rk-think.show { opacity:1; }
         .rk-think .rk-tail { position:absolute; bottom:-8px; width:0; height:0;
-          border-left:8px solid transparent; border-right:8px solid transparent; border-top:9px solid ${T.bubble}; }
-        .rk-th-h { color:${T.red}; font-size:12px; font-weight:700; margin-bottom:4px; }
-        .rk-th-i { color:${T.text}; line-height:1.55; }
-        .rk-th-i .rk-arr { color:${T.redDim}; }
+          border-left:8px solid transparent; border-right:8px solid transparent; border-top:9px solid var(--bg-elev2,${T.bubble}); }
+        .rk-th-h { color:var(--accent,${T.red}); font-size:12px; font-weight:700; margin-bottom:4px; }
+        .rk-th-i { color:var(--text,${T.text}); line-height:1.55; }
+        .rk-th-i .rk-arr { color:var(--accent,${T.redDim}); }
         .rk-fade { opacity:0; animation:rk-fadein .3s ease forwards; }
         @keyframes rk-fadein { from{opacity:0; transform:translateY(3px);} to{opacity:1; transform:none;} }
         .rk-shout { position:absolute; pointer-events:none; z-index:60; opacity:0;
-          background:${T.red}; color:#fff; font-weight:700; font-size:12px; padding:5px 9px; border-radius:8px;
+          background:var(--accent,${T.red}); color:#fff; font-weight:700; font-size:12px; padding:5px 9px; border-radius:8px;
           white-space:nowrap; box-shadow:0 6px 18px rgba(224,49,47,.45); transition:opacity .12s ease;
           font-family:ui-monospace,Menlo,Consolas,monospace; }
         .rk-shout.show { opacity:1; }
         .rk-shout .rk-tail { position:absolute; bottom:-7px; left:14px; width:0; height:0;
-          border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid ${T.red}; }
+          border-left:7px solid transparent; border-right:7px solid transparent; border-top:8px solid var(--accent,${T.red}); }
       `;
       document.head.appendChild(st);
     }
