@@ -193,16 +193,23 @@
     }
     cv.addEventListener("click", () => triggerAngry(performance.now()));
 
-    // resize handling
-    if (window.ResizeObserver) new ResizeObserver(() => { fit(); computeRest(); }).observe(wrap);
-    else window.addEventListener("resize", () => { fit(); computeRest(); });
-
-    // ---------- reduced motion: render a single static idle frame ----------
+    // ---------- reduced motion: render a static idle frame (redraw on resize) ----------
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      ctx.clearRect(0,0,cv.width,cv.height);
-      drawSprite(FRAME_REST, Math.round((cv.width-PW)/2), Math.round(floorY), false, false);
+      const drawStatic = () => {
+        fit();
+        ctx.clearRect(0, 0, cv.width, cv.height);
+        drawSprite(FRAME_REST, Math.round((cv.width - PW) / 2), Math.round(floorY), false, false);
+      };
+      drawStatic();
+      if (window.ResizeObserver) new ResizeObserver(drawStatic).observe(wrap);
+      else window.addEventListener("resize", drawStatic);
+      requestAnimationFrame(drawStatic);   // redraw after observer's initial fire clears the canvas
       return;
     }
+
+    // resize handling (animated path)
+    if (window.ResizeObserver) new ResizeObserver(() => { fit(); computeRest(); }).observe(wrap);
+    else window.addEventListener("resize", () => { fit(); computeRest(); });
 
     // ---------- main loop ----------
     function loop(t) {
