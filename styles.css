@@ -1030,9 +1030,16 @@ textarea {
 .not-label-row label { margin-bottom: 0; }
 
 /* ===== Reverse Shell Generator (revshells-style) ===== */
-.rsg-top { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; align-items: start; }
-.rsg-top .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
+.rsg-conn-fields { display: flex; flex-direction: column; gap: 12px; }
+.rsg-listener-row { display: grid; grid-template-columns: 170px 1fr; gap: 16px; align-items: start; }
 .rsg-cfg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+/* fill vs copy field distinction */
+.fld-edit label i { color: var(--text-mute); font-size: 10px; margin-right: 2px; }
+.rsg-copyhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; min-height: 22px; }
+.rsg-copyhead > span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-dim); }
+.rsg-copyhead i { color: var(--accent); font-size: 11px; }
+.rsg-copyout { border-left: 3px solid var(--accent); background: var(--bg-elev2); }
 .rsg-tabs { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
 .rsg-tab { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg); color: var(--text-dim); cursor: pointer; transition: 0.12s; }
 .rsg-tab:hover { border-color: var(--accent); color: var(--text); }
@@ -1045,5 +1052,5 @@ textarea {
 .rsg-item:hover { border-color: var(--accent); color: var(--text); background: var(--bg-elev2); }
 .rsg-item.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); font-weight: 600; }
 .rsg-empty { grid-column: 1 / -1; padding: 20px; color: var(--text-mute); font-size: 13px; text-align: center; }
-.rsg-outwrap { border: 1px solid var(--border); border-radius: 10px; background: var(--bg); padding: 12px 14px; }
-@media (max-width: 880px) { .rsg-top { grid-template-columns: 1fr; } .rsg-cfg { grid-template-columns: 1fr 1fr; } }
+.rsg-outwrap { min-width: 0; }
+@media (max-width: 880px) { .rsg-top { grid-template-columns: 1fr; } .rsg-cfg { grid-template-columns: 1fr 1fr; } .rsg-listener-row { grid-template-columns: 1fr; } }
