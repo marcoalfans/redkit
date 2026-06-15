@@ -48,17 +48,17 @@
   const FRAME_REST=HEAD_BODY.concat(LEGS_STAND), FRAME_ANGRY=ANGRY_HEAD.concat(LEGS_STAND);
   const SPR_W=16, SPR_H=17;
 
-  // ---------- laptop held while resting (open laptop, terminal on screen) ----------
+  // ---------- laptop held while resting (screen faces the mascot — we see the lid back) ----------
   const LAPTOP = [
-    ".FFFFFFF.",
-    ".FsssssF.",
-    ".FsCCCsF.",
-    ".FsCsssF.",
-    ".FsCCCsF.",
-    "KKKKKKKKK",
-    ".KKKKKKK.",
+    "EEEEEEEEE",
+    "EKKKKKKKE",
+    "EKKKKKKKE",
+    "EKKKaKKKE",
+    "EKKKKKKKE",
+    "EEEEEEEEE",
+    "bbbbbbbbb",
   ];
-  const LAP_PAL = { F:"#15171c", s:"#0a0c10", C:"#5ef08a", K:"#3a3d44" };
+  const LAP_PAL = { E:"#14161b", K:"#2c2f36", a:"#e0312f", b:"#3a3d44" };
   const LAP_W = 9, LAP_H = LAPTOP.length;
 
   function init() {
