@@ -2760,22 +2760,23 @@ const severityFromScore = (s) => {
 };
 
 // ----- CVSS per-option icons: AV keeps chandanbn sprite; the rest are clean inline SVGs -----
+const G = '#58d177', D = '#1f2328';  // green fill + dark outline (matches AV sprite vibe)
 const CVSS_SVG = {
-  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>',
-  puzzle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z"/></svg>',
-  ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>',
-  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>',
-  unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7-2.6"/></svg>',
-  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
-  usershield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="10" cy="8" r="3.3"/><path d="M3.5 21a7 7 0 0 1 10.5-5.5"/><path d="M18 12.5l3.2 1.1v2.9c0 2.1-1.6 3.2-3.2 3.7-1.6-.5-3.2-1.6-3.2-3.7v-2.9z"/></svg>',
-  pointer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3l6 18 2-7 7-2z"/></svg>',
-  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
-  boxshift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="10" height="10" rx="2"/><path d="M11 18h8M19 18l-3-3M19 18l-3 3"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
-  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/></svg>',
-  penciloff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M3 3l18 18"/></svg>',
-  power: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M7 6a8 8 0 1 0 10 0"/></svg>',
-  poweroff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v6"/><path d="M7 6a8 8 0 1 0 10 0"/><path d="M4 4l16 16"/></svg>',
+  bolt: `<svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  puzzle: `<svg viewBox="0 0 24 24"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  ban: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M6 6l12 12" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  flag: `<svg viewBox="0 0 24 24"><path d="M6 21V4" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M6 4h11l-2 4 2 4H6z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  unlock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 0 1 7-2.6" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  user: `<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  usershield: `<svg viewBox="0 0 24 24"><circle cx="9.5" cy="8" r="3.3" fill="none" stroke="${D}" stroke-width="1.6"/><path d="M3.5 20.5a6.5 6.5 0 0 1 10-5" fill="none" stroke="${D}" stroke-width="1.6"/><path d="M18 12.5l3.2 1.1v2.9c0 2.1-1.6 3.2-3.2 3.7-1.6-.5-3.2-1.6-3.2-3.7v-2.9z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  pointer: `<svg viewBox="0 0 24 24"><path d="M5 3l6 18 2-7 7-2z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  box: `<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/></svg>`,
+  boxshift: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="10" height="10" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M11 18h8M19 18l-3-3M19 18l-3 3" fill="none" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  lock: `<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M8 11V8a4 4 0 1 1 8 0v3" fill="none" stroke="${D}" stroke-width="1.6"/></svg>`,
+  pencil: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/></svg>`,
+  penciloff: `<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19 8l-3-3L5 16z" fill="${G}" stroke="${D}" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 3l18 18" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+  power: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  poweroff: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8.5" fill="${G}" stroke="${D}" stroke-width="1.6"/><path d="M12 5v6" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M8.3 9a5 5 0 1 0 7.4 0" fill="none" stroke="${D}" stroke-width="1.6" stroke-linecap="round"/><path d="M4 4l16 16" fill="none" stroke="${D}" stroke-width="1.8" stroke-linecap="round"/></svg>`,
 };
 const cvssOptToken = (key, val) => {
   const map = {
