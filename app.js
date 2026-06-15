@@ -2759,14 +2759,44 @@ const severityFromScore = (s) => {
   return ['critical', 'Critical'];
 };
 
-// ----- CVSS per-option icons (chandanbn cvssicons.png sprite) + shareable URL-hash sync -----
-const cvssIconClass = (key, val) => {
-  if (['AV', 'AC', 'PR', 'UI'].includes(key)) return key + val;
-  if (key === 'S') return val === 'C' ? 'SC' : 'SU';
-  const impact = { C: 'C', VC: 'C', SC: 'C', I: 'I', VI: 'I', SI: 'I', A: 'A', VA: 'A', SA: 'A' }[key];
-  return impact ? impact + val : '';
+// ----- CVSS per-option icons: AV keeps chandanbn sprite; the rest are clean inline SVGs -----
+const CVSS_SVG = {
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg>',
+  puzzle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 5h4a2 2 0 1 1 4 0h4v4a2 2 0 1 0 0 4v4h-4a2 2 0 1 0-4 0H6v-4a2 2 0 1 1 0-4z"/></svg>',
+  ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>',
+  flag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 21V4M6 4h11l-2 4 2 4H6"/></svg>',
+  unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 7-2.6"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  usershield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="10" cy="8" r="3.3"/><path d="M3.5 21a7 7 0 0 1 10.5-5.5"/><path d="M18 12.5l3.2 1.1v2.9c0 2.1-1.6 3.2-3.2 3.7-1.6-.5-3.2-1.6-3.2-3.7v-2.9z"/></svg>',
+  pointer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3l6 18 2-7 7-2z"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
+  boxshift: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="10" height="10" rx="2"/><path d="M11 18h8M19 18l-3-3M19 18l-3 3"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/></svg>',
+  penciloff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M3 3l18 18"/></svg>',
+  power: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v8"/><path d="M7 6a8 8 0 1 0 10 0"/></svg>',
+  poweroff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v6"/><path d="M7 6a8 8 0 1 0 10 0"/><path d="M4 4l16 16"/></svg>',
 };
-const optIcon = (key, val) => { const c = cvssIconClass(key, val); return c ? '<span class="cvico-wrap"><i class="cvico ' + c + '"></i></span>' : ''; };
+const cvssOptToken = (key, val) => {
+  const map = {
+    AC: { L: 'bolt', H: 'puzzle' },
+    AT: { N: 'ban', P: 'flag' },
+    PR: { N: 'unlock', L: 'user', H: 'usershield' },
+    UI: { N: 'ban', R: 'pointer', P: 'pointer', A: 'pointer' },
+    S:  { U: 'box', C: 'boxshift' },
+  }[key];
+  if (map) return map[val] || '';
+  const dim = { C: 'c', VC: 'c', SC: 'c', I: 'i', VI: 'i', SI: 'i', A: 'a', VA: 'a', SA: 'a' }[key];
+  if (dim === 'c') return val === 'N' ? 'unlock' : 'lock';
+  if (dim === 'i') return val === 'N' ? 'penciloff' : 'pencil';
+  if (dim === 'a') return val === 'N' ? 'poweroff' : 'power';
+  return '';
+};
+const optIcon = (key, val) => {
+  if (key === 'AV') return '<span class="cvico-wrap"><i class="cvico AV' + val + '"></i></span>';
+  const t = cvssOptToken(key, val);
+  return t && CVSS_SVG[t] ? '<span class="cvico-wrap cvico-svg">' + CVSS_SVG[t] + '</span>' : '';
+};
 const readCvssHash = (ver, keys) => {
   const m = location.hash.match(new RegExp('CVSS:' + ver.replace('.', '\\.') + '/([^#?]*)'));
   const out = {};

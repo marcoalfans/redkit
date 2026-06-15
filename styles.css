@@ -504,8 +504,7 @@ textarea {
 }
 
 .metric {
-  flex: 1 1 160px;
-  max-width: 230px;
+  flex: 0 0 178px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -992,6 +991,8 @@ textarea {
 /* ===== CVSS per-option icons (chandanbn cvssicons.png sprite) ===== */
 .cvico-wrap { display: inline-flex; align-items: center; justify-content: center; background: #eceef0; border-radius: 6px; padding: 3px; flex-shrink: 0; }
 .cvico { width: 1em; height: 1em; font-size: 26px; display: inline-block; background: url("cvssicons.png") 0 0 no-repeat; background-size: 21em 1em; }
+.cvico-svg { color: #24292f; }
+.cvico-svg svg { width: 24px; height: 24px; display: block; }
 .cvico.AVP{background-position:0 0}.cvico.AVL{background-position:-1em 0}.cvico.AVA{background-position:-2em 0}.cvico.AVN{background-position:-3em 0}
 .cvico.ACL{background-position:-4em 0}.cvico.ACH{background-position:-5em 0}
 .cvico.PRN{background-position:-6em 0}.cvico.PRL{background-position:-7em 0}.cvico.PRH{background-position:-8em 0}
