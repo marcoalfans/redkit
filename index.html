@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RedKit — Pentest & Red Team Toolkit</title>
+  <meta name="description" content="RedKit — a client-side toolkit of encoders, payload libraries, recon helpers and calculators for pentest and red team engagements.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo-wrap"><span class="brand-logo">RK</span></div>
+        <div class="brand-meta">
+          <div class="brand-title">RedKit</div>
+          <div class="brand-subtitle">Pentest & Red Team Toolkit</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <div class="nav-section">
+          <div class="nav-title">Recon & OSINT</div>
+          <button class="nav-item" data-tool="google-dork">Google Dork Generator</button>
+          <button class="nav-item" data-tool="shodan-dork">Shodan Dork Generator</button>
+          <button class="nav-item" data-tool="subdomain-finder">Subdomain Finder</button>
+          <button class="nav-item" data-tool="js-analyzer">JS File Analyzer</button>
+          <button class="nav-item" data-tool="header-analyzer">Security Header Analyzer</button>
+          <button class="nav-item" data-tool="dns-lookup">DNS Lookup</button>
+          <button class="nav-item" data-tool="url-parser">URL Parser</button>
+          <button class="nav-item" data-tool="ip-info">IP / Domain Info</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Encoding</div>
+          <button class="nav-item" data-tool="base64">Base64 Encode/Decode</button>
+          <button class="nav-item" data-tool="url-encode">URL Encode/Decode</button>
+          <button class="nav-item" data-tool="html-encode">HTML Encode/Decode</button>
+          <button class="nav-item" data-tool="hex">Hex Encode/Decode</button>
+          <button class="nav-item" data-tool="base32">Base32 Encode/Decode</button>
+          <button class="nav-item" data-tool="base58">Base58 Encode/Decode</button>
+          <button class="nav-item" data-tool="base85">Base85 / ASCII85</button>
+          <button class="nav-item" data-tool="binary">Binary Encode/Decode</button>
+          <button class="nav-item" data-tool="morse">Morse Code</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Crypto & Hash</div>
+          <button class="nav-item" data-tool="hash">Hash Generator</button>
+          <button class="nav-item" data-tool="hash-id">Hash Identifier</button>
+          <button class="nav-item" data-tool="jwt">JWT Decoder / Editor</button>
+          <button class="nav-item" data-tool="cipher">Classic Ciphers</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Payloads & Web Exploitation</div>
+          <button class="nav-item" data-tool="csrf-poc">CSRF PoC Generator</button>
+          <button class="nav-item" data-tool="dos-gen">DoS Payload Generator</button>
+          <button class="nav-item" data-tool="xss-payloads">XSS Payload Library</button>
+          <button class="nav-item" data-tool="sqli-payloads">SQLi Payload Library</button>
+          <button class="nav-item" data-tool="idor-helper">IDOR Helper & Patterns</button>
+          <button class="nav-item" data-tool="csrf-bypass">CSRF Bypass Techniques</button>
+          <button class="nav-item" data-tool="path-traversal">Path Traversal / LFI Helper</button>
+          <button class="nav-item" data-tool="graphql-helper">GraphQL Helper</button>
+          <button class="nav-item" data-tool="ssrf-helper">SSRF Helper</button>
+        </div>
+        <div class="nav-section">
+          <div class="nav-title">Reporting</div>
+          <button class="nav-item" data-tool="cvss31">CVSS 3.1 Calculator</button>
+          <button class="nav-item" data-tool="cvss40">CVSS 4.0 Calculator</button>
+          <button class="nav-item" data-tool="report-template">Report Template</button>
+        </div>
+      </nav>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div class="topbar-title">
+          <h2 id="currentToolTitle">RedKit</h2>
+          <p id="currentToolDesc">Select a tool from the sidebar</p>
+        </div>
+      </div>
+      <div class="content" id="content"></div>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
