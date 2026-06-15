@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,6 +22,7 @@
         <button class="rk-tab" data-cat="reporting">Reporting</button>
     </nav>
     <div class="rk-header-right">
+      <button class="rk-icon-btn" id="rkTheme" aria-label="Toggle theme"><span id="rkThemeIcon">☀</span></button>
       <a href="https://marcoalfans.github.io/" class="rk-back">← portfolio</a>
     </div>
   </header>
@@ -93,27 +94,69 @@
     (function () {
       const tabs = Array.from(document.querySelectorAll('.rk-tab'));
       const sections = Array.from(document.querySelectorAll('.nav-section[data-cat]'));
+      const items = Array.from(document.querySelectorAll('.nav-item[data-tool]'));
       const sidebar = document.querySelector('.sidebar');
+
       function show(cat) {
         sections.forEach(s => { s.style.display = s.dataset.cat === cat ? '' : 'none'; });
         tabs.forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
       }
-      tabs.forEach(t => t.addEventListener('click', () => {
-        show(t.dataset.cat);
-        const sec = sections.find(s => s.dataset.cat === t.dataset.cat);
-        const first = sec && sec.querySelector('.nav-item');
-        if (first) first.click();
-        if (sidebar) sidebar.classList.remove('open');
-      }));
-      function sync() {
+      function syncCat() {
         const active = document.querySelector('.nav-item.active');
         const sec = active && active.closest('.nav-section[data-cat]');
         show(sec ? sec.dataset.cat : 'recon');
       }
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(sync, 0));
-      else setTimeout(sync, 0);
+
+      // category tabs
+      tabs.forEach(t => t.addEventListener('click', () => {
+        const sec = sections.find(s => s.dataset.cat === t.dataset.cat);
+        const first = sec && sec.querySelector('.nav-item');
+        if (first) first.click(); else show(t.dataset.cat);
+        if (sidebar) sidebar.classList.remove('open');
+      }));
+
+      // deep-link routing (#/<tool>)
+      items.forEach(it => it.addEventListener('click', () => {
+        const key = it.dataset.tool;
+        if (location.hash !== '#/' + key) location.hash = '#/' + key;
+        setTimeout(syncCat, 0);
+      }));
+      function hashKey() { const m = location.hash.match(/^#\/([\w-]+)/); return m ? m[1] : null; }
+      function route() {
+        const key = hashKey();
+        if (!key) return false;
+        const target = document.querySelector('.nav-item[data-tool="' + key + '"]');
+        if (!target) return false;
+        const active = document.querySelector('.nav-item.active');
+        if (!active || active.dataset.tool !== key) target.click(); else syncCat();
+        return true;
+      }
+      window.addEventListener('hashchange', route);
+
+      // theme toggle (matches writeups)
+      const root = document.documentElement;
+      const tbtn = document.getElementById('rkTheme');
+      const ticon = document.getElementById('rkThemeIcon');
+      function applyTheme(t) { root.setAttribute('data-theme', t); if (ticon) ticon.textContent = t === 'dark' ? '☀' : '☾'; }
+      applyTheme(localStorage.getItem('theme') || 'dark');
+      if (tbtn) tbtn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next); applyTheme(next);
+      });
+
       const ham = document.getElementById('rkHamburger');
       if (ham) ham.addEventListener('click', () => sidebar && sidebar.classList.toggle('open'));
+
+      // init after app.js loads default/last tool
+      function init() {
+        if (!route()) {
+          const active = document.querySelector('.nav-item.active');
+          if (active) history.replaceState(null, '', '#/' + active.dataset.tool);
+          syncCat();
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(init, 0));
+      else setTimeout(init, 0);
     })();
   </script>
 </body>
