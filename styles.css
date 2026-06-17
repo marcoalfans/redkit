@@ -1057,7 +1057,7 @@ textarea {
 .tc-pane { display: flex; flex-direction: column; min-width: 0; }
 .tc-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; min-height: 28px; }
 .tc-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
-.tc-area { width: 100%; min-height: 230px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
+.tc-area { width: 100%; min-height: 230px; resize: vertical; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; }
 .tc-out { background: var(--bg-elev2); }
 .tc-out.tc-err { color: var(--accent); }
 .tc-swap { align-self: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-elev2); color: var(--text-dim); cursor: pointer; transition: transform 0.25s, border-color 0.15s, color 0.15s; }

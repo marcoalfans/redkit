@@ -1074,6 +1074,10 @@ const transcoderTemplate = (id, opts = {}) => `
   </div>
 `;
 
+// grow a textarea to fit its content (so long input/output expands the box
+// downward instead of scrolling inside it); CSS min-height stays the floor.
+const autosize = (el) => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
+
 const wireTranscoder = (id, getCodec) => {
   const src = $(`#${id}-src`), dst = $(`#${id}-dst`), ll = $(`#${id}-llabel`), rl = $(`#${id}-rlabel`);
   let dir = 'enc';   // 'enc' = left(Text) → right(encoded);  'dec' = left(encoded) → right(Text)
@@ -1084,9 +1088,12 @@ const wireTranscoder = (id, getCodec) => {
   };
   const convert = () => {
     const c = getCodec(), fn = dir === 'enc' ? c.enc : c.dec, input = src.value;
-    if (input === '') { dst.value = ''; dst.classList.remove('tc-err'); return; }
-    try { dst.value = fn(input) ?? ''; dst.classList.remove('tc-err'); }
-    catch (e) { dst.value = '⚠ ' + (e.message || 'invalid input'); dst.classList.add('tc-err'); }
+    if (input === '') { dst.value = ''; dst.classList.remove('tc-err'); }
+    else {
+      try { dst.value = fn(input) ?? ''; dst.classList.remove('tc-err'); }
+      catch (e) { dst.value = '⚠ ' + (e.message || 'invalid input'); dst.classList.add('tc-err'); }
+    }
+    autosize(src); autosize(dst);
   };
   src.addEventListener('input', convert);
   $(`#${id}-swap`).addEventListener('click', () => {
