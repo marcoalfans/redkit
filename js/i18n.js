@@ -297,6 +297,12 @@
     'curl command': 'Perintah curl',
     'Code': 'Kode',
 
+    // JWT / XXE / Open-redirect / 403-bypass helpers
+    'JSON Web Token attack techniques: alg confusion, key confusion, kid/jku injection, weak secrets.': 'Teknik serangan JSON Web Token: alg confusion, key confusion, injeksi kid/jku, secret lemah.',
+    'XML External Entity payloads: file read, SSRF, blind OOB exfiltration, and parser bypasses.': 'Payload XML External Entity: baca file, SSRF, eksfiltrasi blind OOB, dan bypass parser.',
+    'Open redirect payloads and filter/allowlist bypasses, plus the parameters worth fuzzing.': 'Payload open redirect dan bypass filter/allowlist, plus parameter yang layak di-fuzz.',
+    'Techniques to bypass 403/401 on a path: path tricks, header spoofing, verbs, case and encoding.': 'Teknik bypass 403/401 pada sebuah path: trik path, spoof header, verb, case, dan encoding.',
+
     // Command Injection / SSTI helpers
     'OS command injection payloads: separators, blind/time-based, OOB, and filter/WAF bypasses.': 'Payload OS command injection: separator, blind/time-based, OOB, dan bypass filter/WAF.',
     'Server-Side Template Injection payloads and RCE chains for Jinja2, Twig, Freemarker, ERB and more.': 'Payload Server-Side Template Injection dan rantai RCE untuk Jinja2, Twig, Freemarker, ERB, dan lainnya.',
