@@ -1,5 +1,5 @@
 /* ============================================================
-   HackTools - Bug Bounty Toolkit
+   RedKit - Pentest & Red Team Toolkit
    Vanilla JS, single-file app
    ============================================================ */
 
@@ -26,7 +26,8 @@ const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({
 }[m]));
 
 const toast = (msg) => {
-  const t = $('#toast');
+  let t = $('#toast');
+  if (!t) { t = el('div', { id: 'toast', class: 'toast' }); document.body.appendChild(t); }
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toast._t);
@@ -1254,7 +1255,7 @@ const morseDecode = (s) =>
 // ===== Codec registry (shared by transcoder tools + Magic) =====
 const b64Enc = s => btoa(unescape(encodeURIComponent(s)));
 const b64Dec = s => decodeURIComponent(escape(atob(s.replace(/\s+/g, ''))));
-const htmlEnc = s => s.replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const htmlEnc = escapeHtml; // same HTML-entity encoder, kept as an alias for the codec registry
 const htmlDec = s => { const ta = document.createElement('textarea'); ta.innerHTML = s; return ta.value; };
 const hexEnc = s => Array.from(new TextEncoder().encode(s)).map(b => b.toString(16).padStart(2, '0')).join('');
 const hexDec = s => {
@@ -2215,10 +2216,7 @@ const renderPayloadLibrary = (cardTitle, sections, tips) => {
 
 const initPayloadLibrary = () => {
   document.querySelectorAll('[data-copy]').forEach(b => {
-    b.addEventListener('click', () => {
-      const txt = b.getAttribute('data-copy');
-      navigator.clipboard.writeText(txt).then(() => toast('Copied'));
-    });
+    b.addEventListener('click', () => copy(b.getAttribute('data-copy')));
   });
   const search = document.querySelector('[data-pl-search]');
   if (search) {
@@ -3564,15 +3562,9 @@ TOOLS['ps-encode'] = {
 // ============================================================
 // Per-tool EXAMPLES — feature-specific sample inputs (not generic defaults)
 // ============================================================
-const exFill = (id, val) => {
-  const el = $('#' + id);
-  if (!el) return;
-  el.value = val;
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-  el.dispatchEvent(new Event('change', { bubbles: true }));
-};
-const exFillSel = (sel, val) => {
-  const el = $(sel);
+// accepts a bare id ("gd-domain") or a full CSS selector (".rt-url", "#x")
+const exFill = (idOrSel, val) => {
+  const el = $(/^[#.\[]/.test(idOrSel) ? idOrSel : '#' + idOrSel);
   if (!el) return;
   el.value = val;
   el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3627,8 +3619,8 @@ const EXAMPLES = {
     exFill('rt-type', 'Cross-Site Scripting (Reflected)');
     exFill('rt-cvssver', '3.1');
     exFill('rt-vector', 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N');
-    exFillSel('.rt-url', 'https://app.example.com/search?q=test');
-    exFillSel('.rt-ref', 'https://owasp.org/www-community/attacks/xss/');
+    exFill('.rt-url', 'https://app.example.com/search?q=test');
+    exFill('.rt-ref', 'https://owasp.org/www-community/attacks/xss/');
     exFill('rt-desc', 'The `q` parameter on the search endpoint reflects user input into the HTML response without output encoding, allowing arbitrary JavaScript execution in the victim’s browser session.');
     exFill('rt-impact', 'An attacker can steal session cookies, perform actions as the victim, and deface the page or redirect users to phishing/malware.');
     exFill('rt-rem', 'Context-aware output encoding for all user-controlled data; deploy a strict Content-Security-Policy; validate and sanitize input server-side.');
