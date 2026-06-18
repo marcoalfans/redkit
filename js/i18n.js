@@ -264,6 +264,10 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // HTTP & Port Reference
+    'Searchable reference of HTTP status codes and common ports, with pentest notes.': 'Referensi HTTP status code dan port umum yang bisa dicari, lengkap dengan catatan pentest.',
+    'Filter by code, name, service or keyword...': 'Cari berdasarkan kode, nama, layanan, atau kata kunci...',
+
     // Nmap / curl Builder
     'Build Nmap scans and curl requests from a form, with copy-ready commands.': 'Susun perintah scan Nmap dan request curl dari form, siap disalin.',
     'Target(s)': 'Target',

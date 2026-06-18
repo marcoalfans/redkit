@@ -1183,3 +1183,176 @@ TOOLS['cmd-builder'] = {
   }
 };
 
+// ===== HTTP STATUS & PORT REFERENCE =====
+const HTTP_STATUS = [
+  [100, 'Continue', 'Headers received; client should send the request body.'],
+  [101, 'Switching Protocols', 'Server is switching protocols (e.g. to WebSocket).'],
+  [103, 'Early Hints', 'Preload hints sent before the final response.'],
+  [200, 'OK', 'Standard success.'],
+  [201, 'Created', 'Resource created (check the Location header).'],
+  [202, 'Accepted', 'Accepted for async processing.'],
+  [204, 'No Content', 'Success with no body; common for DELETE / PUT.'],
+  [206, 'Partial Content', 'Range request served; probe Range header handling.'],
+  [301, 'Moved Permanently', 'Permanent redirect; inspect Location for open-redirect.'],
+  [302, 'Found', 'Temporary redirect; classic open-redirect sink.'],
+  [303, 'See Other', 'Redirect to a GET resource after POST.'],
+  [304, 'Not Modified', 'Cached copy is still valid (conditional request).'],
+  [307, 'Temporary Redirect', 'Like 302 but keeps the method/body.'],
+  [308, 'Permanent Redirect', 'Like 301 but keeps the method/body.'],
+  [400, 'Bad Request', 'Malformed request; often from injection / bad parsing.'],
+  [401, 'Unauthorized', 'Authentication required or failed (check WWW-Authenticate).'],
+  [403, 'Forbidden', 'Access denied; try bypasses: X-Original-URL, ..;/, path case, verb change.'],
+  [404, 'Not Found', 'No such resource; fuzz for hidden paths.'],
+  [405, 'Method Not Allowed', 'Verb blocked; try GET/POST/PUT/PATCH/DELETE/HEAD (check Allow).'],
+  [406, 'Not Acceptable', 'Server cannot match the Accept header.'],
+  [407, 'Proxy Authentication Required', 'Auth needed at a proxy.'],
+  [408, 'Request Timeout', 'Client too slow; relevant to time-based / Slowloris.'],
+  [409, 'Conflict', 'State conflict; watch for race conditions.'],
+  [410, 'Gone', 'Resource permanently removed.'],
+  [411, 'Length Required', 'Content-Length header is required.'],
+  [413, 'Payload Too Large', 'Body exceeds the server limit (DoS / upload limit).'],
+  [414, 'URI Too Long', 'URL exceeds the limit; relevant to long-URL attacks.'],
+  [415, 'Unsupported Media Type', 'Content-Type rejected; try alternates to bypass filters.'],
+  [418, "I'm a Teapot", 'Joke code (RFC 2324); sometimes a WAF/bot block tell.'],
+  [421, 'Misdirected Request', 'Wrong server for this connection; HTTP/2 host confusion.'],
+  [422, 'Unprocessable Content', 'Validation failed on a well-formed request.'],
+  [426, 'Upgrade Required', 'Client must switch protocols.'],
+  [429, 'Too Many Requests', 'Rate limited; try IP rotation, casing, or header tricks to bypass.'],
+  [431, 'Request Header Fields Too Large', 'Headers exceed the limit.'],
+  [451, 'Unavailable For Legal Reasons', 'Blocked for legal/censorship reasons.'],
+  [500, 'Internal Server Error', 'Unhandled error; stack traces here often leak internals.'],
+  [501, 'Not Implemented', 'Method/feature not supported by the server.'],
+  [502, 'Bad Gateway', 'Bad upstream response; possible SSRF / proxy misconfig.'],
+  [503, 'Service Unavailable', 'Overloaded or down; watch for Retry-After.'],
+  [504, 'Gateway Timeout', 'Upstream timed out; useful signal for blind SSRF / time-based.'],
+  [505, 'HTTP Version Not Supported', 'Server rejects the HTTP version.'],
+  [507, 'Insufficient Storage', 'Server out of storage (WebDAV).'],
+  [508, 'Loop Detected', 'Infinite loop in processing (WebDAV).'],
+  [511, 'Network Authentication Required', 'Captive portal wants authentication.'],
+  [444, 'No Response (nginx)', 'nginx closed the connection with no response.'],
+  [499, 'Client Closed Request (nginx)', 'Client disconnected before the server replied.'],
+  [520, 'Unknown Error (Cloudflare)', 'Origin returned something unexpected to Cloudflare.'],
+  [521, 'Web Server Is Down (Cloudflare)', 'Origin refused the connection; hint to find the origin IP.'],
+  [522, 'Connection Timed Out (Cloudflare)', 'Cloudflare could not reach the origin.'],
+  [523, 'Origin Is Unreachable (Cloudflare)', 'Origin host unreachable.'],
+  [525, 'SSL Handshake Failed (Cloudflare)', 'TLS handshake with the origin failed.'],
+];
+const HTTP_CLASS = { 1: 'Informational', 2: 'Success', 3: 'Redirection', 4: 'Client Error', 5: 'Server Error' };
+const COMMON_PORTS = [
+  [21, 'TCP', 'FTP', 'File transfer; check anon login and cleartext creds.'],
+  [22, 'TCP', 'SSH', 'Remote shell; banner-grab, key/user enum, weak creds.'],
+  [23, 'TCP', 'Telnet', 'Cleartext remote shell; high-value, often default creds.'],
+  [25, 'TCP', 'SMTP', 'Mail; user enum (VRFY), open relay.'],
+  [53, 'TCP/UDP', 'DNS', 'Name resolution; try zone transfer (AXFR).'],
+  [69, 'UDP', 'TFTP', 'No-auth file transfer; grab configs.'],
+  [80, 'TCP', 'HTTP', 'Web; the main app attack surface.'],
+  [110, 'TCP', 'POP3', 'Cleartext mail retrieval.'],
+  [111, 'TCP/UDP', 'RPCbind', 'Portmapper; enumerate RPC services / NFS.'],
+  [123, 'UDP', 'NTP', 'Time; monlist amplification.'],
+  [135, 'TCP', 'MSRPC', 'Windows RPC endpoint mapper.'],
+  [139, 'TCP', 'NetBIOS-SSN', 'Legacy Windows file sharing.'],
+  [143, 'TCP', 'IMAP', 'Cleartext mail access.'],
+  [161, 'UDP', 'SNMP', 'Device mgmt; try community strings public/private.'],
+  [389, 'TCP', 'LDAP', 'Directory; anon bind, user enum.'],
+  [443, 'TCP', 'HTTPS', 'Web over TLS; inspect cert for hostnames.'],
+  [445, 'TCP', 'SMB', 'Windows file sharing; EternalBlue, null sessions, shares.'],
+  [465, 'TCP', 'SMTPS', 'SMTP over TLS.'],
+  [500, 'UDP', 'IKE/IPsec', 'VPN; aggressive-mode PSK capture.'],
+  [512, 'TCP', 'rexec', 'Legacy remote exec.'],
+  [513, 'TCP', 'rlogin', 'Legacy remote login; trust abuse.'],
+  [514, 'UDP', 'syslog', 'Log collection; injection / spoofing.'],
+  [587, 'TCP', 'SMTP (submission)', 'Authenticated mail submission.'],
+  [623, 'UDP', 'IPMI', 'Out-of-band mgmt; auth bypass, hash dump.'],
+  [636, 'TCP', 'LDAPS', 'LDAP over TLS.'],
+  [873, 'TCP', 'rsync', 'File sync; often unauthenticated modules.'],
+  [993, 'TCP', 'IMAPS', 'IMAP over TLS.'],
+  [995, 'TCP', 'POP3S', 'POP3 over TLS.'],
+  [1080, 'TCP', 'SOCKS', 'Proxy; open proxy / pivot.'],
+  [1099, 'TCP', 'Java RMI', 'Deserialization RCE.'],
+  [1433, 'TCP', 'MSSQL', 'SQL Server; xp_cmdshell, weak sa.'],
+  [1521, 'TCP', 'Oracle DB', 'TNS; SID enum, default creds.'],
+  [1723, 'TCP', 'PPTP', 'Legacy VPN.'],
+  [2049, 'TCP', 'NFS', 'Network file share; no_root_squash exports.'],
+  [2375, 'TCP', 'Docker API', 'Unauth Docker daemon = host RCE.'],
+  [2379, 'TCP', 'etcd', 'K8s key-value store; secrets if unauth.'],
+  [3128, 'TCP', 'Squid Proxy', 'HTTP proxy; open proxy / SSRF pivot.'],
+  [3306, 'TCP', 'MySQL', 'Database; weak/empty root.'],
+  [3389, 'TCP', 'RDP', 'Windows remote desktop; BlueKeep, weak creds.'],
+  [4444, 'TCP', 'Metasploit', 'Default Meterpreter handler port.'],
+  [4505, 'TCP', 'SaltStack', 'Salt master; CVE-2020-11651 auth bypass.'],
+  [5432, 'TCP', 'PostgreSQL', 'Database; weak creds, COPY TO/FROM RCE.'],
+  [5601, 'TCP', 'Kibana', 'ES dashboard; old RCEs, data exposure.'],
+  [5672, 'TCP', 'AMQP/RabbitMQ', 'Message queue; guest/guest default.'],
+  [5900, 'TCP', 'VNC', 'Remote desktop; no/weak auth.'],
+  [5984, 'TCP', 'CouchDB', 'NoSQL; unauth admin, CVE-2017-12635.'],
+  [5985, 'TCP', 'WinRM', 'Windows remote mgmt; creds = shell (evil-winrm).'],
+  [6379, 'TCP', 'Redis', 'Often no auth; RCE via module / cron / SSH key write.'],
+  [6443, 'TCP', 'Kubernetes API', 'Cluster control; anon access = takeover.'],
+  [7001, 'TCP', 'WebLogic', 'Java app server; many deserialization RCEs.'],
+  [8000, 'TCP', 'HTTP-alt', 'Dev servers / apps.'],
+  [8080, 'TCP', 'HTTP-proxy/alt', 'Tomcat, proxies, dev apps.'],
+  [8443, 'TCP', 'HTTPS-alt', 'Alt TLS web / admin consoles.'],
+  [8086, 'TCP', 'InfluxDB', 'Time-series DB; unauth queries.'],
+  [8089, 'TCP', 'Splunk', 'Mgmt API; RCE via app upload.'],
+  [8500, 'TCP', 'Consul', 'Service mesh; unauth = RCE via services.'],
+  [8888, 'TCP', 'Jupyter/alt', 'Notebooks = code execution if open.'],
+  [9000, 'TCP', 'PHP-FPM/SonarQube', 'FastCGI RCE; or SonarQube.'],
+  [9092, 'TCP', 'Kafka', 'Message broker; unauth topic access.'],
+  [9200, 'TCP', 'Elasticsearch', 'Often unauth; data dump, old RCEs.'],
+  [9418, 'TCP', 'Git', 'git:// protocol; repo exposure.'],
+  [10000, 'TCP', 'Webmin', 'Admin panel; CVE-2019-15107 RCE.'],
+  [11211, 'TCP', 'Memcached', 'No auth; cache dump, UDP amplification.'],
+  [15672, 'TCP', 'RabbitMQ Mgmt', 'Web UI; guest/guest default.'],
+  [27017, 'TCP', 'MongoDB', 'Often no auth; full DB read/write.'],
+  [50070, 'TCP', 'Hadoop HDFS', 'NameNode UI; unauth, YARN RCE nearby.'],
+];
+
+TOOLS['http-ref'] = {
+  title: 'HTTP & Port Reference',
+  desc: 'Searchable reference of HTTP status codes and common ports, with pentest notes.',
+  render() {
+    return `
+      <div class="tool">
+        ${card('Reference', `
+          <div class="not-formats" id="ref-tabs">
+            <button class="not-fmt active" data-t="status">HTTP Status</button>
+            <button class="not-fmt" data-t="ports">Ports</button>
+          </div>
+          <input type="text" class="input ref-search" id="ref-search" placeholder="Filter by code, name, service or keyword..." autocomplete="off">
+          <div id="ref-body"></div>
+        `)}
+      </div>`;
+  },
+  init() {
+    const statusBody = () => {
+      let html = '', last = 0;
+      [...HTTP_STATUS].sort((a, b) => a[0] - b[0]).forEach(([code, name, desc]) => {
+        const cls = Math.floor(code / 100);
+        if (cls !== last) { html += `<div class="ref-group">${cls}xx ${HTTP_CLASS[cls]}</div>`; last = cls; }
+        html += `<div class="ref-row" data-f="${escapeHtml((code + ' ' + name + ' ' + desc).toLowerCase())}"><code class="ref-code ref-${cls}xx">${code}</code><span class="ref-name">${escapeHtml(name)}</span><span class="ref-desc">${escapeHtml(desc)}</span></div>`;
+      });
+      return html;
+    };
+    const portsBody = () => COMMON_PORTS.map(([port, proto, svc, desc]) =>
+      `<div class="ref-row" data-f="${escapeHtml((port + ' ' + proto + ' ' + svc + ' ' + desc).toLowerCase())}"><code class="ref-code">${port}</code><span class="ref-name">${escapeHtml(svc)} <span class="ref-proto">${proto}</span></span><span class="ref-desc">${escapeHtml(desc)}</span></div>`
+    ).join('');
+    const body = $('#ref-body'), search = $('#ref-search');
+    let tab = 'status';
+    const filter = () => {
+      const q = search.value.trim().toLowerCase();
+      let any = false;
+      $$('.ref-row', body).forEach(r => { const show = !q || r.dataset.f.includes(q); r.style.display = show ? '' : 'none'; if (show) any = true; });
+      $$('.ref-group', body).forEach(g => { let n = g.nextElementSibling, vis = false; while (n && !n.classList.contains('ref-group')) { if (n.classList.contains('ref-row') && n.style.display !== 'none') { vis = true; break; } n = n.nextElementSibling; } g.style.display = vis ? '' : 'none'; });
+      let em = $('.ref-empty', body); if (!any) { if (!em) { em = el('div', { class: 'ref-empty' }, 'No matches.'); body.appendChild(em); } em.style.display = ''; } else if (em) em.style.display = 'none';
+    };
+    const mount = () => { body.innerHTML = tab === 'ports' ? portsBody() : statusBody(); filter(); };
+    $$('.not-fmt', $('#ref-tabs')).forEach(b => b.addEventListener('click', () => {
+      tab = b.dataset.t;
+      $$('.not-fmt', $('#ref-tabs')).forEach(x => x.classList.toggle('active', x === b));
+      mount();
+    }));
+    search.addEventListener('input', filter);
+    mount();
+  }
+};
+
