@@ -124,15 +124,14 @@ TOOLS['3.1'] = {
     return `
       <div class="tool">
         <div class="cvss-grid">
-          <div class="card">
+          ${card('', `
             <div class="metric-group">
               <h4>Base Metrics</h4>
               ${['AV','AC','PR','UI','S','C','I','A'].map(renderMetric).join('')}
             </div>
             <button class="btn btn-secondary" id="cvss31-reset">Reset</button>
-          </div>
-          <div class="card" style="position:sticky;top:0">
-            <div class="card-title">Score</div>
+          `)}
+          ${card('Score', `
             <div class="cvss-score" id="cvss31-score">0.0</div>
             <div style="text-align:center;margin-bottom:14px"><span class="severity-badge sev-none" id="cvss31-sev">None</span></div>
             <div class="cvss-vector" id="cvss31-vector">CVSS:3.1/...</div>
@@ -140,7 +139,7 @@ TOOLS['3.1'] = {
               <button class="btn btn-secondary" id="cvss31-copy-vec">Copy Vector</button>
               <button class="btn btn-secondary" id="cvss31-copy-score">Copy Score</button>
             </div>
-          </div>
+          `, { style: 'position:sticky;top:0' })}
         </div>
       </div>
     `;
@@ -175,8 +174,8 @@ TOOLS['3.1'] = {
       $$('.metric-btn').forEach(b => b.classList.remove('active'));
       update();
     });
-    $('#cvss31-copy-vec').addEventListener('click', () => copy($('#cvss31-vector').textContent));
-    $('#cvss31-copy-score').addEventListener('click', () => copy($('#cvss31-score').textContent));
+    wireCopy('cvss31-copy-vec', () => $('#cvss31-vector').textContent);
+    wireCopy('cvss31-copy-score', () => $('#cvss31-score').textContent);
     const preOrder = ['AV','AC','PR','UI','S','C','I','A'];
     Object.assign(sel, readCvssHash('3.1', preOrder));
     $$('.metric-options').forEach(group => { const k = group.dataset.key; const btn = sel[k] && $(`.metric-btn[data-val="${sel[k]}"]`, group); if (btn) btn.classList.add('active'); });
@@ -220,7 +219,7 @@ TOOLS['4.0'] = {
     return `
       <div class="tool">
         <div class="cvss-grid">
-          <div class="card">
+          ${card('', `
             <div class="metric-group">
               <h4>Exploitability</h4>
               ${['AV','AC','AT','PR','UI'].map(renderMetric).join('')}
@@ -234,9 +233,8 @@ TOOLS['4.0'] = {
               ${['SC','SI','SA'].map(renderMetric).join('')}
             </div>
             <button class="btn btn-secondary" id="cvss40-reset">Reset</button>
-          </div>
-          <div class="card" style="position:sticky;top:0">
-            <div class="card-title">Score</div>
+          `)}
+          ${card('Score', `
             <div class="cvss-score" id="cvss40-score">0.0</div>
             <div style="text-align:center;margin-bottom:14px"><span class="severity-badge sev-none" id="cvss40-sev">None</span></div>
             <div class="cvss-vector" id="cvss40-vector">CVSS:4.0/...</div>
@@ -244,7 +242,7 @@ TOOLS['4.0'] = {
               <button class="btn btn-secondary" id="cvss40-copy-vec">Copy Vector</button>
               <button class="btn btn-secondary" id="cvss40-copy-score">Copy Score</button>
             </div>
-          </div>
+          `, { style: 'position:sticky;top:0' })}
         </div>
       </div>
     `;
@@ -279,8 +277,8 @@ TOOLS['4.0'] = {
       $$('.metric-btn').forEach(b => b.classList.remove('active'));
       update();
     });
-    $('#cvss40-copy-vec').addEventListener('click', () => copy($('#cvss40-vector').textContent));
-    $('#cvss40-copy-score').addEventListener('click', () => copy($('#cvss40-score').textContent));
+    wireCopy('cvss40-copy-vec', () => $('#cvss40-vector').textContent);
+    wireCopy('cvss40-copy-score', () => $('#cvss40-score').textContent);
     const preOrder = ['AV','AC','AT','PR','UI','VC','VI','VA','SC','SI','SA'];
     Object.assign(sel, readCvssHash('4.0', preOrder));
     $$('.metric-options').forEach(group => { const k = group.dataset.key; const btn = sel[k] && $(`.metric-btn[data-val="${sel[k]}"]`, group); if (btn) btn.classList.add('active'); });
@@ -331,89 +329,44 @@ TOOLS['report-template'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Vulnerability Details</div>
-          <div class="field">
-            <label>Vulnerability Name</label>
-            <input type="text" id="rt-name" placeholder="e.g. Stored XSS in user profile bio">
-          </div>
-          <div class="field">
-            <label>Vulnerability Type</label>
-            <input type="text" id="rt-type" list="rt-type-list" placeholder="Select or type a vulnerability type" autocomplete="off">
-            <datalist id="rt-type-list">${VULN_TYPES.map(t => `<option value="${escapeHtml(t)}"></option>`).join('')}</datalist>
-          </div>
+        ${card('Vulnerability Details', `
+          ${field('Vulnerability Name', `<input type="text" id="rt-name" placeholder="e.g. Stored XSS in user profile bio">`)}
+          ${field('Vulnerability Type', `<input type="text" id="rt-type" list="rt-type-list" placeholder="Select or type a vulnerability type" autocomplete="off">
+            <datalist id="rt-type-list">${VULN_TYPES.map(t => `<option value="${escapeHtml(t)}"></option>`).join('')}</datalist>`)}
           <div class="rt-cvss-row">
-            <div class="field">
-              <label>CVSS Ver.</label>
-              <select id="rt-cvssver">
+            ${field('CVSS Ver.', `<select id="rt-cvssver">
                 <option value="3.1">CVSS 3.1</option>
                 <option value="4.0">CVSS 4.0</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>CVSS Vector</label>
-              <input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">
-            </div>
-            <div class="field">
-              <label>Score</label>
-              <div class="rt-out-box"><span class="rt-score" id="rt-score">—</span></div>
-            </div>
-            <div class="field">
-              <label>Severity</label>
-              <div class="rt-out-box"><span class="severity-badge sev-none" id="rt-sevbadge">—</span></div>
-            </div>
+              </select>`)}
+            ${field('CVSS Vector', `<input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">`)}
+            ${field('Score', `<div class="rt-out-box"><span class="rt-score" id="rt-score">—</span></div>`)}
+            ${field('Severity', `<div class="rt-out-box"><span class="severity-badge sev-none" id="rt-sevbadge">—</span></div>`)}
           </div>
-          <div class="field">
-            <label>Affected URL(s)</label>
-            <div id="rt-urls">
+          ${field('Affected URL(s)', `<div id="rt-urls">
               <div class="rt-url-row">
                 <input type="text" class="rt-url" placeholder="https://target.com/affected/endpoint">
                 <button type="button" class="rt-url-rm" title="Remove">&times;</button>
               </div>
             </div>
-            <button type="button" class="btn btn-secondary rt-url-add" id="rt-url-add">+ Add URL</button>
-          </div>
-          <div class="field">
-            <label>Description</label>
-            <textarea id="rt-desc" rows="4" placeholder="Describe the vulnerability..."></textarea>
-          </div>
-          <div class="field">
-            <label>Impact</label>
-            <textarea id="rt-impact" rows="4" placeholder="Describe the impact and risk..."></textarea>
-          </div>
-          <div class="field">
-            <label>Remediation</label>
-            <textarea id="rt-rem" rows="3" placeholder="How to fix..."></textarea>
-          </div>
-          <div class="field">
-            <label>References</label>
-            <div id="rt-refs">
+            <button type="button" class="btn btn-secondary rt-url-add" id="rt-url-add">+ Add URL</button>`)}
+          ${field('Description', `<textarea id="rt-desc" rows="4" placeholder="Describe the vulnerability..."></textarea>`)}
+          ${field('Impact', `<textarea id="rt-impact" rows="4" placeholder="Describe the impact and risk..."></textarea>`)}
+          ${field('Remediation', `<textarea id="rt-rem" rows="3" placeholder="How to fix..."></textarea>`)}
+          ${field('References', `<div id="rt-refs">
               <div class="rt-url-row">
                 <input type="text" class="rt-ref" placeholder="OWASP / CWE / CVE link...">
                 <button type="button" class="rt-url-rm" title="Remove">&times;</button>
               </div>
             </div>
-            <button type="button" class="btn btn-secondary rt-url-add" id="rt-ref-add">+ Add Reference</button>
-          </div>
-          <div class="field">
-            <label>Proof of Concept</label>
-            <textarea id="rt-poc" rows="6" placeholder="Step 1...&#10;Step 2...&#10;Request/Payload..."></textarea>
-          </div>
+            <button type="button" class="btn btn-secondary rt-url-add" id="rt-ref-add">+ Add Reference</button>`)}
+          ${field('Proof of Concept', `<textarea id="rt-poc" rows="6" placeholder="Step 1...&#10;Step 2...&#10;Request/Payload..."></textarea>`)}
           <div class="btn-row">
             <button class="btn" id="rt-gen">Generate Report</button>
             <button class="btn btn-secondary" id="rt-clear">Clear</button>
           </div>
-        </div>
-        <div class="card" id="rt-results" style="display:none">
-          <div class="result-header">
-            <h4>Report (Markdown)</h4>
-            <div>
-              <button class="btn btn-ghost" id="rt-copy">Copy</button>
-              <button class="btn btn-ghost" id="rt-dl">Download .md</button>
-            </div>
-          </div>
-          <div class="result-box" id="rt-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Report (Markdown)', `<div>${ghostBtn('rt-copy')}${ghostBtn('rt-dl', 'Download .md')}</div>`) +
+          `<div class="result-box" id="rt-output"></div>`, { id: 'rt-results', hidden: true })}
       </div>
     `;
   },
@@ -517,7 +470,7 @@ ${fields.poc}
       $('#rt-sevbadge').className = 'severity-badge sev-none';
       $('#rt-sevbadge').textContent = '—';
     });
-    $('#rt-copy').addEventListener('click', () => copy($('#rt-output').textContent));
+    wireCopy('rt-copy', () => $('#rt-output').textContent);
     $('#rt-dl').addEventListener('click', () => {
       const name = ($('#rt-name').value || 'report').toLowerCase().replace(/[^a-z0-9]+/g, '-');
       download(`${name}.md`, $('#rt-output').textContent, 'text/markdown');
@@ -532,13 +485,7 @@ TOOLS['notationer'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Input</div>
-          <div class="field">
-            <label>One identifier or phrase per line</label>
-            <textarea id="not-in" placeholder="userProfileId\nmax retry count\nHTTP-Response-Code"></textarea>
-          </div>
-        </div>
+        ${card('Input', field('One identifier or phrase per line', `<textarea id="not-in" placeholder="userProfileId\nmax retry count\nHTTP-Response-Code"></textarea>`))}
         <div id="not-out"></div>
       </div>
     `;
