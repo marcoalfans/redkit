@@ -14,42 +14,24 @@ TOOLS['csrf-poc'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Raw HTTP Request</div>
-          <div class="field">
-            <label>Paste the raw request (request line + headers + blank line + body)</label>
-            <textarea id="csrf-raw" rows="14" placeholder="POST /api/action HTTP/1.1&#10;Host: target.com&#10;Content-Type: application/x-www-form-urlencoded&#10;&#10;name=evil&email=attacker@example.com"></textarea>
-          </div>
+        ${card('Raw HTTP Request', `
+          ${field('Paste the raw request (request line + headers + blank line + body)', `<textarea id="csrf-raw" rows="14" placeholder="POST /api/action HTTP/1.1&#10;Host: target.com&#10;Content-Type: application/x-www-form-urlencoded&#10;&#10;name=evil&email=attacker@example.com"></textarea>`)}
           <div class="field-row">
-            <div class="field">
-              <label>Scheme</label>
-              <select id="csrf-scheme">
+            ${field('Scheme', `<select id="csrf-scheme">
                 <option value="https">HTTPS</option>
                 <option value="http">HTTP</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Submission</label>
-              <select id="csrf-submit">
+              </select>`)}
+            ${field('Submission', `<select id="csrf-submit">
                 <option value="auto">Auto-submit</option>
                 <option value="button">Require submit button</option>
-              </select>
-            </div>
+              </select>`)}
           </div>
           <div class="btn-row">
             <button class="btn" id="csrf-gen">Generate</button>
           </div>
-        </div>
-        <div class="card" id="csrf-results" style="display:none">
-          <div class="result-header">
-            <h4>Generated PoC</h4>
-            <div>
-              <button class="btn btn-ghost" id="csrf-copy">Copy</button>
-              <button class="btn btn-ghost" id="csrf-dl">Download .html</button>
-            </div>
-          </div>
-          <div class="result-box" id="csrf-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Generated PoC', `<div>${ghostBtn('csrf-copy')}${ghostBtn('csrf-dl', 'Download .html')}</div>`) +
+          `<div class="result-box" id="csrf-output"></div>`, { id: 'csrf-results', hidden: true })}
       </div>
     `;
   },
@@ -138,7 +120,7 @@ ${inputs}${submitBtn}
       try { showOut(buildPoc()); }
       catch (e) { toast('Error: ' + e.message); }
     });
-    $('#csrf-copy').addEventListener('click', () => copy($('#csrf-output').textContent));
+    wireCopy('csrf-copy', () => $('#csrf-output').textContent);
     $('#csrf-dl').addEventListener('click', () => download('csrf-poc.html', $('#csrf-output').textContent, 'text/html'));
   }
 };
@@ -150,38 +132,20 @@ TOOLS['dos-gen'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Payload Configuration</div>
-          <div class="field">
-            <label>Text input</label>
-            <input type="text" id="dos-text" value="a">
-          </div>
+        ${card('Payload Configuration', `
+          ${field('Text input', `<input type="text" id="dos-text" value="a">`)}
           <div class="field-row-3">
-            <div class="field">
-              <label>Repetition count</label>
-              <input type="number" id="dos-count" value="1000">
-            </div>
-            <div class="field">
-              <label>Separator (optional)</label>
-              <input type="text" id="dos-sep" placeholder="e.g. /">
-            </div>
-            <div class="field">
-              <label>Filename</label>
-              <input type="text" id="dos-file" value="payload.txt">
-            </div>
+            ${field('Repetition count', `<input type="number" id="dos-count" value="1000">`)}
+            ${field('Separator (optional)', `<input type="text" id="dos-sep" placeholder="e.g. /">`)}
+            ${field('Filename', `<input type="text" id="dos-file" value="payload.txt">`)}
           </div>
           <div class="btn-row">
             <button class="btn" id="dos-gen">Generate &amp; Download</button>
             <button class="btn btn-secondary" id="dos-preview">Preview</button>
           </div>
-        </div>
-        <div class="card" id="dos-results" style="display:none">
-          <div class="result-header">
-            <h4>Preview <span id="dos-size" style="color:var(--text-mute);font-weight:400;font-size:11px"></span></h4>
-            <button class="btn btn-ghost" id="dos-copy">Copy</button>
-          </div>
-          <div class="result-box" id="dos-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead(`Preview <span id="dos-size" style="color:var(--text-mute);font-weight:400;font-size:11px"></span>`, ghostBtn('dos-copy')) +
+          `<div class="result-box" id="dos-output"></div>`, { id: 'dos-results', hidden: true })}
       </div>
     `;
   },
@@ -852,41 +816,33 @@ TOOLS['revshell'] = {
     return `
       <div class="tool">
         <div class="rsg-top">
-          <div class="card rsg-conn">
-            <div class="card-title">Connection</div>
-            <div class="rsg-conn-fields">
-              <div class="field"><label>IP / Interface</label><input type="text" id="rsg-ip" value="10.10.14.1"></div>
-              <div class="field"><label>Port</label><input type="text" id="rsg-port" value="9001"></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">Listener</div>
+          ${card('Connection', `<div class="rsg-conn-fields">${field('IP / Interface', `<input type="text" id="rsg-ip" value="10.10.14.1">`)}${field('Port', `<input type="text" id="rsg-port" value="9001">`)}</div>`, { cls: 'rsg-conn' })}
+          ${card('Listener', `
             <div class="rsg-listener-row">
-              <div class="field"><label>Listener</label><select id="rsg-listener">${(D.listenerCommands || []).map((l, i) => `<option value="${i}">${escapeHtml(l[0])}</option>`).join('')}</select></div>
+              ${field('Listener', `<select id="rsg-listener">${(D.listenerCommands || []).map((l, i) => `<option value="${i}">${escapeHtml(l[0])}</option>`).join('')}</select>`)}
               <div class="rsg-outwrap">
-                <div class="result-header"><h4>Command</h4><button class="btn btn-ghost" id="rsg-lcopy">Copy</button></div>
+                ${resultHead('Command', ghostBtn('rsg-lcopy'))}
                 <pre class="not-pre mono" id="rsg-lout"></pre>
               </div>
             </div>
-          </div>
+          `)}
         </div>
-        <div class="card">
-          <div class="card-title">Payload</div>
+        ${card('Payload', `
           <div class="rsg-cfg">
-            <div class="field"><label>Shell</label><select id="rsg-shell">${shells.map(s => `<option${s === 'bash' ? ' selected' : ''}>${s}</option>`).join('')}</select></div>
-            <div class="field"><label>Encoding</label><select id="rsg-enc"><option value="none">None</option><option value="b64">Base64</option><option value="url">URL Encode</option><option value="url2">Double URL</option></select></div>
-            <div class="field"><label>OS</label><select id="rsg-os"><option value="all">All</option><option value="linux">Linux</option><option value="windows">Windows</option><option value="mac">Mac</option></select></div>
+            ${field('Shell', `<select id="rsg-shell">${shells.map(s => `<option${s === 'bash' ? ' selected' : ''}>${s}</option>`).join('')}</select>`)}
+            ${field('Encoding', `<select id="rsg-enc"><option value="none">None</option><option value="b64">Base64</option><option value="url">URL Encode</option><option value="url2">Double URL</option></select>`)}
+            ${field('OS', `<select id="rsg-os"><option value="all">All</option><option value="linux">Linux</option><option value="windows">Windows</option><option value="mac">Mac</option></select>`)}
           </div>
           <div class="rsg-tabs" id="rsg-tabs">${RSG_TYPES.map((t, i) => `<button class="rsg-tab${i === 0 ? ' active' : ''}" data-type="${t[0]}">${t[1]}</button>`).join('')}</div>
           <input type="text" id="rsg-search" placeholder="Filter payloads..." autocomplete="off" style="margin:10px 0 16px">
           <div class="rsg-grid">
             <div class="rsg-list" id="rsg-list"></div>
             <div class="rsg-outwrap">
-              <div class="result-header"><h4 id="rsg-name">—</h4><button class="btn btn-ghost" id="rsg-copy">Copy</button></div>
+              <div class="result-header"><h4 id="rsg-name">—</h4>${ghostBtn('rsg-copy')}</div>
               <pre class="not-pre mono" id="rsg-out"></pre>
             </div>
           </div>
-        </div>
+        `)}
       </div>`;
   },
   init() {
@@ -953,8 +909,8 @@ TOOLS['revshell'] = {
     $('#rsg-os').addEventListener('change', renderList);
     $('#rsg-search').addEventListener('input', renderList);
     $('#rsg-listener').addEventListener('change', renderListener);
-    $('#rsg-copy').addEventListener('click', () => copy($('#rsg-out').textContent));
-    $('#rsg-lcopy').addEventListener('click', () => copy($('#rsg-lout').textContent));
+    wireCopy('rsg-copy', () => $('#rsg-out').textContent);
+    wireCopy('rsg-lcopy', () => $('#rsg-lout').textContent);
     renderList();
     renderListener();
   }
