@@ -100,34 +100,18 @@ TOOLS['shodan-dork'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Target</div>
+        ${card('Target', `
           <div class="field-row">
-            <div class="field">
-              <label>Domain</label>
-              <input type="text" id="sd-domain" placeholder="example.com">
-            </div>
-            <div class="field">
-              <label>IP / CIDR</label>
-              <input type="text" id="sd-ip" placeholder="1.2.3.4 or 1.2.3.0/24">
-            </div>
+            ${field('Domain', `<input type="text" id="sd-domain" placeholder="example.com">`)}
+            ${field('IP / CIDR', `<input type="text" id="sd-ip" placeholder="1.2.3.4 or 1.2.3.0/24">`)}
           </div>
           <div class="field-row">
-            <div class="field">
-              <label>Organization</label>
-              <input type="text" id="sd-org" placeholder="Acme Corp">
-            </div>
-            <div class="field">
-              <label>SSL/Certificate Name</label>
-              <input type="text" id="sd-ssl" placeholder="example.com">
-            </div>
+            ${field('Organization', `<input type="text" id="sd-org" placeholder="Acme Corp">`)}
+            ${field('SSL/Certificate Name', `<input type="text" id="sd-ssl" placeholder="example.com">`)}
           </div>
           <button class="btn" id="sd-gen">Generate Queries</button>
-        </div>
-        <div class="card" id="sd-results" style="display:none">
-          <div class="result-header"><h4>Shodan Queries</h4></div>
-          <div class="dork-list" id="sd-list"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Shodan Queries') + `<div class="dork-list" id="sd-list"></div>`, { id: 'sd-results', hidden: true })}
       </div>
     `;
   },
@@ -193,25 +177,13 @@ TOOLS['subdomain-finder'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Target Domain</div>
-          <div class="field">
-            <label>Root domain (e.g., example.com)</label>
-            <input type="text" id="sf-domain" placeholder="example.com">
-          </div>
+        ${card('Target Domain', `
+          ${field('Root domain (e.g., example.com)', `<input type="text" id="sf-domain" placeholder="example.com">`)}
           <button class="btn" id="sf-search">Search Subdomains</button>
           <span id="sf-timer" style="margin-left:12px;color:var(--text-mute);font-size:12px">Uses crt.sh - may take 10–30s</span>
-        </div>
-        <div class="card" id="sf-results" style="display:none">
-          <div class="result-header">
-            <h4>Subdomains <span id="sf-count" style="color:var(--text-mute);font-weight:400"></span></h4>
-            <div>
-              <button class="btn btn-ghost" id="sf-copy">Copy</button>
-              <button class="btn btn-ghost" id="sf-download">Download</button>
-            </div>
-          </div>
-          <div class="result-box" id="sf-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead(`Subdomains <span id="sf-count" style="color:var(--text-mute);font-weight:400"></span>`, `<div>${ghostBtn('sf-copy')}${ghostBtn('sf-download', 'Download')}</div>`) +
+          `<div class="result-box" id="sf-output"></div>`, { id: 'sf-results', hidden: true })}
       </div>
     `;
   },
@@ -267,7 +239,7 @@ TOOLS['subdomain-finder'] = {
         btn.textContent = 'Search Subdomains';
       }
     });
-    $('#sf-copy').addEventListener('click', () => copy((TOOLS['subdomain-finder']._last || []).join('\n')));
+    wireCopy('sf-copy', () => (TOOLS['subdomain-finder']._last || []).join('\n'));
     $('#sf-download').addEventListener('click', () => {
       const d = $('#sf-domain').value.trim() || 'subdomains';
       download(`${d}-subdomains.txt`, (TOOLS['subdomain-finder']._last || []).join('\n'));
@@ -282,14 +254,10 @@ TOOLS['js-analyzer'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">JavaScript Source</div>
-          <div class="field">
-            <label>Paste JS source code (Right Click -> View Page Source or CTRL + U)</label>
-            <textarea id="js-input" rows="10" placeholder="// paste js source here..."></textarea>
-          </div>
+        ${card('JavaScript Source', `
+          ${field('Paste JS source code (Right Click -> View Page Source or CTRL + U)', `<textarea id="js-input" rows="10" placeholder="// paste js source here..."></textarea>`)}
           <button class="btn" id="js-analyze">Analyze</button>
-        </div>
+        `)}
         <div id="js-results"></div>
       </div>
     `;
@@ -322,9 +290,9 @@ TOOLS['js-analyzer'] = {
       out.innerHTML = '';
       Object.entries(findings).forEach(([k, v]) => {
         if (!v.length) return;
-        const card = el('div', { class: 'card' });
-        card.innerHTML = `<div class="card-title">${escapeHtml(k)} (${v.length})</div><div class="result-box">${v.map(escapeHtml).join('\n')}</div>`;
-        out.appendChild(card);
+        const cardEl = el('div', { class: 'card' });
+        cardEl.innerHTML = `<div class="card-title">${escapeHtml(k)} (${v.length})</div><div class="result-box">${v.map(escapeHtml).join('\n')}</div>`;
+        out.appendChild(cardEl);
       });
       if (!out.children.length) {
         out.innerHTML = '<div class="card"><div class="card-title">No findings</div><p style="color:var(--text-mute);font-size:13px">Nothing interesting found in the source.</p></div>';
@@ -340,27 +308,19 @@ TOOLS['header-analyzer'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Fetch from URL <span style="color:var(--text-mute);font-weight:400;font-size:11px">(experimental)</span></div>
-          <div class="field">
-            <label>Domain or URL</label>
-            <input type="text" id="hdr-url" placeholder="example.com or https://example.com">
-          </div>
+        ${card(`Fetch from URL <span style="color:var(--text-mute);font-weight:400;font-size:11px">(experimental)</span>`, `
+          ${field('Domain or URL', `<input type="text" id="hdr-url" placeholder="example.com or https://example.com">`)}
           <button class="btn" id="hdr-fetch">Fetch &amp; Analyze</button>
           <div id="hdr-fetch-status" style="margin-top:8px;font-size:12px;color:var(--text-mute)"></div>
-        </div>
-        <div class="card">
-          <div class="card-title">HTTP Response Headers</div>
-          <div class="field">
-            <label>Paste raw response headers</label>
-            <textarea id="hdr-input" rows="12" placeholder="HTTP/1.1 200 OK
+        `)}
+        ${card('HTTP Response Headers', `
+          ${field('Paste raw response headers', `<textarea id="hdr-input" rows="12" placeholder="HTTP/1.1 200 OK
 Server: nginx
 Content-Type: text/html
-..."></textarea>
-          </div>
+..."></textarea>`)}
           <button class="btn" id="hdr-analyze">Analyze Headers</button>
-        </div>
-        <div class="card" id="hdr-grade-card" style="display:none">
+        `)}
+        ${card('', `
           <div class="grade-dual">
             <div class="grade-wrap">
               <div class="grade-letter" id="hdr-grade">?</div>
@@ -390,18 +350,10 @@ Content-Type: text/html
             information leaks (Server, X-Powered-By, etc.) and weak cookie flags
             (missing HttpOnly / Secure / SameSite).
           </p>
-        </div>
-        <div class="card" id="hdr-results" style="display:none">
-          <div class="result-header"><h4>Analysis</h4></div>
-          <div class="header-result" id="hdr-output"></div>
-        </div>
-        <div class="card" id="hdr-recs-card" style="display:none">
-          <div class="result-header">
-            <h4>Recommendations <span id="hdr-recs-count" style="color:var(--text-mute);font-weight:400"></span></h4>
-            <button class="btn btn-secondary" id="hdr-recs-toggle">Show More Info</button>
-          </div>
-          <div id="hdr-recs" style="display:none"></div>
-        </div>
+        `, { id: 'hdr-grade-card', hidden: true })}
+        ${card('', resultHead('Analysis') + `<div class="header-result" id="hdr-output"></div>`, { id: 'hdr-results', hidden: true })}
+        ${card('', resultHead(`Recommendations <span id="hdr-recs-count" style="color:var(--text-mute);font-weight:400"></span>`, `<button class="btn btn-secondary" id="hdr-recs-toggle">Show More Info</button>`) +
+          `<div id="hdr-recs" style="display:none"></div>`, { id: 'hdr-recs-card', hidden: true })}
       </div>
     `;
   },
@@ -753,29 +705,19 @@ TOOLS['dns-lookup'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">DNS Query</div>
+        ${card('DNS Query', `
           <div class="field-row">
-            <div class="field">
-              <label>Domain</label>
-              <input type="text" id="dns-domain" placeholder="example.com">
-            </div>
-            <div class="field">
-              <label>Record Type</label>
-              <select id="dns-type">
+            ${field('Domain', `<input type="text" id="dns-domain" placeholder="example.com">`)}
+            ${field('Record Type', `<select id="dns-type">
                 <option>A</option><option>AAAA</option><option>CNAME</option>
                 <option>MX</option><option>TXT</option><option>NS</option>
                 <option>SOA</option><option>CAA</option><option>SRV</option><option>PTR</option>
                 <option value="ALL">ALL</option>
-              </select>
-            </div>
+              </select>`)}
           </div>
           <button class="btn" id="dns-lookup">Lookup</button>
-        </div>
-        <div class="card" id="dns-results" style="display:none">
-          <div class="result-header"><h4>Records</h4></div>
-          <div class="result-box" id="dns-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Records') + `<div class="result-box" id="dns-output"></div>`, { id: 'dns-results', hidden: true })}
       </div>
     `;
   },
@@ -822,17 +764,11 @@ TOOLS['url-parser'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">URL</div>
-          <div class="field">
-            <input type="text" id="up-input" placeholder="https://user:pass@example.com:8080/path?key=value#frag">
-          </div>
+        ${card('URL', `
+          ${field('', `<input type="text" id="up-input" placeholder="https://user:pass@example.com:8080/path?key=value#frag">`)}
           <button class="btn" id="up-parse">Parse</button>
-        </div>
-        <div class="card" id="up-results" style="display:none">
-          <div class="card-title">Components</div>
-          <dl class="info-grid" id="up-output"></dl>
-        </div>
+        `)}
+        ${card('Components', `<dl class="info-grid" id="up-output"></dl>`, { id: 'up-results', hidden: true })}
       </div>
     `;
   },
@@ -880,18 +816,11 @@ TOOLS['ip-info'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Target</div>
-          <div class="field">
-            <label>IP address or domain</label>
-            <input type="text" id="ipi-input" placeholder="8.8.8.8 or example.com">
-          </div>
+        ${card('Target', `
+          ${field('IP address or domain', `<input type="text" id="ipi-input" placeholder="8.8.8.8 or example.com">`)}
           <button class="btn" id="ipi-lookup">Lookup</button>
-        </div>
-        <div class="card" id="ipi-results" style="display:none">
-          <div class="card-title">Info</div>
-          <dl class="info-grid" id="ipi-output"></dl>
-        </div>
+        `)}
+        ${card('Info', `<dl class="info-grid" id="ipi-output"></dl>`, { id: 'ipi-results', hidden: true })}
       </div>
     `;
   },
