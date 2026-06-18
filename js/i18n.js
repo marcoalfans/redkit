@@ -264,6 +264,19 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // Nmap / curl Builder
+    'Build Nmap scans and curl requests from a form, with copy-ready commands.': 'Susun perintah scan Nmap dan request curl dari form, siap disalin.',
+    'Target(s)': 'Target',
+    'Scan type': 'Jenis scan',
+    'Ports': 'Port',
+    'Custom ports (overrides above)': 'Port khusus (menimpa pilihan di atas)',
+    'Options': 'Opsi',
+    'NSE script': 'Skrip NSE',
+    'Output basename (-oA)': 'Nama dasar output (-oA)',
+    'Method': 'Metode',
+    'Extra headers (one per line: Key: Value)': 'Header tambahan (satu per baris: Key: Value)',
+    'Output file (-o)': 'File output (-o)',
+
     // Command Injection / SSTI helpers
     'OS command injection payloads: separators, blind/time-based, OOB, and filter/WAF bypasses.': 'Payload OS command injection: separator, blind/time-based, OOB, dan bypass filter/WAF.',
     'Server-Side Template Injection payloads and RCE chains for Jinja2, Twig, Freemarker, ERB and more.': 'Payload Server-Side Template Injection dan rantai RCE untuk Jinja2, Twig, Freemarker, ERB, dan lainnya.',

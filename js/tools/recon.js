@@ -908,3 +908,147 @@ TOOLS['ip-info'] = {
   }
 };
 
+// ===== NMAP / CURL COMMAND BUILDER =====
+const sh = (s) => "'" + String(s).replace(/'/g, "'\\''") + "'"; // shell-safe single-quote
+
+TOOLS['cmd-builder'] = {
+  title: 'Nmap / curl Builder',
+  desc: 'Build Nmap scans and curl requests from a form, with copy-ready commands.',
+  render() {
+    return `
+      <div class="tool">
+        ${card('Command Builder', `
+          <div class="not-formats" id="cb-tabs">
+            <button class="not-fmt active" data-b="nmap">Nmap</button>
+            <button class="not-fmt" data-b="curl">curl</button>
+          </div>
+          <div id="cb-form"></div>
+        `)}
+        ${card('', resultHead('Command', ghostBtn('cb-copy')) + `<pre class="not-pre mono" id="cb-out"></pre>`)}
+      </div>`;
+  },
+  init() {
+    const chk = (id, label, on) => `<label class="pe-chk"><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
+    const v = id => ($('#' + id) ? $('#' + id).value.trim() : '');
+    const c = id => !!($('#' + id) && $('#' + id).checked);
+
+    const NMAP = {
+      form: () => `
+        ${field('Target(s)', `<input type="text" id="nm-target" value="scanme.nmap.org" placeholder="host, CIDR, or 10.0.0.1-50">`)}
+        <div class="field-row">
+          ${field('Scan type', `<select id="nm-scan">
+            <option value="-sS">TCP SYN (-sS)</option>
+            <option value="-sT">TCP connect (-sT)</option>
+            <option value="-sU">UDP (-sU)</option>
+            <option value="-sn">Ping / host discovery (-sn)</option>
+            <option value="-sA">TCP ACK (-sA)</option>
+          </select>`)}
+          ${field('Ports', `<select id="nm-ports">
+            <option value="">Default (top 1000)</option>
+            <option value="--top-ports 100">Top 100</option>
+            <option value="-F">Fast 100 (-F)</option>
+            <option value="-p-">All 65535 (-p-)</option>
+          </select>`)}
+        </div>
+        ${field('Custom ports (overrides above)', `<input type="text" id="nm-pcustom" placeholder="e.g. 22,80,443,8000-8100">`)}
+        <div class="field"><label>Options</label><div class="pe-flags">
+          ${chk('nm-sv', '-sV version', true)}${chk('nm-o', '-O OS')}${chk('nm-a', '-A aggressive')}${chk('nm-sc', '-sC default scripts')}
+          ${chk('nm-open', '--open', true)}${chk('nm-pn', '-Pn no ping')}${chk('nm-n', '-n no DNS')}${chk('nm-v', '-v verbose', true)}
+        </div></div>
+        <div class="field-row">
+          ${field('Timing', `<select id="nm-timing"><option>-T2</option><option>-T3</option><option selected>-T4</option><option>-T5</option></select>`)}
+          ${field('NSE script', `<input type="text" id="nm-script" placeholder="e.g. vuln, http-title">`)}
+        </div>
+        ${field('Output basename (-oA)', `<input type="text" id="nm-out" placeholder="writes name.nmap / .gnmap / .xml">`)}
+      `,
+      build: () => {
+        const parts = ['nmap'];
+        const scan = v('nm-scan'); if (scan) parts.push(scan);
+        const agg = c('nm-a');
+        if (agg) parts.push('-A');
+        if (c('nm-sv') && !agg) parts.push('-sV');
+        if (c('nm-o') && !agg) parts.push('-O');
+        if (c('nm-sc') && !agg) parts.push('-sC');
+        const pc = v('nm-pcustom'); if (pc) parts.push('-p ' + pc); else if (v('nm-ports')) parts.push(v('nm-ports'));
+        if (c('nm-open')) parts.push('--open');
+        if (c('nm-pn')) parts.push('-Pn');
+        if (c('nm-n')) parts.push('-n');
+        if (c('nm-v')) parts.push('-v');
+        if (v('nm-timing')) parts.push(v('nm-timing'));
+        const s = v('nm-script'); if (s) parts.push('--script ' + s);
+        const o = v('nm-out'); if (o) parts.push('-oA ' + o);
+        parts.push(v('nm-target') || 'TARGET');
+        return parts.join(' ');
+      }
+    };
+
+    const CURL = {
+      form: () => `
+        ${field('URL', `<input type="text" id="cu-url" placeholder="https://target.com/api/login">`)}
+        <div class="field-row">
+          ${field('Method', `<select id="cu-method">${['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map(m => `<option>${m}</option>`).join('')}</select>`)}
+          ${field('Content-Type', `<select id="cu-ct">
+            <option value="">(none)</option>
+            <option value="application/json">application/json</option>
+            <option value="application/x-www-form-urlencoded">x-www-form-urlencoded</option>
+            <option value="multipart/form-data">multipart/form-data</option>
+          </select>`)}
+        </div>
+        ${field('Body / data (-d)', `<textarea id="cu-data" rows="3" placeholder='{"user":"admin","pass":"x"}'></textarea>`)}
+        ${field('Extra headers (one per line: Key: Value)', `<textarea id="cu-headers" rows="2" placeholder="X-Api-Key: abc123"></textarea>`)}
+        <div class="field-row">
+          ${field('Authorization (Bearer)', `<input type="text" id="cu-auth" placeholder="token, adds Authorization: Bearer ...">`)}
+          ${field('Cookie (-b)', `<input type="text" id="cu-cookie" placeholder="session=...">`)}
+        </div>
+        <div class="field-row">
+          ${field('User-Agent', `<input type="text" id="cu-ua" placeholder="Mozilla/5.0 ...">`)}
+          ${field('Proxy (-x)', `<input type="text" id="cu-proxy" placeholder="http://127.0.0.1:8080 (Burp)">`)}
+        </div>
+        <div class="field"><label>Options</label><div class="pe-flags">
+          ${chk('cu-k', '-k insecure')}${chk('cu-l', '-L follow', true)}${chk('cu-i', '-i include')}${chk('cu-s', '-s silent')}
+          ${chk('cu-v', '-v verbose')}${chk('cu-comp', '--compressed')}${chk('cu-g', '-G data as query')}
+        </div></div>
+        ${field('Output file (-o)', `<input type="text" id="cu-out" placeholder="e.g. resp.json">`)}
+      `,
+      build: () => {
+        const parts = ['curl'];
+        if (c('cu-k')) parts.push('-k');
+        if (c('cu-l')) parts.push('-L');
+        if (c('cu-i')) parts.push('-i');
+        if (c('cu-s')) parts.push('-s');
+        if (c('cu-v')) parts.push('-v');
+        if (c('cu-comp')) parts.push('--compressed');
+        if (c('cu-g')) parts.push('-G');
+        const m = v('cu-method'); if (m && m !== 'GET') parts.push('-X ' + m);
+        const ct = v('cu-ct'); if (ct) parts.push('-H ' + sh('Content-Type: ' + ct));
+        const auth = v('cu-auth'); if (auth) parts.push('-H ' + sh('Authorization: Bearer ' + auth));
+        const ua = v('cu-ua'); if (ua) parts.push('-A ' + sh(ua));
+        const ck = v('cu-cookie'); if (ck) parts.push('-b ' + sh(ck));
+        v('cu-headers').split('\n').map(l => l.trim()).filter(Boolean).forEach(h => parts.push('-H ' + sh(h)));
+        const data = v('cu-data'); if (data) parts.push((c('cu-g') ? '--data-urlencode ' : '-d ') + sh(data));
+        const o = v('cu-out'); if (o) parts.push('-o ' + sh(o));
+        const proxy = v('cu-proxy'); if (proxy) parts.push('-x ' + sh(proxy));
+        parts.push(sh(v('cu-url') || 'URL'));
+        return parts.join(' ');
+      }
+    };
+
+    const builders = { nmap: NMAP, curl: CURL };
+    let tab = 'nmap';
+    const update = () => { $('#cb-out').textContent = builders[tab].build(); };
+    const mount = () => {
+      $('#cb-form').innerHTML = builders[tab].form();
+      $$('#cb-form input, #cb-form select, #cb-form textarea').forEach(e => { e.addEventListener('input', update); e.addEventListener('change', update); });
+      if (window.translateUI) window.translateUI();
+      update();
+    };
+    $$('.not-fmt', $('#cb-tabs')).forEach(b => b.addEventListener('click', () => {
+      tab = b.dataset.b;
+      $$('.not-fmt', $('#cb-tabs')).forEach(x => x.classList.toggle('active', x === b));
+      mount();
+    }));
+    wireCopy('cb-copy', () => $('#cb-out').textContent);
+    mount();
+  }
+};
+

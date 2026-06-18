@@ -37,6 +37,7 @@ const EXAMPLES = {
   'js-analyzer': () => { exFill('js-input', `const API_KEY = "AIzaSyB1a-EXAMPLE-2c3d4e5f6g7h8i9j0";\nconst base = "https://admin-internal.example.com/api/v2";\nfetch(base + "/users?token=" + localStorage.getItem("jwt"));\n// FIXME debug: aws_secret = "AKIAIOSFODNN7EXAMPLE"`); exClick('js-analyze'); },
   'header-analyzer': () => { exFill('hdr-input', `HTTP/1.1 200 OK\nServer: Apache/2.4.41 (Ubuntu)\nContent-Type: text/html; charset=UTF-8\nSet-Cookie: SESSIONID=8f3b2a; path=/\nX-Powered-By: PHP/7.4.3`); exClick('hdr-analyze'); },
   'url-parser': () => { exFill('up-input', 'https://user:p%40ss@admin.example.com:8443/dashboard/report?id=42&redirect=https%3A%2F%2Fevil.com%2Fsteal#settings'); exClick('up-parse'); },
+  'cmd-builder': () => { exClickText('curl'); exFill('cu-url', 'https://target.com/api/login'); exFill('cu-method', 'POST'); exFill('cu-ct', 'application/json'); exFill('cu-data', '{"user":"admin","pass":"admin"}'); },
 
   // ---- Crypto / Encoding ----
   'base': () => { exFill('base-type', 'base64'); exFill('base-src', 'admin:S3cr3tP@ss!'); },
