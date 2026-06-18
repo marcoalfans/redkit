@@ -264,6 +264,9 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // PowerShell Encoder
+    'Flags': 'Flag',
+
     // Unicode / Homoglyph tool
     'Inspect characters, spot confusable and invisible spoofing, and convert IDN punycode.': 'Periksa karakter, deteksi spoofing dari karakter mirip dan tak terlihat, serta konversi punycode IDN.',
     'Text or domain': 'Teks atau domain',
