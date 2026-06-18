@@ -360,6 +360,11 @@ TOOLS['hash'] = {
       const algos = ['MD5', 'SHA1', 'SHA224', 'SHA256', 'SHA384', 'SHA512', 'SHA3', 'RIPEMD160'];
       const out = $('#hash-output');
       out.innerHTML = '';
+      if (typeof CryptoJS === 'undefined') {
+        out.innerHTML = '<div class="header-row"><span class="h-detail">Hash library failed to load — check your connection and retry.</span></div>';
+        $('#hash-results').style.display = 'block';
+        return;
+      }
       algos.forEach(a => {
         try {
           const h = CryptoJS[a](txt).toString();

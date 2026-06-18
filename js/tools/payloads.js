@@ -172,7 +172,7 @@ TOOLS['dos-gen'] = {
       $('#dos-size').textContent = `(${payload.length.toLocaleString()} bytes)`;
       $('#dos-results').style.display = 'block';
     });
-    $('#dos-copy').addEventListener('click', () => copy(build() || ''));
+    $('#dos-copy').addEventListener('click', () => { const p = build(); if (p != null) copy(p); });
   }
 };
 
