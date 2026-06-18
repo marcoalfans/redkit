@@ -55,6 +55,39 @@ const download = (filename, content, mime = 'text/plain') => {
 };
 
 // ============================================================
+// UI BUILDERS — shared markup helpers used by every tool.
+// See js/tools/_template.js for how to use them in a new tool.
+// ============================================================
+
+// <div class="card"[ id][ style]> [<div class="card-title">title</div>] inner </div>
+// opts: { id, hidden (→ display:none), cls (extra classes), style }
+const card = (title, inner = '', opts = {}) => {
+  const cls = 'card' + (opts.cls ? ' ' + opts.cls : '');
+  const idA = opts.id ? ` id="${opts.id}"` : '';
+  const styleA = opts.hidden ? ' style="display:none"' : (opts.style ? ` style="${opts.style}"` : '');
+  const head = title ? `<div class="card-title">${title}</div>` : '';
+  return `<div class="${cls}"${idA}${styleA}>${head}${inner}</div>`;
+};
+
+// <div class="field"> [<label>label</label>] inner </div>
+const field = (label, inner) => `<div class="field">${label ? `<label>${label}</label>` : ''}${inner}</div>`;
+
+// a ghost button (default text "Copy")
+const ghostBtn = (id, label = 'Copy') => `<button class="btn btn-ghost" id="${id}">${label}</button>`;
+
+// <div class="result-header"><h4>title</h4> buttons </div>
+const resultHead = (title, buttons = '') => `<div class="result-header"><h4>${title}</h4>${buttons}</div>`;
+
+// wire a copy button to a value or a function returning text
+const wireCopy = (btnId, getText) => { const b = $('#' + btnId); if (b) b.addEventListener('click', () => copy(typeof getText === 'function' ? getText() : getText)); };
+
+// run `fn` on click of #btnId and (optionally) Enter inside #inputId
+const wireRun = (btnId, fn, inputId) => {
+  const b = $('#' + btnId); if (b) b.addEventListener('click', fn);
+  if (inputId) { const i = $('#' + inputId); if (i) i.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fn(); } }); }
+};
+
+// ============================================================
 // TOOLS REGISTRY
 // ============================================================
 const TOOLS = {};
