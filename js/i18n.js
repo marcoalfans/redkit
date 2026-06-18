@@ -267,6 +267,18 @@
     // PowerShell Encoder
     'Flags': 'Flag',
 
+    // Timestamp Converter
+    'Convert between Unix epoch, ISO 8601 and human dates, across time zones, with a live clock.': 'Konversi antara Unix epoch, ISO 8601, dan tanggal manusiawi, lintas zona waktu, dengan jam langsung.',
+    'Timestamp or date': 'Timestamp atau tanggal',
+    'Now (live)': 'Sekarang (live)',
+    'Local time': 'Waktu lokal',
+    'Relative': 'Relatif',
+    'Day of week': 'Hari',
+    'Day of year': 'Hari dalam setahun',
+    'ISO week': 'Pekan ISO',
+    'Quarter': 'Kuartal',
+    '⚠ Could not parse that date.': '⚠ Tidak bisa mengurai tanggal tersebut.',
+
     // Unicode / Homoglyph tool
     'Inspect characters, spot confusable and invisible spoofing, and convert IDN punycode.': 'Periksa karakter, deteksi spoofing dari karakter mirip dan tak terlihat, serta konversi punycode IDN.',
     'Text or domain': 'Teks atau domain',
