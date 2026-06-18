@@ -87,6 +87,19 @@ const wireRun = (btnId, fn, inputId) => {
   if (inputId) { const i = $('#' + inputId); if (i) i.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fn(); } }); }
 };
 
+// tab strip: toggles .active on the .not-fmt buttons in `container`, calls onSelect(value, btn)
+const wireTabs = (container, attr, onSelect) => {
+  const btns = $$('.not-fmt', container);
+  btns.forEach(b => b.addEventListener('click', () => {
+    btns.forEach(x => x.classList.toggle('active', x === b));
+    onSelect(b.dataset[attr], b);
+  }));
+};
+
+// copy-button delegation: data-copy holds the literal text; data-cp holds an element id to read
+const wireCopyAll = (root) => $$('[data-copy]', root || document).forEach(b => b.addEventListener('click', () => copy(b.getAttribute('data-copy'))));
+const wireCopyRefs = (root) => $$('[data-cp]', root || document).forEach(b => b.addEventListener('click', () => { const t = $('#' + b.dataset.cp); if (t) copy(t.textContent); }));
+
 // ============================================================
 // TOOLS REGISTRY
 // ============================================================
