@@ -62,7 +62,7 @@ const TOOLS = {};
 // ===== 1. GOOGLE DORK GENERATOR =====
 TOOLS['google-dork'] = {
   title: 'Google Dork Generator',
-  desc: 'Generate common Google dork queries for a target domain',
+  desc: 'Build targeted Google dork queries to uncover exposed files, logins, and indexed pages on a domain.',
   render() {
     return `
       <div class="tool">
@@ -165,7 +165,7 @@ TOOLS['google-dork'] = {
 // ===== 2. SHODAN DORK GENERATOR =====
 TOOLS['shodan-dork'] = {
   title: 'Shodan Dork Generator',
-  desc: 'Generate Shodan queries by domain, IP, or organization',
+  desc: 'Build Shodan queries to map a target exposed hosts, services, and open ports.',
   render() {
     return `
       <div class="tool">
@@ -258,7 +258,7 @@ TOOLS['shodan-dork'] = {
 // ===== 3. SUBDOMAIN FINDER =====
 TOOLS['subdomain-finder'] = {
   title: 'Subdomain Finder',
-  desc: 'Find subdomains using crt.sh certificate transparency logs',
+  desc: 'Enumerate a domain subdomains from public certificate transparency logs.',
   render() {
     return `
       <div class="tool">
@@ -347,7 +347,7 @@ TOOLS['subdomain-finder'] = {
 // ===== 4. JS FILE ANALYZER =====
 TOOLS['js-analyzer'] = {
   title: 'JS File Analyzer',
-  desc: 'Extract endpoints, secrets, and interesting strings from JavaScript',
+  desc: 'Extract endpoints, secrets, and interesting strings from JavaScript source.',
   render() {
     return `
       <div class="tool">
@@ -405,7 +405,7 @@ TOOLS['js-analyzer'] = {
 // ===== 5. SECURITY HEADER ANALYZER =====
 TOOLS['header-analyzer'] = {
   title: 'Security Header Analyzer',
-  desc: 'Analyze HTTP response headers for security misconfigurations',
+  desc: 'Review HTTP response headers and flag missing or weak security controls.',
   render() {
     return `
       <div class="tool">
@@ -818,7 +818,7 @@ Content-Type: text/html
 // ===== 6. DNS LOOKUP =====
 TOOLS['dns-lookup'] = {
   title: 'DNS Lookup',
-  desc: 'Query DNS records via Cloudflare DNS-over-HTTPS',
+  desc: 'Look up any DNS record type quickly over encrypted DNS over HTTPS.',
   render() {
     return `
       <div class="tool">
@@ -887,7 +887,7 @@ TOOLS['dns-lookup'] = {
 // ===== 7. URL PARSER =====
 TOOLS['url-parser'] = {
   title: 'URL Parser',
-  desc: 'Parse and decompose a URL into its components',
+  desc: 'Decompose any URL into its scheme, host, path, query, and fragment.',
   render() {
     return `
       <div class="tool">
@@ -945,7 +945,7 @@ TOOLS['url-parser'] = {
 // ===== 8. IP / DOMAIN INFO =====
 TOOLS['ip-info'] = {
   title: 'IP / Domain Info',
-  desc: 'Get geolocation and ASN info for an IP or domain',
+  desc: 'Look up geolocation, network, and ASN details for an IP or domain.',
   render() {
     return `
       <div class="tool">
@@ -1279,7 +1279,7 @@ const CODECS = {
 const BASE_TYPES = [['base64', 'Base64'], ['base32', 'Base32'], ['base58', 'Base58'], ['base85', 'Base85 / ASCII85']];
 TOOLS['base'] = {
   title: 'Base Encoding',
-  desc: 'Base64 / Base32 / Base58 / Base85 — pick a scheme, type to encode, ⇄ to decode',
+  desc: 'Encode and decode text across Base64, Base32, Base58, and Base85 in one place.',
   render: () => transcoderTemplate('base', {
     typeSelect: `<select id="base-type">${BASE_TYPES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`,
   }),
@@ -1287,11 +1287,11 @@ TOOLS['base'] = {
 };
 
 // ----- Single-scheme transcoder tools -----
-TOOLS['url-encode']  = { title: 'URL Encode/Decode',  desc: 'Percent-encoding — type to encode, ⇄ to decode',       render: () => transcoderTemplate('urlc'),  init: () => wireTranscoder('urlc', () => CODECS.url) };
-TOOLS['html-encode'] = { title: 'HTML Encode/Decode', desc: 'HTML entities — type to encode, ⇄ to decode',           render: () => transcoderTemplate('htm'),   init: () => wireTranscoder('htm', () => CODECS.html) };
-TOOLS['hex']         = { title: 'Hex Encode/Decode',  desc: 'Hex (UTF-8 bytes) — type to encode, ⇄ to decode',       render: () => transcoderTemplate('hex'),   init: () => wireTranscoder('hex', () => CODECS.hex) };
-TOOLS['binary']      = { title: 'Binary Encode/Decode', desc: '8-bit binary — type to encode, ⇄ to decode',          render: () => transcoderTemplate('bin'),   init: () => wireTranscoder('bin', () => CODECS.binary) };
-TOOLS['morse']       = { title: 'Morse Code',         desc: 'International Morse (/ = word gap) — type to encode, ⇄ to decode', render: () => transcoderTemplate('morse'), init: () => wireTranscoder('morse', () => CODECS.morse) };
+TOOLS['url-encode']  = { title: 'URL Encode/Decode',  desc: 'Encode and decode URL percent-encoding as you type.',       render: () => transcoderTemplate('urlc'),  init: () => wireTranscoder('urlc', () => CODECS.url) };
+TOOLS['html-encode'] = { title: 'HTML Encode/Decode', desc: 'Encode and decode HTML entities for safe markup and payloads.',           render: () => transcoderTemplate('htm'),   init: () => wireTranscoder('htm', () => CODECS.html) };
+TOOLS['hex']         = { title: 'Hex Encode/Decode',  desc: 'Convert text to hexadecimal bytes and back.',       render: () => transcoderTemplate('hex'),   init: () => wireTranscoder('hex', () => CODECS.hex) };
+TOOLS['binary']      = { title: 'Binary Encode/Decode', desc: 'Convert text to 8-bit binary and back.',          render: () => transcoderTemplate('bin'),   init: () => wireTranscoder('bin', () => CODECS.binary) };
+TOOLS['morse']       = { title: 'Morse Code',         desc: 'Convert text to and from International Morse code.', render: () => transcoderTemplate('morse'), init: () => wireTranscoder('morse', () => CODECS.morse) };
 
 // ===== MAGIC — auto-detect encoding(s), CyberChef-style =====
 const rot13 = s => s.replace(/[a-zA-Z]/g, c => { const b = c <= 'Z' ? 65 : 97; return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b); });
@@ -1353,8 +1353,8 @@ const magicSearch = (input) => {
   return uniq;
 };
 TOOLS['magic'] = {
-  title: 'Magic — Encoding Detector',
-  desc: 'Auto-detect the encoding(s) and decode — à la CyberChef Magic (recursive, depth 3)',
+  title: 'Magic Encoding Detector',
+  desc: 'Detect unknown encodings and decode them automatically, including nested layers.',
   render: () => `
     <div class="tool">
       <div class="card">
@@ -1375,7 +1375,7 @@ TOOLS['magic'] = {
       const v = $('#magic-in').value.trim();
       if (!v) { box.innerHTML = '<div class="mg-empty">Waiting for input…</div>'; return; }
       const res = magicSearch(v);
-      if (!res.length) { box.innerHTML = '<div class="mg-empty">No known encoding detected — try the Base / Hex tools manually.</div>'; return; }
+      if (!res.length) { box.innerHTML = '<div class="mg-empty">No known encoding detected. Try the Base or Hex tools manually.</div>'; return; }
       box.innerHTML = res.map((r, i) => {
         const conf = Math.max(4, Math.min(100, Math.round(r.score * 55)));
         const out = escapeHtml(r.output.length > 600 ? r.output.slice(0, 600) + '…' : r.output);
@@ -1396,7 +1396,7 @@ TOOLS['magic'] = {
 // ===== HASH GENERATOR =====
 TOOLS['hash'] = {
   title: 'Hash Generator',
-  desc: 'Generate MD5, SHA-1, SHA-256, SHA-512, and other hashes',
+  desc: 'Generate MD5, SHA-1, SHA-256, SHA-512, and more from any input.',
   render() {
     return `
       <div class="tool">
@@ -1438,7 +1438,7 @@ TOOLS['hash'] = {
 // ===== HASH IDENTIFIER =====
 TOOLS['hash-id'] = {
   title: 'Hash Identifier',
-  desc: 'Identify hash type by length, character set, and format',
+  desc: 'Identify an unknown hash by its length, character set, and format.',
   render() {
     return `
       <div class="tool">
@@ -1660,7 +1660,7 @@ TOOLS['hash-id'] = {
 // ===== JWT DECODER =====
 TOOLS['jwt'] = {
   title: 'JWT Decoder / Editor',
-  desc: 'Decode, edit, and re-sign JSON Web Tokens. Supports alg=none and HS256 weak-secret resigning.',
+  desc: 'Decode, edit, and re-sign JSON Web Tokens, including alg none and weak-secret attacks.',
   render() {
     return `
       <div class="tool">
@@ -1898,7 +1898,7 @@ TOOLS['jwt'] = {
 // ===== CLASSIC CIPHERS =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'ROT13, Caesar, Atbash, and reverse',
+  desc: 'Encrypt and decrypt classic ciphers including ROT13, Caesar, Atbash, and reverse.',
   render() {
     return `
       <div class="tool">
@@ -1959,7 +1959,7 @@ TOOLS['cipher'] = {
 // ===== CSRF POC CREATOR =====
 TOOLS['csrf-poc'] = {
   title: 'CSRF PoC Generator',
-  desc: 'Paste a raw HTTP request and generate an HTML form PoC',
+  desc: 'Turn a raw HTTP request into a working CSRF proof-of-concept form.',
   render() {
     return `
       <div class="tool">
@@ -2095,7 +2095,7 @@ ${inputs}${submitBtn}
 // ===== DOS PAYLOAD GENERATOR =====
 TOOLS['dos-gen'] = {
   title: 'DoS Payload Generator',
-  desc: 'Generate large repeated payloads for input validation testing',
+  desc: 'Generate large repeated payloads to test input validation limits.',
   render() {
     return `
       <div class="tool">
@@ -2235,7 +2235,7 @@ const initPayloadLibrary = () => {
 // ===== XSS PAYLOAD LIBRARY =====
 TOOLS['xss-payloads'] = {
   title: 'XSS Payload Library',
-  desc: 'Cross-Site Scripting payloads, bypasses & techniques from real bounty reports',
+  desc: 'A curated library of Cross-Site Scripting payloads, bypasses, and techniques.',
   render() {
     const sections = [
       { name: 'Basic Payloads', items: [
@@ -2336,7 +2336,7 @@ TOOLS['xss-payloads'] = {
 // ===== SQLi PAYLOAD LIBRARY =====
 TOOLS['sqli-payloads'] = {
   title: 'SQLi Payload Library',
-  desc: 'SQL Injection payloads & escalation techniques from real bug bounty reports',
+  desc: 'A curated library of SQL Injection payloads and privilege escalation techniques.',
   render() {
     const sections = [
       { name: 'Auth Bypass', items: [
@@ -2428,7 +2428,7 @@ TOOLS['sqli-payloads'] = {
 // ===== IDOR HELPER =====
 TOOLS['idor-helper'] = {
   title: 'IDOR Helper & Patterns',
-  desc: 'Insecure Direct Object Reference patterns & test methodology from 180+ reports',
+  desc: 'Find and exploit Insecure Direct Object References with proven test patterns.',
   render() {
     const sections = [
       { name: 'ID Types to Test', items: [
@@ -2485,7 +2485,7 @@ TOOLS['idor-helper'] = {
 // ===== CSRF BYPASS LIBRARY =====
 TOOLS['csrf-bypass'] = {
   title: 'CSRF Bypass Techniques',
-  desc: 'CSRF bypass patterns from 100+ real reports - use with the CSRF PoC Generator',
+  desc: 'Proven techniques to defeat CSRF protections and bypass token defenses.',
   render() {
     const sections = [
       { name: 'Token Bypasses', items: [
@@ -2540,7 +2540,7 @@ TOOLS['csrf-bypass'] = {
 // ===== PATH TRAVERSAL / FILE DISCLOSURE =====
 TOOLS['path-traversal'] = {
   title: 'Path Traversal / LFI Helper',
-  desc: 'File disclosure & path traversal payloads from 73+ reports including Apache & WAF bypasses',
+  desc: 'Path traversal and file disclosure payloads, including server quirks and WAF bypasses.',
   render() {
     const sections = [
       { name: 'Basic Traversal', items: [
@@ -2624,7 +2624,7 @@ TOOLS['path-traversal'] = {
 // ===== GRAPHQL HELPER =====
 TOOLS['graphql-helper'] = {
   title: 'GraphQL Helper',
-  desc: 'GraphQL exploitation queries: introspection, IDOR, DoS, CSRF, SQLi',
+  desc: 'Exploit GraphQL APIs with ready-made introspection, IDOR, DoS, and injection queries.',
   render() {
     const sections = [
       { name: 'Introspection', note: 'First check - if enabled, dump the schema', items: [
@@ -2683,7 +2683,7 @@ TOOLS['graphql-helper'] = {
 // ===== SSRF PAYLOAD LIBRARY =====
 TOOLS['ssrf-helper'] = {
   title: 'SSRF Helper',
-  desc: 'Server-Side Request Forgery payloads: cloud metadata, internal hosts, scheme abuse, filter bypass',
+  desc: 'Server-Side Request Forgery payloads for cloud metadata, internal hosts, and filter bypasses.',
   render() {
     const sections = [
       { name: 'Cloud Metadata Endpoints', note: 'The classic SSRF win - read instance creds from the metadata service', items: [
@@ -2892,7 +2892,7 @@ const writeCvssHash = (toolKey, ver, sel, order) => {
 
 TOOLS['3.1'] = {
   title: 'CVSS 3.1 Calculator',
-  desc: 'Calculate Common Vulnerability Scoring System 3.1 base score',
+  desc: 'Score vulnerability severity with the CVSS 3.1 base metrics.',
   render() {
     const renderMetric = (key) => {
       const m = CVSS31_METRICS[key];
@@ -2988,7 +2988,7 @@ const calcCVSS40 = (sel) => (window.calcCVSS40Official ? window.calcCVSS40Offici
 
 TOOLS['4.0'] = {
   title: 'CVSS 4.0 Calculator',
-  desc: 'Calculate Common Vulnerability Scoring System 4.0 base metrics',
+  desc: 'Score vulnerability severity with the CVSS 4.0 base metrics.',
   render() {
     const renderMetric = (key) => {
       const m = CVSS40_METRICS[key];
@@ -3111,7 +3111,7 @@ const VULN_TYPES = [
 
 TOOLS['report-template'] = {
   title: 'Report Template',
-  desc: 'Generate a structured bug bounty report',
+  desc: 'Build a clean, structured vulnerability report ready to submit.',
   render() {
     return `
       <div class="tool">
@@ -3308,7 +3308,7 @@ ${fields.poc}
 // ===== NOTATIONER (code naming-convention converter) =====
 TOOLS['notationer'] = {
   title: 'Notationer',
-  desc: 'Convert identifiers between naming conventions — camelCase, snake_case, kebab-case, and more',
+  desc: 'Convert identifiers between camelCase, snake_case, kebab-case, and more.',
   render() {
     return `
       <div class="tool">
@@ -3380,7 +3380,7 @@ TOOLS['notationer'] = {
 const RSG_TYPES = [['ReverseShell', 'Reverse'], ['BindShell', 'Bind'], ['MSFVenom', 'MSFVenom'], ['HoaxShell', 'HoaxShell']];
 TOOLS['revshell'] = {
   title: 'Reverse Shell Generator',
-  desc: 'Reverse / bind / MSFVenom / HoaxShell payloads with encoding + listeners (revshells-style)',
+  desc: 'Generate reverse, bind, MSFVenom, and HoaxShell payloads with encoding and listeners.',
   render() {
     const D = window.rsgData || { shells: [], listenerCommands: [] };
     const shells = D.shells || [];
@@ -3498,7 +3498,7 @@ TOOLS['revshell'] = {
 // ===== POWERSHELL ENCODER (-EncodedCommand, Base64 UTF-16LE) =====
 TOOLS['ps-encode'] = {
   title: 'PowerShell Encoder',
-  desc: 'Encode a PowerShell command into multiple execution / obfuscation variants',
+  desc: 'Encode a PowerShell command into multiple execution and obfuscation variants.',
   render() {
     return `
       <div class="tool">
