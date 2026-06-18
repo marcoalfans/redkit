@@ -224,22 +224,20 @@ const renderPayloadLibrary = (cardTitle, sections, tips) => {
 };
 
 const initPayloadLibrary = () => {
-  document.querySelectorAll('[data-copy]').forEach(b => {
-    b.addEventListener('click', () => copy(b.getAttribute('data-copy')));
-  });
-  const search = document.querySelector('[data-pl-search]');
+  const root = $('#content'); // scope to the tool pane (NOT the sidebar, which also uses [data-cat])
+  wireCopyAll(root);
+  const search = $('[data-pl-search]', root);
   if (search) {
     search.addEventListener('input', () => {
       const q = search.value.toLowerCase();
-      document.querySelectorAll('[data-payload]').forEach(item => {
-        const txt = item.textContent.toLowerCase();
-        item.style.display = !q || txt.includes(q) ? '' : 'none';
+      $$('[data-payload]', root).forEach(item => {
+        item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
       });
       // hide empty categories
-      document.querySelectorAll('[data-cat]').forEach(cat => {
-        let n = cat.nextElementSibling;
+      $$('[data-cat]', root).forEach(cat => {
+        const n = cat.nextElementSibling;
         if (!n) return;
-        const visible = Array.from(n.querySelectorAll('[data-payload]')).some(i => i.style.display !== 'none');
+        const visible = $$('[data-payload]', n).some(i => i.style.display !== 'none');
         cat.style.display = visible ? '' : 'none';
         n.style.display = visible ? '' : 'none';
       });
