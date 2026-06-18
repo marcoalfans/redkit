@@ -74,59 +74,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
   overflow: hidden;
 }
 
-/* ===== Brand (sidebar header) ===== */
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 18px 18px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.brand-logo-wrap {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-elev2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.brand-logo {
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 15px;
-  color: var(--accent);
-  letter-spacing: -0.5px;
-}
-
-.brand-meta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  line-height: 1.2;
-}
-
-.brand-title {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  color: var(--text);
-}
-
-.brand-subtitle {
-  font-size: 11px;
-  color: var(--text-mute);
-  margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .nav {
   flex: 1;
   overflow-y: auto;
@@ -270,18 +217,6 @@ code, pre, .mono { font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace; }
   transform: translateY(-2px);
 }
 
-.welcome-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent-dim);
-  border-radius: 10px;
-  flex-shrink: 0;
-  color: var(--accent);
-}
-.welcome-icon svg { width: 22px; height: 22px; }
 
 .welcome-item h3 { font-size: 14px; margin-bottom: 4px; }
 .welcome-item p { font-size: 12px; color: var(--text-mute); }
@@ -788,25 +723,6 @@ textarea {
   word-break: break-word;
 }
 
-.tab-row {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 18px;
-}
-.tab {
-  padding: 10px 16px;
-  background: transparent;
-  border: none;
-  color: var(--text-dim);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 13px;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 .payload-list {
   display: flex;
@@ -1009,13 +925,6 @@ textarea {
 .cvico-svg { color: #24292f; }
 .cvico-svg svg { width: 24px; height: 24px; display: block; }
 .cvico.AVP{background-position:0 0}.cvico.AVL{background-position:-1em 0}.cvico.AVA{background-position:-2em 0}.cvico.AVN{background-position:-3em 0}
-.cvico.ACL{background-position:-4em 0}.cvico.ACH{background-position:-5em 0}
-.cvico.PRN{background-position:-6em 0}.cvico.PRL{background-position:-7em 0}.cvico.PRH{background-position:-8em 0}
-.cvico.UIR{background-position:-9em 0}.cvico.UIN{background-position:-10em 0}
-.cvico.SU{background-position:-10em 0}.cvico.SC{background-position:-11em 0}
-.cvico.CN{background-position:-12em 0}.cvico.CL{background-position:-13em 0}.cvico.CH{background-position:-14em 0}
-.cvico.IN{background-position:-15em 0}.cvico.IH{background-position:-16em 0}.cvico.IL{background-position:-17em 0}
-.cvico.AN{background-position:-18em 0}.cvico.AL{background-position:-19em 0}.cvico.AH{background-position:-20em 0}
 
 /* ===== Tooltips (CVSS metric/option descriptions) ===== */
 .rk-tip { position: fixed; z-index: 400; display: none; max-width: 340px; background: var(--bg-elev2); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; font-size: 12px; line-height: 1.55; box-shadow: 0 12px 34px rgba(0,0,0,.55); pointer-events: none; }
@@ -1040,8 +949,6 @@ textarea {
 .not-fmt.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 /* ===== Notationer input label row ===== */
-.not-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
-.not-label-row label { margin-bottom: 0; }
 
 /* ===== Fill vs Copy field distinction (global, all tools) ===== */
 /* editable fields the user fills get a pencil hint */
