@@ -2877,8 +2877,10 @@ const optIcon = (key, val) => {
   return t && CVSS_SVG[t] ? '<span class="cvico-wrap cvico-svg">' + CVSS_SVG[t] + '</span>' : '';
 };
 const TT_ALIAS = { C: 'VC', I: 'VI', A: 'VA' };
-const ttMetric = (k) => { const t = window.CVSS_TT || {}; return t[k] || t[TT_ALIAS[k]] || ''; };
-const ttOption = (k, v) => { const t = window.CVSS_TT || {}; return t[k + ':' + v] || t[(TT_ALIAS[k] || k) + ':' + v] || ''; };
+// use Indonesian tooltips when lang=id, falling back to English for any untranslated key
+const ttTable = () => ((window.getLang && window.getLang() === 'id' && window.CVSS_TT_ID) ? window.CVSS_TT_ID : (window.CVSS_TT || {}));
+const ttMetric = (k) => { const t = ttTable(), e = window.CVSS_TT || {}; return t[k] || t[TT_ALIAS[k]] || e[k] || e[TT_ALIAS[k]] || ''; };
+const ttOption = (k, v) => { const t = ttTable(), e = window.CVSS_TT || {}; return t[k + ':' + v] || t[(TT_ALIAS[k] || k) + ':' + v] || e[k + ':' + v] || e[(TT_ALIAS[k] || k) + ':' + v] || ''; };
 const readCvssHash = (ver, keys) => {
   const m = location.hash.match(new RegExp('CVSS:' + ver.replace('.', '\\.') + '/([^#?]*)'));
   const out = {};

@@ -170,6 +170,7 @@
     'result…': 'hasil…',
     'type or paste…': 'ketik atau tempel…',
     'Select or type a vulnerability type': 'Pilih atau ketik jenis kerentanan',
+    'e.g. Stored XSS in user profile bio': 'misal. Stored XSS pada bio profil pengguna',
     'OWASP / CWE / CVE link...': 'Tautan OWASP / CWE / CVE...',
     'paste hash here (e.g. 5d41402abc4b2a76b9719d911017c592)': 'tempel hash di sini (mis. 5d41402abc4b2a76b9719d911017c592)',
     '// paste js source here...': '// tempel kode js di sini...',
