@@ -3632,6 +3632,7 @@ const loadTool = (key) => {
   $('#currentToolDesc').textContent = tool.desc;
   $('#content').innerHTML = tool.render();
   if (tool.init) tool.init();
+  if (window.translateUI) window.translateUI();
   const exBtn = $('#rk-example-btn');
   if (exBtn) {
     const ex = EXAMPLES[key];

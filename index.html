@@ -23,7 +23,8 @@
         <button class="rk-tab" data-cat="reporting">Reporting</button>
     </nav>
     <div class="rk-header-right">
-      <a href="https://marcoalfans.github.io/" class="rk-back">← portfolio</a>
+      <a href="https://marcoalfans.github.io/" class="rk-back">←<span class="rk-back-label"> portfolio</span></a>
+      <button class="rk-lang-btn" id="rkLang" aria-label="Toggle language">EN</button>
       <button class="rk-icon-btn" id="rkTheme" aria-label="Toggle theme"><i class="fas fa-sun" id="rkThemeIcon"></i></button>
     </div>
   </header>
@@ -119,6 +120,7 @@
   <script src="cvss_tips.js"></script>
   <script src="cvss4.js"></script>
   <script src="rsg_data.js"></script>
+  <script src="i18n.js"></script>
   <script src="app.js"></script>
   <script>
     (function () {
@@ -205,6 +207,22 @@
         const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         localStorage.setItem('theme', next); applyTheme(next);
       });
+
+      // ----- language toggle (EN / ID) -----
+      const langBtn = document.getElementById('rkLang');
+      function syncLangLabel() { if (langBtn && window.getLang) langBtn.textContent = window.getLang() === 'id' ? 'ID' : 'EN'; }
+      function rerenderCurrent() {
+        const key = hashKey();
+        if (key && document.querySelector('.nav-item[data-tool="' + key + '"]')) { loadTool(key); syncCat(); }
+        else showHome();
+      }
+      if (langBtn) langBtn.addEventListener('click', () => {
+        const next = (window.getLang && window.getLang() === 'id') ? 'en' : 'id';
+        if (window.setLang) window.setLang(next);
+        syncLangLabel();
+        rerenderCurrent();
+      });
+      syncLangLabel();
 
       const ham = document.getElementById('rkHamburger');
       if (ham) ham.addEventListener('click', () => sidebar && sidebar.classList.toggle('open'));
