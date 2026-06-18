@@ -175,10 +175,103 @@
     'paste hash here (e.g. 5d41402abc4b2a76b9719d911017c592)': 'tempel hash di sini (mis. 5d41402abc4b2a76b9719d911017c592)',
     '// paste js source here...': '// tempel kode js di sini...',
     'Step 1...\nStep 2...\nRequest/Payload...': 'Langkah 1...\nLangkah 2...\nRequest/Payload...',
+
+    // ---------- Extra labels / dynamic result text ----------
+    'Command': 'Perintah',
+    'Hashes': 'Hash',
+    'Text': 'Teks',
+
+    // URL parser
+    'Protocol': 'Protokol',
+    'Username': 'Nama pengguna',
+    'Password': 'Kata sandi',
+    'Query Parameters': 'Parameter Query',
+    '(none)': '(tidak ada)',
+
+    // IP / Domain info
+    'Version': 'Versi',
+    'Country': 'Negara',
+    'Region': 'Wilayah',
+    'City': 'Kota',
+    'Postal': 'Kode Pos',
+    'Latitude': 'Lintang',
+    'Longitude': 'Bujur',
+    'Timezone': 'Zona Waktu',
+    'Type': 'Tipe',
+    'Org': 'Organisasi',
+    'Loading...': 'Memuat...',
+    'Resolved': 'Resolusi',
+    'Source': 'Sumber',
+
+    // Hash identifier
+    'Length': 'Panjang',
+    'Character set': 'Kumpulan karakter',
+    'Lowercase only': 'Hanya huruf kecil',
+    'Uppercase only': 'Hanya huruf besar',
+    'Yes': 'Ya',
+    'No': 'Tidak',
+    'Hexadecimal (a-f, 0-9)': 'Heksadesimal (a-f, 0-9)',
+    'Mixed (likely formatted hash)': 'Campuran (kemungkinan hash terformat)',
+    'Custom / unknown': 'Khusus / tidak diketahui',
+    'MOST LIKELY': 'PALING MUNGKIN',
+    'Possible Hash Types': 'Kemungkinan Jenis Hash',
+
+    // Security header analyzer — badges, grades, descriptions
+    'Security Headers': 'Header Keamanan',
+    'PRESENT': 'ADA',
+    'MISSING': 'HILANG',
+    'WEAK': 'LEMAH',
+    'LEAK': 'BOCOR',
+    'Recommended fix': 'Perbaikan yang disarankan',
+    'No issues found': 'Tidak ada masalah ditemukan',
+    'Hide More Info': 'Sembunyikan Info Lainnya',
+    'Forces HTTPS': 'Memaksa HTTPS',
+    'Mitigates XSS / data injection': 'Memitigasi XSS / injeksi data',
+    'Mitigates clickjacking': 'Memitigasi clickjacking',
+    'Should be "nosniff"': 'Sebaiknya "nosniff"',
+    'Controls referrer info': 'Mengontrol info referrer',
+    'Restricts browser features': 'Membatasi fitur browser',
+    'Outstanding - all headers configured strongly': 'Luar biasa - semua header dikonfigurasi dengan kuat',
+    'Excellent - all main headers present': 'Sangat baik - semua header utama ada',
+    'Good - one important header missing': 'Baik - satu header penting hilang',
+    'Average - two important headers missing': 'Cukup - dua header penting hilang',
+    'Poor - three important headers missing': 'Kurang - tiga header penting hilang',
+    'Bad - four important headers missing': 'Buruk - empat header penting hilang',
+    'Failing - five or more headers missing': 'Gagal - lima header atau lebih hilang',
+    'Clean - no leaks or weak cookies': 'Bersih - tidak ada kebocoran atau cookie lemah',
+    'Good - minor hygiene issues': 'Baik - masalah kebersihan kecil',
+    'Poor - multiple leaks / weak cookies': 'Kurang - banyak kebocoran / cookie lemah',
+
+    // JS analyzer / Magic statuses
+    'Nothing interesting found in the source.': 'Tidak ada yang menarik ditemukan di kode sumber.',
+    'Waiting for input…': 'Menunggu input…',
+    'No known encoding detected. Try the Base or Hex tools manually.': 'Tidak ada encoding yang dikenali. Coba alat Base atau Hex secara manual.',
+
+    // CVSS option labels (metric buttons + severity words)
+    'Network': 'Jaringan',
+    'Adjacent': 'Berdekatan',
+    'Local': 'Lokal',
+    'Physical': 'Fisik',
+    'Low': 'Rendah',
+    'High': 'Tinggi',
+    'None': 'Tidak Ada',
+    'Medium': 'Sedang',
+    'Critical': 'Kritis',
+    'Required': 'Dibutuhkan',
+    'Unchanged': 'Tidak Berubah',
+    'Changed': 'Berubah',
+    'Present': 'Ada',
+    'Passive': 'Pasif',
+    'Active': 'Aktif',
   };
 
   const getLang = () => localStorage.getItem('lang') || 'en';
   const setLang = (l) => { localStorage.setItem('lang', l); document.documentElement.setAttribute('data-lang', l); };
+
+  // never translate raw output/code panes — their text is user/decoded data that
+  // could coincidentally equal a dictionary key and get corrupted.
+  const SKIP = '.result-box, pre, code, [data-noi18n]';
+  const inSkip = (node) => { const e = node.nodeType === 1 ? node : node.parentElement; return !!(e && e.closest && e.closest(SKIP)); };
 
   // swap a trimmed phrase while preserving surrounding whitespace
   const trText = (s) => { const k = s.trim(); if (!k) return s; const v = DICT[k]; return v === undefined ? s : s.replace(k, v); };
@@ -187,14 +280,18 @@
 
   const translateNode = (root) => {
     if (getLang() !== 'id' || !root) return;
-    if (root.nodeType === 3) { root.nodeValue = trText(root.nodeValue); return; }
+    // assign only when the value actually changes — keeps the characterData
+    // observer loop-free (a translated value is never a dictionary key).
+    if (root.nodeType === 3) { if (!inSkip(root)) setText(root); return; }
     if (root.nodeType !== 1) return;
+    if (root.closest(SKIP)) return;
     trEl(root);
-    root.querySelectorAll('[placeholder],[data-tip],[title]').forEach(trEl);
-    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    root.querySelectorAll('[placeholder],[data-tip],[title]').forEach(e => { if (!e.closest(SKIP)) trEl(e); });
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: t => (t.parentElement && t.parentElement.closest(SKIP)) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
     const arr = []; let n; while ((n = w.nextNode())) arr.push(n);
-    arr.forEach(t => { t.nodeValue = trText(t.nodeValue); });
+    arr.forEach(setText);
   };
+  const setText = (t) => { const nv = trText(t.nodeValue); if (nv !== t.nodeValue) t.nodeValue = nv; };
 
   // re-translate the active tool's pane + description (called by loadTool)
   const translateUI = () => {
@@ -212,9 +309,12 @@
     if (!content) return;
     observer = new MutationObserver(muts => {
       if (getLang() !== 'id') return;
-      for (const m of muts) m.addedNodes.forEach(translateNode);
+      for (const m of muts) {
+        if (m.type === 'characterData') translateNode(m.target);
+        else m.addedNodes.forEach(translateNode);
+      }
     });
-    observer.observe(content, { childList: true, subtree: true });
+    observer.observe(content, { childList: true, subtree: true, characterData: true });
   };
 
   window.getLang = getLang;
