@@ -647,9 +647,9 @@ TOOLS['jwt'] = {
     const b64uDecode = (s) => {
       const norm = s.replace(/-/g, '+').replace(/_/g, '/');
       const pad = norm + '='.repeat((4 - norm.length % 4) % 4);
-      return atob(pad);
+      return decodeURIComponent(escape(atob(pad))); // UTF-8 aware
     };
-    const b64uEncode = (s) => btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const b64uEncode = (s) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); // UTF-8 aware
     const b64uEncodeBytes = (bytes) => {
       let bin = '';
       for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
@@ -747,9 +747,7 @@ TOOLS['jwt'] = {
       // Force the alg field in header to match the chosen signing strategy
       if (alg !== 'keep') header.alg = alg;
 
-      const headerB64 = b64uEncode(JSON.stringify(header));
-      const payloadB64 = b64uEncode(JSON.stringify(payload));
-      const signingInput = `${headerB64}.${payloadB64}`;
+      const signingInput = `${b64uEncode(JSON.stringify(header))}.${b64uEncode(JSON.stringify(payload))}`;
 
       let sigB64 = '';
       try {
@@ -1155,7 +1153,7 @@ TOOLS['unicode'] = {
     const run = () => {
       const text = $('#uni-in').value;
       out.innerHTML = tab === 'homoglyph' ? renderHomoglyph(text) : tab === 'punycode' ? renderPuny(text) : renderInspect(text);
-      $$('[data-copy]', out).forEach(b => b.addEventListener('click', () => copy(b.getAttribute('data-copy'))));
+      wireCopyAll(out);
       $$('[data-act]', out).forEach(b => b.addEventListener('click', () => {
         const v = $('#uni-in');
         v.value = b.dataset.act === 'strip' ? stripInvisible(v.value) : v.value.normalize('NFKC');
@@ -1163,11 +1161,7 @@ TOOLS['unicode'] = {
       }));
     };
 
-    $$('.not-fmt', $('#uni-tabs')).forEach(b => b.addEventListener('click', () => {
-      tab = b.dataset.tab;
-      $$('.not-fmt', $('#uni-tabs')).forEach(x => x.classList.toggle('active', x === b));
-      run();
-    }));
+    wireTabs($('#uni-tabs'), 'tab', v => { tab = v; run(); });
     $('#uni-in').addEventListener('input', run);
     run();
   }
@@ -1208,6 +1202,7 @@ const tsInTz = (d, tz) => { try { return new Intl.DateTimeFormat(undefined, { da
 const tsIsoWeek = (d) => { const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const ys = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return { week: Math.ceil(((t - ys) / 864e5 + 1) / 7), year: t.getUTCFullYear() }; };
 const tsDayOfYear = (d) => Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5);
 
+let tsTick = null; // single live-clock interval; cleared on each (re)init to avoid leaks
 TOOLS['timestamp'] = {
   title: 'Timestamp Converter',
   desc: 'Convert between Unix epoch, ISO 8601 and human dates, across time zones, with a live clock.',
@@ -1255,9 +1250,11 @@ TOOLS['timestamp'] = {
     $('#ts-in').addEventListener('input', update);
     $('#ts-tzsel').addEventListener('change', update);
     $('#ts-now').addEventListener('click', () => { $('#ts-in').value = ''; update(); });
-    $$('[data-cp]', $('#ts-results')).forEach(b => b.addEventListener('click', () => copy($('#' + b.dataset.cp).textContent)));
-    // live tick: keeps "now" + relative current; self-clears when the tool unmounts
-    const tick = setInterval(() => { if (!$('#ts-in')) { clearInterval(tick); return; } update(); }, 1000);
+    wireCopyRefs($('#ts-results'));
+    // live tick: keeps "now" + relative current. Clear any prior interval first
+    // (re-init via language toggle / re-render would otherwise stack intervals).
+    clearInterval(tsTick);
+    tsTick = setInterval(() => { if (!$('#ts-in')) { clearInterval(tsTick); return; } update(); }, 1000);
     update();
   }
 };
@@ -1327,7 +1324,7 @@ TOOLS['chmod'] = {
     ['or', 'ow', 'ox', 'gr', 'gw', 'gx', 'tr', 'tw', 'tx', 'suid', 'sgid', 'sticky'].forEach(id => C(id).addEventListener('change', () => draw(false)));
     C('chmod-file').addEventListener('input', () => draw(false));
     C('chmod-oct').addEventListener('input', setFromOctal);
-    $$('[data-cp]', $('#content')).forEach(b => b.addEventListener('click', () => copy(C(b.dataset.cp).textContent)));
+    wireCopyRefs($('#content'));
     draw(false);
   }
 };
