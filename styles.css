@@ -783,6 +783,9 @@ textarea {
 .header-row .h-detail {
   font-size: 11.5px;
   color: var(--text-mute);
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .tab-row {
