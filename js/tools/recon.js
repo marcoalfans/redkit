@@ -11,21 +11,12 @@ TOOLS['google-dork'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Target</div>
-          <div class="field">
-            <label>Domain (e.g., example.com)</label>
-            <input type="text" id="gd-domain" placeholder="example.com">
-          </div>
+        ${card('Target', `
+          ${field('Domain (e.g., example.com)', `<input type="text" id="gd-domain" placeholder="example.com">`)}
           <button class="btn" id="gd-gen">Generate Dorks</button>
-        </div>
-        <div class="card" id="gd-results" style="display:none">
-          <div class="result-header">
-            <h4>Generated Dorks</h4>
-            <button class="btn btn-ghost" id="gd-copy-all">Copy All</button>
-          </div>
-          <div class="dork-list" id="gd-list"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Generated Dorks', ghostBtn('gd-copy-all', 'Copy All')) +
+          `<div class="dork-list" id="gd-list"></div>`, { id: 'gd-results', hidden: true })}
       </div>
     `;
   },
@@ -49,13 +40,8 @@ TOOLS['google-dork'] = {
       });
       $('#gd-results').style.display = 'block';
     };
-    $('#gd-gen').addEventListener('click', gen);
-    $('#gd-domain').addEventListener('keydown', e => e.key === 'Enter' && gen());
-    $('#gd-copy-all').addEventListener('click', () => {
-      const d = $('#gd-domain').value.trim();
-      const all = TOOLS['google-dork']._build(d).map(([q]) => q).join('\n');
-      copy(all);
-    });
+    wireRun('gd-gen', gen, 'gd-domain');
+    wireCopy('gd-copy-all', () => TOOLS['google-dork']._build($('#gd-domain').value.trim()).map(([q]) => q).join('\n'));
   },
   _build(d) {
     return [
