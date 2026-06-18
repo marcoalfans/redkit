@@ -264,6 +264,10 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // Command Injection / SSTI helpers
+    'OS command injection payloads: separators, blind/time-based, OOB, and filter/WAF bypasses.': 'Payload OS command injection: separator, blind/time-based, OOB, dan bypass filter/WAF.',
+    'Server-Side Template Injection payloads and RCE chains for Jinja2, Twig, Freemarker, ERB and more.': 'Payload Server-Side Template Injection dan rantai RCE untuk Jinja2, Twig, Freemarker, ERB, dan lainnya.',
+
     // PowerShell Encoder
     'Flags': 'Flag',
 
