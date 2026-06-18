@@ -264,6 +264,20 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // Chmod Calculator
+    'Convert Unix file permissions between octal, symbolic and checkboxes, with the chmod command.': 'Konversi izin file Unix antara octal, simbolik, dan checkbox, lengkap dengan perintah chmod.',
+    'Permissions': 'Izin',
+    'Owner': 'Pemilik',
+    'Group': 'Grup',
+    'Others': 'Lainnya',
+    'Read (4)': 'Baca (4)',
+    'Write (2)': 'Tulis (2)',
+    'Execute (1)': 'Eksekusi (1)',
+    'Special bits': 'Bit khusus',
+    'Apply to (filename)': 'Terapkan ke (nama file)',
+    'Symbolic': 'Simbolik',
+    'chmod command': 'Perintah chmod',
+
     // HTTP & Port Reference
     'Searchable reference of HTTP status codes and common ports, with pentest notes.': 'Referensi HTTP status code dan port umum yang bisa dicari, lengkap dengan catatan pentest.',
     'Filter by code, name, service or keyword...': 'Cari berdasarkan kode, nama, layanan, atau kata kunci...',

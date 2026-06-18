@@ -49,6 +49,7 @@ const EXAMPLES = {
   'magic': () => { exFill('magic-in', 'ZmxhZ3tyZWRraXRfbWFnaWN9'); },
   'unicode': () => { exFill('uni-in', 'pаypаl.com'); },
   'timestamp': () => { exFill('ts-in', '1700000000'); },
+  'chmod': () => { exFill('chmod-oct', '755'); },
   'hash': () => { exFill('hash-input', 'P@ssw0rd!2024'); exClick('hash-gen'); },
   'hash-id': () => { exFill('hid-input', '5f4dcc3b5aa765d61d8327deb882cf99'); exClick('hid-id'); },
   'jwt': () => { exFill('jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwibmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); exClick('jwt-decode'); },
