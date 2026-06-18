@@ -264,6 +264,18 @@
     'Passive': 'Pasif',
     'Active': 'Aktif',
 
+    // Review quick-wins (sit next to already-translated siblings)
+    'Command Builder': 'Pembuat Perintah',
+    'Reference': 'Referensi',
+    'HTTP Status': 'Status HTTP',
+    'Octal': 'Oktal',
+    'Unix (seconds)': 'Unix (detik)',
+    'Unix (milliseconds)': 'Unix (milidetik)',
+    'Homoglyphs': 'Homoglyph',
+    'chars': 'karakter',
+    'confusable': 'mirip',
+    'invisible': 'tak terlihat',
+
     // Chmod Calculator
     'Convert Unix file permissions between octal, symbolic and checkboxes, with the chmod command.': 'Konversi izin file Unix antara octal, simbolik, dan checkbox, lengkap dengan perintah chmod.',
     'Permissions': 'Izin',
