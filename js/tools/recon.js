@@ -921,10 +921,11 @@ TOOLS['cmd-builder'] = {
           <div class="not-formats" id="cb-tabs">
             <button class="not-fmt active" data-b="nmap">Nmap</button>
             <button class="not-fmt" data-b="curl">curl</button>
+            <button class="not-fmt" data-b="converter">curl → code</button>
           </div>
           <div id="cb-form"></div>
         `)}
-        ${card('', resultHead('Command', ghostBtn('cb-copy')) + `<pre class="not-pre mono" id="cb-out"></pre>`)}
+        ${card('', `<div class="result-header"><h4 id="cb-outlabel">Command</h4>${ghostBtn('cb-copy')}</div><pre class="not-pre mono" id="cb-out"></pre>`)}
       </div>`;
   },
   init() {
@@ -1033,12 +1034,142 @@ TOOLS['cmd-builder'] = {
       }
     };
 
-    const builders = { nmap: NMAP, curl: CURL };
+    // ----- curl -> code converter -----
+    // shell tokenizer: respects single/double quotes, backslash, and \<newline> line continuations
+    const tokenize = (s) => {
+      s = s.replace(/\\\r?\n/g, ' ');
+      const out = []; let cur = '', inS = false, inD = false, has = false, i = 0;
+      while (i < s.length) {
+        const ch = s[i];
+        if (inS) { if (ch === "'") inS = false; else cur += ch; i++; continue; }
+        if (inD) {
+          if (ch === '\\' && i + 1 < s.length && '"\\$`'.includes(s[i + 1])) { cur += s[i + 1]; i += 2; continue; }
+          if (ch === '"') inD = false; else cur += ch; i++; continue;
+        }
+        if (ch === "'") { inS = true; has = true; i++; continue; }
+        if (ch === '"') { inD = true; has = true; i++; continue; }
+        if (ch === '\\' && i + 1 < s.length) { cur += s[i + 1]; i += 2; has = true; continue; }
+        if (/\s/.test(ch)) { if (cur || has) { out.push(cur); cur = ''; has = false; } i++; continue; }
+        cur += ch; has = true; i++;
+      }
+      if (cur || has) out.push(cur);
+      return out;
+    };
+    const parseCurl = (raw) => {
+      const t = tokenize(raw.trim());
+      if (!t.length) return null;
+      let i = (t[0] === 'curl') ? 1 : 0;
+      const r = { method: '', url: '', headers: [], data: [], get: false, insecure: false, follow: false, proxy: '', user: '' };
+      const arg = () => t[++i] || '';
+      for (; i < t.length; i++) {
+        const a = t[i];
+        if (a === '-X' || a === '--request') r.method = arg();
+        else if (a === '-H' || a === '--header') r.headers.push(arg());
+        else if (a === '-A' || a === '--user-agent') r.headers.push('User-Agent: ' + arg());
+        else if (a === '-e' || a === '--referer') r.headers.push('Referer: ' + arg());
+        else if (a === '-b' || a === '--cookie') r.headers.push('Cookie: ' + arg());
+        else if (a === '-u' || a === '--user') r.user = arg();
+        else if (a === '-x' || a === '--proxy') r.proxy = arg();
+        else if (a === '--data-urlencode') r.data.push(arg());
+        else if (a === '-d' || a === '--data' || a === '--data-raw' || a === '--data-ascii' || a === '--data-binary') r.data.push(arg());
+        else if (a === '-G' || a === '--get') r.get = true;
+        else if (a === '-k' || a === '--insecure') r.insecure = true;
+        else if (a === '-L' || a === '--location') r.follow = true;
+        else if (a === '-o' || a === '--output') arg();
+        else if (a.startsWith('-')) { /* ignore -s -v -i -O --compressed etc. */ }
+        else if (!r.url) r.url = a;
+      }
+      if (!r.method) r.method = r.data.length ? 'POST' : 'GET';
+      return r;
+    };
+    const splitH = (h) => { const x = h.indexOf(':'); return x < 0 ? [h.trim(), ''] : [h.slice(0, x).trim(), h.slice(x + 1).trim()]; };
+    const php = (s) => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+    const J = JSON.stringify;
+    const cvGen = {
+      python: (r) => {
+        const L = ['import requests', '', `url = ${J(r.url)}`];
+        if (r.headers.length) { L.push('headers = {'); r.headers.forEach(h => { const [k, v] = splitH(h); L.push(`    ${J(k)}: ${J(v)},`); }); L.push('}'); }
+        const body = r.data.join('&');
+        if (body && !r.get) L.push(`data = ${J(body)}`);
+        const a = ['url']; if (r.headers.length) a.push('headers=headers');
+        if (body && !r.get) a.push('data=data');
+        if (body && r.get) a.push(`params=${J(body)}`);
+        if (r.user) { const [u, ...p] = r.user.split(':'); a.push(`auth=(${J(u)}, ${J(p.join(':'))})`); }
+        if (r.proxy) a.push(`proxies={"http": ${J(r.proxy)}, "https": ${J(r.proxy)}}`);
+        if (r.insecure) a.push('verify=False');
+        L.push('', `response = requests.request(${J(r.method)}, ${a.join(', ')})`, 'print(response.status_code)', 'print(response.text)');
+        return L.join('\n');
+      },
+      javascript: (r) => {
+        const body = r.data.join('&');
+        const o = [`  method: ${J(r.method)}`];
+        if (r.headers.length) o.push(`  headers: {\n${r.headers.map(h => { const [k, v] = splitH(h); return `    ${J(k)}: ${J(v)}`; }).join(',\n')}\n  }`);
+        if (body && !r.get) o.push(`  body: ${J(body)}`);
+        const url = (body && r.get) ? `${J(r.url)} + "?" + ${J(body)}` : J(r.url);
+        return `fetch(${url}, {\n${o.join(',\n')}\n})\n  .then(res => res.text())\n  .then(console.log)\n  .catch(console.error);`;
+      },
+      node: (r) => {
+        const body = r.data.join('&');
+        const L = ["const axios = require('axios');", '', 'axios({', `  method: ${J(r.method.toLowerCase())},`, `  url: ${J(r.url)},`];
+        if (r.headers.length) L.push(`  headers: {\n${r.headers.map(h => { const [k, v] = splitH(h); return `    ${J(k)}: ${J(v)}`; }).join(',\n')}\n  },`);
+        if (body && !r.get) L.push(`  data: ${J(body)},`);
+        if (body && r.get) L.push(`  params: new URLSearchParams(${J(body)}),`);
+        L.push('})', '  .then(res => console.log(res.data))', '  .catch(err => console.error(err));');
+        return L.join('\n');
+      },
+      php: (r) => {
+        const body = r.data.join('&');
+        const L = ['<?php', '$ch = curl_init();', `curl_setopt($ch, CURLOPT_URL, ${php(r.url)});`, 'curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);', `curl_setopt($ch, CURLOPT_CUSTOMREQUEST, ${php(r.method)});`];
+        if (r.headers.length) L.push(`curl_setopt($ch, CURLOPT_HTTPHEADER, [${r.headers.map(php).join(', ')}]);`);
+        if (body) L.push(`curl_setopt($ch, CURLOPT_POSTFIELDS, ${php(body)});`);
+        if (r.user) L.push(`curl_setopt($ch, CURLOPT_USERPWD, ${php(r.user)});`);
+        if (r.proxy) L.push(`curl_setopt($ch, CURLOPT_PROXY, ${php(r.proxy)});`);
+        if (r.follow) L.push('curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);');
+        if (r.insecure) L.push('curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);', 'curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);');
+        L.push('$response = curl_exec($ch);', 'curl_close($ch);', 'echo $response;');
+        return L.join('\n');
+      },
+      go: (r) => {
+        const body = r.data.join('&');
+        const imp = ['\t"fmt"', '\t"io"', '\t"net/http"']; if (body) imp.push('\t"strings"');
+        const L = ['package main', '', 'import (', ...imp, ')', '', 'func main() {', `\turl := ${J(r.url)}`];
+        if (body) L.push(`\tpayload := strings.NewReader(${J(body)})`);
+        L.push(`\treq, _ := http.NewRequest(${J(r.method)}, url, ${body ? 'payload' : 'nil'})`);
+        r.headers.forEach(h => { const [k, v] = splitH(h); L.push(`\treq.Header.Add(${J(k)}, ${J(v)})`); });
+        L.push('\tclient := &http.Client{}', '\tres, _ := client.Do(req)', '\tdefer res.Body.Close()', '\tbody, _ := io.ReadAll(res.Body)', '\tfmt.Println(string(body))', '}');
+        return L.join('\n');
+      },
+    };
+    const CV_LANGS = [['python', 'Python'], ['javascript', 'JavaScript'], ['node', 'Node.js'], ['php', 'PHP'], ['go', 'Go']];
+    let cvLang = 'python';
+    const CONVERTER = {
+      form: () => `
+        ${field('curl command', `<textarea id="cv-in" rows="5" placeholder="curl 'https://api.example.com/login' -X POST -H 'Content-Type: application/json' -d '{&quot;user&quot;:&quot;admin&quot;}'"></textarea>`)}
+        <div class="not-formats" id="cv-langs">${CV_LANGS.map(([id, n]) => `<button class="not-fmt cv-lang${id === cvLang ? ' active' : ''}" data-lang="${id}">${n}</button>`).join('')}</div>
+      `,
+      build: () => {
+        const raw = v('cv-in');
+        if (!raw.trim()) return '# paste a curl command above';
+        const r = parseCurl(raw);
+        if (!r || !r.url) return '# could not find a URL in that curl command';
+        try { return cvGen[cvLang](r); } catch (e) { return '# error: ' + e.message; }
+      }
+    };
+
+    const builders = { nmap: NMAP, curl: CURL, converter: CONVERTER };
     let tab = 'nmap';
-    const update = () => { $('#cb-out').textContent = builders[tab].build(); };
+    const update = () => {
+      $('#cb-outlabel').textContent = tab === 'converter' ? 'Code' : 'Command';
+      $('#cb-out').textContent = builders[tab].build();
+    };
     const mount = () => {
       $('#cb-form').innerHTML = builders[tab].form();
       $$('#cb-form input, #cb-form select, #cb-form textarea').forEach(e => { e.addEventListener('input', update); e.addEventListener('change', update); });
+      $$('#cb-form .cv-lang').forEach(b => b.addEventListener('click', () => {
+        cvLang = b.dataset.lang;
+        $$('#cb-form .cv-lang').forEach(x => x.classList.toggle('active', x === b));
+        update();
+      }));
       if (window.translateUI) window.translateUI();
       update();
     };

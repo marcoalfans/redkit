@@ -276,6 +276,8 @@
     'Method': 'Metode',
     'Extra headers (one per line: Key: Value)': 'Header tambahan (satu per baris: Key: Value)',
     'Output file (-o)': 'File output (-o)',
+    'curl command': 'Perintah curl',
+    'Code': 'Kode',
 
     // Command Injection / SSTI helpers
     'OS command injection payloads: separators, blind/time-based, OOB, and filter/WAF bypasses.': 'Payload OS command injection: separator, blind/time-based, OOB, dan bypass filter/WAF.',
