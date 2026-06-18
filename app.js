@@ -1,6 +1,5 @@
 /* ============================================================
    RedKit - Pentest & Red Team Toolkit
-   Vanilla JS, single-file app
    ============================================================ */
 
 // ===== Helpers =====
@@ -230,7 +229,6 @@ TOOLS['shodan-dork'] = {
         queries.push([`ssl.cert.issuer.cn:"${ssl}"`, 'SSL issuer CN match']);
       }
 
-      // Generic useful queries
       queries.push([`product:"nginx" "200 OK"`, 'nginx servers']);
       queries.push([`product:"Apache" country:"US"`, 'Apache in US']);
       queries.push([`"Server: Microsoft-IIS"`, 'IIS servers']);
@@ -769,7 +767,6 @@ Content-Type: text/html
       }
     });
 
-    // Toggle handler (set once)
     $('#hdr-recs-toggle').addEventListener('click', () => {
       const c = $('#hdr-recs');
       const visible = c.style.display !== 'none';
@@ -1612,7 +1609,6 @@ TOOLS['hash-id'] = {
       const v = $('#hid-input').value.trim();
       if (!v) return toast('Enter a hash');
 
-      // Build info panel
       const info = $('#hid-info');
       info.innerHTML = '';
       const charset =
@@ -1630,9 +1626,7 @@ TOOLS['hash-id'] = {
         info.innerHTML += `<dt>${k}</dt><dd>${escapeHtml(val)}</dd>`;
       });
 
-      // Match signatures
       const matches = SIGS.filter(s => s.re.test(v));
-      // Sort: likely first
       matches.sort((a, b) => (b.likely ? 1 : 0) - (a.likely ? 1 : 0));
 
       const out = $('#hid-output');
@@ -3629,6 +3623,8 @@ const EXAMPLES = {
   },
 };
 
+// Renders a tool into the main pane. Single source of truth for nav state;
+// invoked only by the hash router in index.html (#/<tool>).
 const loadTool = (key) => {
   const tool = TOOLS[key];
   if (!tool) return;
@@ -3643,21 +3639,5 @@ const loadTool = (key) => {
     exBtn.onclick = ex || null;
   }
   $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.tool === key));
-  localStorage.setItem('lastTool', key);
 };
-
-const initNav = () => {
-  $$('.nav-item').forEach(n => {
-    n.addEventListener('click', () => loadTool(n.dataset.tool));
-  });
-};
-
-// ============================================================
-// INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded', () => {
-  initNav();
-  window._toast = toast;
-  const last = localStorage.getItem('lastTool');
-  loadTool(last && TOOLS[last] ? last : 'google-dork');
-});
+window.loadTool = loadTool;

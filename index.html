@@ -165,22 +165,22 @@
         }
       }
 
-      // ----- category tabs -----
+      // ----- category tabs (drive the hash; the router renders) -----
       tabs.forEach(t => t.addEventListener('click', () => {
         const sec = sections.find(s => s.dataset.cat === t.dataset.cat);
         const first = sec && sec.querySelector('.nav-item');
-        if (first) first.click(); else show(t.dataset.cat);
+        if (first) location.hash = '#/' + first.dataset.tool; else show(t.dataset.cat);
         if (sidebar) sidebar.classList.remove('open');
       }));
 
-      // ----- deep-link routing (#/<tool>) -----
+      // ----- nav items (drive the hash; the router renders) -----
       items.forEach(it => it.addEventListener('click', () => {
-        const key = it.dataset.tool;
-        const want = '#/' + key;
+        const want = '#/' + it.dataset.tool;
         if (location.hash !== want && !location.hash.startsWith(want + '/')) location.hash = want;
         if (sidebar) sidebar.classList.remove('open');
-        setTimeout(syncCat, 0);
       }));
+
+      // ----- deep-link routing (#/<tool>) — single entry point into loadTool -----
       function hashKey() { const m = location.hash.match(/^#\/([\w.-]+)/); return m ? m[1] : null; }
       function route() {
         const key = hashKey();
@@ -189,7 +189,8 @@
         if (!target) return false;
         const active = document.querySelector('.nav-item.active');
         const hasSub = location.hash.startsWith('#/' + key + '/');
-        if (!active || active.dataset.tool !== key || hasSub) target.click(); else syncCat();
+        if (!active || active.dataset.tool !== key || hasSub) loadTool(key);
+        syncCat();
         return true;
       }
       window.addEventListener('hashchange', () => { if (!route()) showHome(); });
