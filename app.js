@@ -3257,36 +3257,40 @@ TOOLS['report-template'] = {
         rem: $('#rt-rem').value,
         poc: $('#rt-poc').value,
       };
-      const md = `# ${fields.name || 'Vulnerability Report'}
+      const id = window.getLang && window.getLang() === 'id';
+      const H = id
+        ? { report: 'Laporan Kerentanan', name: 'Nama Kerentanan', type: 'Jenis Kerentanan', sev: 'Tingkat Keparahan', vec: 'Vektor CVSS', url: 'URL Terdampak', desc: 'Deskripsi', impact: 'Dampak', rem: 'Remediasi', refs: 'Referensi', poc: 'Proof of Concept' }
+        : { report: 'Vulnerability Report', name: 'Vulnerability Name', type: 'Vulnerability Type', sev: 'Severity', vec: 'CVSS Vector', url: 'Affected URL', desc: 'Description', impact: 'Impact', rem: 'Remediation', refs: 'References', poc: 'Proof of Concept' };
+      const md = `# ${fields.name || H.report}
 
-## Vulnerability Name
+## ${H.name}
 ${fields.name}
 
-## Vulnerability Type
+## ${H.type}
 ${fields.type}
 
-## Severity
+## ${H.sev}
 ${sevLine}
 
-## CVSS Vector
+## ${H.vec}
 ${vector ? '`' + vector + '`' : 'N/A'}
 
-## Affected URL
+## ${H.url}
 ${urlOut}
 
-## Description
+## ${H.desc}
 ${fields.desc}
 
-## Impact
+## ${H.impact}
 ${fields.impact}
 
-## Remediation
+## ${H.rem}
 ${fields.rem}
 
-## References
+## ${H.refs}
 ${refOut}
 
-## Proof of Concept
+## ${H.poc}
 ${fields.poc}
 `;
       $('#rt-output').textContent = md;
@@ -3611,15 +3615,22 @@ const EXAMPLES = {
   '3.1': () => { exClick('cvss31-reset'); exCvss('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N'); },
   '4.0': () => { exClick('cvss40-reset'); exCvss('CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N'); },
   'report-template': () => {
-    exFill('rt-name', 'Reflected XSS in search parameter');
+    const id = window.getLang && window.getLang() === 'id';
+    exFill('rt-name', id ? 'Reflected XSS pada parameter pencarian' : 'Reflected XSS in search parameter');
     exFill('rt-type', 'Cross-Site Scripting (Reflected)');
     exFill('rt-cvssver', '3.1');
     exFill('rt-vector', 'CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N');
     exFill('.rt-url', 'https://app.example.com/search?q=test');
     exFill('.rt-ref', 'https://owasp.org/www-community/attacks/xss/');
-    exFill('rt-desc', 'The `q` parameter on the search endpoint reflects user input into the HTML response without output encoding, allowing arbitrary JavaScript execution in the victim’s browser session.');
-    exFill('rt-impact', 'An attacker can steal session cookies, perform actions as the victim, and deface the page or redirect users to phishing/malware.');
-    exFill('rt-rem', 'Context-aware output encoding for all user-controlled data; deploy a strict Content-Security-Policy; validate and sanitize input server-side.');
+    exFill('rt-desc', id
+      ? 'Parameter `q` pada endpoint pencarian memantulkan input pengguna ke dalam respons HTML tanpa output encoding, sehingga memungkinkan eksekusi JavaScript sembarang pada sesi browser korban.'
+      : 'The `q` parameter on the search endpoint reflects user input into the HTML response without output encoding, allowing arbitrary JavaScript execution in the victim’s browser session.');
+    exFill('rt-impact', id
+      ? 'Penyerang dapat mencuri cookie sesi, melakukan aksi atas nama korban, serta merusak tampilan halaman atau mengalihkan pengguna ke phishing/malware.'
+      : 'An attacker can steal session cookies, perform actions as the victim, and deface the page or redirect users to phishing/malware.');
+    exFill('rt-rem', id
+      ? 'Terapkan output encoding sesuai konteks untuk semua data yang dikendalikan pengguna; pasang Content-Security-Policy yang ketat; validasi dan sanitasi input di sisi server.'
+      : 'Context-aware output encoding for all user-controlled data; deploy a strict Content-Security-Policy; validate and sanitize input server-side.');
     exFill('rt-poc', 'GET /search?q=<script>alert(document.cookie)</script>');
     exClick('rt-gen');
   },
