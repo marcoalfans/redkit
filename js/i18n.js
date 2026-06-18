@@ -263,6 +263,22 @@
     'Present': 'Ada',
     'Passive': 'Pasif',
     'Active': 'Aktif',
+
+    // Unicode / Homoglyph tool
+    'Inspect characters, spot confusable and invisible spoofing, and convert IDN punycode.': 'Periksa karakter, deteksi spoofing dari karakter mirip dan tak terlihat, serta konversi punycode IDN.',
+    'Text or domain': 'Teks atau domain',
+    'Inspect': 'Periksa',
+    'ASCII skeleton': 'Kerangka ASCII',
+    'To ASCII (Punycode)': 'Ke ASCII (Punycode)',
+    'To Unicode': 'Ke Unicode',
+    'Strip invisible': 'Buang karakter tak terlihat',
+    'Normalize (NFKC)': 'Normalisasi (NFKC)',
+    'Copy xn--': 'Salin xn--',
+    'Type or paste text to inspect.': 'Ketik atau tempel teks untuk diperiksa.',
+    'Enter a word or domain to generate lookalikes.': 'Masukkan kata atau domain untuk membuat versi miripnya.',
+    'No homoglyphs available for these characters (try a-z, 0-9).': 'Tidak ada homoglyph untuk karakter ini (coba a-z, 0-9).',
+    'Enter a domain to convert (e.g. xn--80ak6aa92e.com or münchen.de).': 'Masukkan domain untuk dikonversi (mis. xn--80ak6aa92e.com atau münchen.de).',
+    '✓ Plain ASCII. No confusables or invisible characters.': '✓ ASCII murni. Tidak ada karakter mirip atau tak terlihat.',
   };
 
   const getLang = () => localStorage.getItem('lang') || 'en';
