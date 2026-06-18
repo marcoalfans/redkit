@@ -1,0 +1,995 @@
+/* ============================================================
+   RedKit - Recon & OSINT tools
+   Loaded after js/core.js (uses $, el, TOOLS, helpers).
+   ============================================================ */
+
+
+// ===== 1. GOOGLE DORK GENERATOR =====
+TOOLS['google-dork'] = {
+  title: 'Google Dork Generator',
+  desc: 'Build targeted Google dork queries to uncover exposed files, logins, and indexed pages on a domain.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Target</div>
+          <div class="field">
+            <label>Domain (e.g., example.com)</label>
+            <input type="text" id="gd-domain" placeholder="example.com">
+          </div>
+          <button class="btn" id="gd-gen">Generate Dorks</button>
+        </div>
+        <div class="card" id="gd-results" style="display:none">
+          <div class="result-header">
+            <h4>Generated Dorks</h4>
+            <button class="btn btn-ghost" id="gd-copy-all">Copy All</button>
+          </div>
+          <div class="dork-list" id="gd-list"></div>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    const gen = () => {
+      const d = $('#gd-domain').value.trim();
+      if (!d) return toast('Enter a domain');
+      const dorks = TOOLS['google-dork']._build(d);
+      const list = $('#gd-list');
+      list.innerHTML = '';
+      dorks.forEach(([q, desc]) => {
+        const item = el('div', { class: 'dork-item' });
+        const wrap = el('div', { class: 'dork-item-wrap' });
+        wrap.innerHTML = `<span class="desc">${escapeHtml(desc)}</span><code>${escapeHtml(q)}</code>`;
+        item.appendChild(wrap);
+        const cBtn = el('button', { class: 'btn btn-ghost', onclick: () => copy(q) }, 'Copy');
+        const oBtn = el('button', { class: 'btn btn-ghost', onclick: () => window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank') }, 'Open');
+        item.appendChild(cBtn);
+        item.appendChild(oBtn);
+        list.appendChild(item);
+      });
+      $('#gd-results').style.display = 'block';
+    };
+    $('#gd-gen').addEventListener('click', gen);
+    $('#gd-domain').addEventListener('keydown', e => e.key === 'Enter' && gen());
+    $('#gd-copy-all').addEventListener('click', () => {
+      const d = $('#gd-domain').value.trim();
+      const all = TOOLS['google-dork']._build(d).map(([q]) => q).join('\n');
+      copy(all);
+    });
+  },
+  _build(d) {
+    return [
+      [`site:${d}`, 'All indexed pages'],
+      [`site:*.${d}`, 'Subdomains'],
+      [`site:${d} -www`, 'Excluding www'],
+      [`site:${d} (ext:env OR ext:log OR ext:bak OR ext:old OR ext:backup OR ext:sql OR ext:conf OR ext:cfg OR ext:ini OR ext:yml OR ext:yaml OR ext:json OR ext:xml OR ext:txt) OR (intitle:"index of" OR intitle:"phpinfo()" OR intext:"DB_PASSWORD" OR intext:"api_key" OR intext:"BEGIN RSA PRIVATE KEY" OR "fatal error" OR "stack trace")`, 'All-in-one Information Disclosure'],
+      [`site:${d} ext:php`, 'PHP files'],
+      [`site:${d} ext:asp OR ext:aspx OR ext:jsp`, 'Server-side files'],
+      [`site:${d} ext:txt OR ext:log OR ext:bak OR ext:old OR ext:backup`, 'Text/backup files'],
+      [`site:${d} ext:xml OR ext:conf OR ext:cnf OR ext:cfg OR ext:ini`, 'Config files'],
+      [`site:${d} ext:sql OR ext:dbf OR ext:mdb`, 'Database files'],
+      [`site:${d} ext:doc OR ext:docx OR ext:pdf OR ext:xls OR ext:xlsx OR ext:ppt OR ext:pptx`, 'Documents'],
+      [`site:${d} ext:env OR ext:yml OR ext:yaml OR ext:json`, 'Environment files'],
+      [`site:${d} inurl:admin`, 'Admin panels'],
+      [`site:${d} inurl:login OR inurl:signin OR inurl:auth`, 'Login pages'],
+      [`site:${d} inurl:register OR inurl:signup OR inurl:sign-up OR inurl:registration OR inurl:create-account`, 'Register / signup pages'],
+      [`site:${d} inurl:dashboard`, 'Dashboards'],
+      [`site:${d} inurl:wp-content OR inurl:wp-admin`, 'WordPress paths'],
+      [`site:${d} inurl:api OR inurl:v1 OR inurl:v2 OR inurl:v3`, 'API endpoints'],
+      [`site:${d} inurl:test OR inurl:dev OR inurl:staging OR inurl:beta`, 'Dev environments'],
+      [`site:${d} inurl:debug`, 'Debug pages'],
+      [`site:${d} inurl:redirect OR inurl:url= OR inurl:next= OR inurl:return=`, 'Open redirect candidates'],
+      [`site:${d} inurl:?id= OR inurl:?cat= OR inurl:?page= OR inurl:?file=`, 'Param-driven URLs (SQLi/LFI)'],
+      [`site:${d} intitle:"index of"`, 'Directory listings'],
+      [`site:${d} intitle:"phpinfo()"`, 'phpinfo pages'],
+      [`site:${d} "sql syntax near" OR "syntax error has occurred"`, 'SQL errors'],
+      [`site:${d} "Warning: include" OR "Warning: require"`, 'PHP errors / LFI hints'],
+      [`site:${d} "fatal error" OR "stack trace"`, 'Stack traces'],
+      [`site:${d} intext:"password" OR intext:"passwd"`, 'Password mentions'],
+      [`site:${d} "BEGIN RSA PRIVATE KEY"`, 'Private keys'],
+      [`site:pastebin.com "${d}"`, 'Pastebin leaks'],
+      [`site:github.com "${d}"`, 'GitHub mentions'],
+      [`site:trello.com "${d}"`, 'Trello leaks'],
+      [`site:s3.amazonaws.com "${d}"`, 'AWS S3 buckets'],
+      [`site:blob.core.windows.net "${d}"`, 'Azure Blob Storage'],
+      [`site:storage.googleapis.com "${d}"`, 'Google Cloud Storage buckets'],
+      [`site:firebasestorage.googleapis.com "${d}"`, 'Firebase Storage'],
+      [`site:digitaloceanspaces.com "${d}"`, 'DigitalOcean Spaces'],
+      [`site:drive.google.com "${d}"`, 'Public Google Drive files'],
+      [`site:docs.google.com "${d}"`, 'Public Google Docs / Sheets / Slides'],
+      [`site:onedrive.live.com "${d}"`, 'Public OneDrive files'],
+      [`site:1drv.ms "${d}"`, 'OneDrive shortlinks'],
+      [`site:dropbox.com "${d}"`, 'Public Dropbox files'],
+      [`site:box.com "${d}"`, 'Public Box files'],
+      [`site:mega.nz "${d}"`, 'Public MEGA files'],
+      [`site:icloud.com "${d}"`, 'Public iCloud shares'],
+    ];
+  }
+};
+
+// ===== 2. SHODAN DORK GENERATOR =====
+TOOLS['shodan-dork'] = {
+  title: 'Shodan Dork Generator',
+  desc: 'Build Shodan queries to map a target exposed hosts, services, and open ports.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Target</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Domain</label>
+              <input type="text" id="sd-domain" placeholder="example.com">
+            </div>
+            <div class="field">
+              <label>IP / CIDR</label>
+              <input type="text" id="sd-ip" placeholder="1.2.3.4 or 1.2.3.0/24">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Organization</label>
+              <input type="text" id="sd-org" placeholder="Acme Corp">
+            </div>
+            <div class="field">
+              <label>SSL/Certificate Name</label>
+              <input type="text" id="sd-ssl" placeholder="example.com">
+            </div>
+          </div>
+          <button class="btn" id="sd-gen">Generate Queries</button>
+        </div>
+        <div class="card" id="sd-results" style="display:none">
+          <div class="result-header"><h4>Shodan Queries</h4></div>
+          <div class="dork-list" id="sd-list"></div>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    $('#sd-gen').addEventListener('click', () => {
+      const d = $('#sd-domain').value.trim();
+      const ip = $('#sd-ip').value.trim();
+      const org = $('#sd-org').value.trim();
+      const ssl = $('#sd-ssl').value.trim();
+      const queries = [];
+
+      if (d) {
+        queries.push([`hostname:"${d}"`, 'Hosts matching domain']);
+        queries.push([`ssl:"${d}"`, 'SSL cert matches domain']);
+        queries.push([`ssl.cert.subject.cn:"${d}"`, 'Cert CN matches']);
+        queries.push([`http.title:"${d}"`, 'HTTP title contains domain']);
+      }
+      if (ip) {
+        queries.push([`net:${ip}`, 'IP / CIDR range']);
+        queries.push([`net:${ip} port:80,443,8080,8443`, 'Web ports on range']);
+      }
+      if (org) {
+        queries.push([`org:"${org}"`, 'By organization']);
+        queries.push([`org:"${org}" port:22`, 'SSH on org']);
+        queries.push([`org:"${org}" port:3389`, 'RDP on org']);
+        queries.push([`org:"${org}" "default password"`, 'Default password mentions']);
+      }
+      if (ssl) {
+        queries.push([`ssl.cert.subject.cn:"${ssl}"`, 'SSL CN match']);
+        queries.push([`ssl.cert.issuer.cn:"${ssl}"`, 'SSL issuer CN match']);
+      }
+
+      queries.push([`product:"nginx" "200 OK"`, 'nginx servers']);
+      queries.push([`product:"Apache" country:"US"`, 'Apache in US']);
+      queries.push([`"Server: Microsoft-IIS"`, 'IIS servers']);
+      queries.push([`port:9200 elastic`, 'Open Elasticsearch']);
+      queries.push([`port:27017 mongodb`, 'Open MongoDB']);
+      queries.push([`port:6379 redis`, 'Open Redis']);
+      queries.push([`"X-Jenkins" "Set-Cookie: JSESSIONID"`, 'Jenkins panels']);
+      queries.push([`title:"Grafana"`, 'Grafana']);
+      queries.push([`title:"Kibana"`, 'Kibana']);
+
+      const list = $('#sd-list');
+      list.innerHTML = '';
+      queries.forEach(([q, desc]) => {
+        const item = el('div', { class: 'dork-item' });
+        const wrap = el('div', { class: 'dork-item-wrap' });
+        wrap.innerHTML = `<span class="desc">${escapeHtml(desc)}</span><code>${escapeHtml(q)}</code>`;
+        item.appendChild(wrap);
+        item.appendChild(el('button', { class: 'btn btn-ghost', onclick: () => copy(q) }, 'Copy'));
+        item.appendChild(el('button', { class: 'btn btn-ghost', onclick: () => window.open('https://www.shodan.io/search?query=' + encodeURIComponent(q), '_blank') }, 'Open'));
+        list.appendChild(item);
+      });
+      $('#sd-results').style.display = 'block';
+    });
+  }
+};
+
+// ===== 3. SUBDOMAIN FINDER =====
+TOOLS['subdomain-finder'] = {
+  title: 'Subdomain Finder',
+  desc: 'Enumerate a domain subdomains from public certificate transparency logs.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Target Domain</div>
+          <div class="field">
+            <label>Root domain (e.g., example.com)</label>
+            <input type="text" id="sf-domain" placeholder="example.com">
+          </div>
+          <button class="btn" id="sf-search">Search Subdomains</button>
+          <span id="sf-timer" style="margin-left:12px;color:var(--text-mute);font-size:12px">Uses crt.sh - may take 10–30s</span>
+        </div>
+        <div class="card" id="sf-results" style="display:none">
+          <div class="result-header">
+            <h4>Subdomains <span id="sf-count" style="color:var(--text-mute);font-weight:400"></span></h4>
+            <div>
+              <button class="btn btn-ghost" id="sf-copy">Copy</button>
+              <button class="btn btn-ghost" id="sf-download">Download</button>
+            </div>
+          </div>
+          <div class="result-box" id="sf-output"></div>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    const formatElapsed = (ms) => {
+      const s = ms / 1000;
+      return s < 10 ? s.toFixed(1) + 's' : Math.round(s) + 's';
+    };
+
+    $('#sf-search').addEventListener('click', async () => {
+      const d = $('#sf-domain').value.trim();
+      if (!d) return toast('Enter a domain');
+      const btn = $('#sf-search');
+      const timerEl = $('#sf-timer');
+      btn.disabled = true;
+      btn.textContent = 'Searching...';
+
+      // Live count-up timer while crt.sh is being queried
+      const start = performance.now();
+      timerEl.style.color = 'var(--accent)';
+      timerEl.textContent = 'Collecting subdomains... 0.0s';
+      const tick = setInterval(() => {
+        timerEl.textContent = `Collecting subdomains... ${formatElapsed(performance.now() - start)}`;
+      }, 100);
+
+      try {
+        const res = await fetch(`https://crt.sh/?q=%25.${encodeURIComponent(d)}&output=json`);
+        if (!res.ok) throw new Error('crt.sh request failed');
+        const data = await res.json();
+        const subs = new Set();
+        data.forEach(entry => {
+          (entry.name_value || '').split('\n').forEach(n => {
+            n = n.trim().toLowerCase().replace(/^\*\./, '');
+            if (n.endsWith(d.toLowerCase())) subs.add(n);
+          });
+        });
+        const sorted = [...subs].sort();
+        const elapsed = formatElapsed(performance.now() - start);
+        $('#sf-output').textContent = sorted.join('\n');
+        $('#sf-count').textContent = `(${sorted.length} found in ${elapsed})`;
+        $('#sf-results').style.display = 'block';
+        TOOLS['subdomain-finder']._last = sorted;
+        clearInterval(tick);
+        timerEl.style.color = 'var(--success)';
+        timerEl.textContent = `Subdomains collected in ${elapsed} (${sorted.length} found)`;
+      } catch (e) {
+        clearInterval(tick);
+        timerEl.style.color = 'var(--danger)';
+        timerEl.textContent = `Failed after ${formatElapsed(performance.now() - start)}`;
+        toast('Error: ' + e.message + ' (CORS may block - try a CORS proxy)');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Search Subdomains';
+      }
+    });
+    $('#sf-copy').addEventListener('click', () => copy((TOOLS['subdomain-finder']._last || []).join('\n')));
+    $('#sf-download').addEventListener('click', () => {
+      const d = $('#sf-domain').value.trim() || 'subdomains';
+      download(`${d}-subdomains.txt`, (TOOLS['subdomain-finder']._last || []).join('\n'));
+    });
+  }
+};
+
+// ===== 4. JS FILE ANALYZER =====
+TOOLS['js-analyzer'] = {
+  title: 'JS File Analyzer',
+  desc: 'Extract endpoints, secrets, and interesting strings from JavaScript source.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">JavaScript Source</div>
+          <div class="field">
+            <label>Paste JS source code (Right Click -> View Page Source or CTRL + U)</label>
+            <textarea id="js-input" rows="10" placeholder="// paste js source here..."></textarea>
+          </div>
+          <button class="btn" id="js-analyze">Analyze</button>
+        </div>
+        <div id="js-results"></div>
+      </div>
+    `;
+  },
+  init() {
+    $('#js-analyze').addEventListener('click', () => {
+      const src = $('#js-input').value;
+      if (!src) return toast('Paste some JS first');
+
+      const findings = {
+        URLs: [...new Set(src.match(/https?:\/\/[^\s'"`<>()]+/g) || [])],
+        'Relative paths': [...new Set(src.match(/['"`]\/[a-zA-Z0-9_\-\/.?=&]+['"`]/g) || [])].map(s => s.slice(1, -1)),
+        'API endpoints': [...new Set(src.match(/['"`]\/?(api|v[0-9]+|graphql|rest)\/[a-zA-Z0-9_\-\/.?=&]+['"`]/gi) || [])].map(s => s.slice(1, -1)),
+        'AWS Access Keys': [...new Set(src.match(/AKIA[0-9A-Z]{16}/g) || [])],
+        'AWS Secret Keys': [...new Set(src.match(/(?<![A-Za-z0-9\/+=])[A-Za-z0-9\/+=]{40}(?![A-Za-z0-9\/+=])/g) || [])].slice(0, 5),
+        'Google API keys': [...new Set(src.match(/AIza[0-9A-Za-z\-_]{35}/g) || [])],
+        'Slack tokens': [...new Set(src.match(/xox[baprs]-[0-9a-zA-Z\-]+/g) || [])],
+        'Bearer tokens': [...new Set(src.match(/[Bb]earer\s+[A-Za-z0-9\-._~+\/]+=*/g) || [])],
+        'JWT tokens': [...new Set(src.match(/eyJ[A-Za-z0-9_\-]+\.eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/g) || [])],
+        'Private keys': [...new Set(src.match(/-----BEGIN [A-Z ]+PRIVATE KEY-----/g) || [])],
+        'Email addresses': [...new Set(src.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [])],
+        'IP addresses': [...new Set(src.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g) || [])],
+        'S3 buckets': [...new Set(src.match(/[a-z0-9.\-]+\.s3[.\-][a-z0-9\-]*\.amazonaws\.com/g) || [])],
+        'Firebase URLs': [...new Set(src.match(/[a-z0-9\-]+\.firebaseio\.com/g) || [])],
+        'API key patterns': [...new Set(src.match(/(?:api[_-]?key|apikey|secret|token|password|passwd|pwd)\s*[:=]\s*['"`][^'"`]{8,}['"`]/gi) || [])],
+        'DOM sinks': [...new Set(src.match(/\.(innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval|setTimeout|setInterval|Function)\b/g) || [])],
+      };
+
+      const out = $('#js-results');
+      out.innerHTML = '';
+      Object.entries(findings).forEach(([k, v]) => {
+        if (!v.length) return;
+        const card = el('div', { class: 'card' });
+        card.innerHTML = `<div class="card-title">${escapeHtml(k)} (${v.length})</div><div class="result-box">${v.map(escapeHtml).join('\n')}</div>`;
+        out.appendChild(card);
+      });
+      if (!out.children.length) {
+        out.innerHTML = '<div class="card"><div class="card-title">No findings</div><p style="color:var(--text-mute);font-size:13px">Nothing interesting found in the source.</p></div>';
+      }
+    });
+  }
+};
+
+// ===== 5. SECURITY HEADER ANALYZER =====
+TOOLS['header-analyzer'] = {
+  title: 'Security Header Analyzer',
+  desc: 'Review HTTP response headers and flag missing or weak security controls.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Fetch from URL <span style="color:var(--text-mute);font-weight:400;font-size:11px">(experimental)</span></div>
+          <div class="field">
+            <label>Domain or URL</label>
+            <input type="text" id="hdr-url" placeholder="example.com or https://example.com">
+          </div>
+          <button class="btn" id="hdr-fetch">Fetch &amp; Analyze</button>
+          <div id="hdr-fetch-status" style="margin-top:8px;font-size:12px;color:var(--text-mute)"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">HTTP Response Headers</div>
+          <div class="field">
+            <label>Paste raw response headers</label>
+            <textarea id="hdr-input" rows="12" placeholder="HTTP/1.1 200 OK
+Server: nginx
+Content-Type: text/html
+..."></textarea>
+          </div>
+          <button class="btn" id="hdr-analyze">Analyze Headers</button>
+        </div>
+        <div class="card" id="hdr-grade-card" style="display:none">
+          <div class="grade-dual">
+            <div class="grade-wrap">
+              <div class="grade-letter" id="hdr-grade">?</div>
+              <div class="grade-meta">
+                <div class="grade-label-top">Security Headers</div>
+                <div class="grade-label" id="hdr-grade-label">-</div>
+                <div class="grade-bar"><div class="grade-bar-fill" id="hdr-grade-bar"></div></div>
+                <div class="grade-score" id="hdr-grade-score">0 / 6 core headers</div>
+              </div>
+            </div>
+            <div class="grade-wrap">
+              <div class="grade-letter" id="hdr-grade2">?</div>
+              <div class="grade-meta">
+                <div class="grade-label-top">Hardening &amp; Hygiene</div>
+                <div class="grade-label" id="hdr-grade2-label">-</div>
+                <div class="grade-bar"><div class="grade-bar-fill" id="hdr-grade2-bar"></div></div>
+                <div class="grade-score" id="hdr-grade2-score">0 issues</div>
+              </div>
+            </div>
+          </div>
+          <p class="grade-note">
+            <strong>Note:</strong> two grades are reported.
+            <em>Security Headers</em> follows securityheaders.com - it scores the 6 core
+            response headers (HSTS, CSP, X-Frame-Options, X-Content-Type-Options,
+            Referrer-Policy, Permissions-Policy).
+            <em>Hardening &amp; Hygiene</em> is an additional check most providers skip:
+            information leaks (Server, X-Powered-By, etc.) and weak cookie flags
+            (missing HttpOnly / Secure / SameSite).
+          </p>
+        </div>
+        <div class="card" id="hdr-results" style="display:none">
+          <div class="result-header"><h4>Analysis</h4></div>
+          <div class="header-result" id="hdr-output"></div>
+        </div>
+        <div class="card" id="hdr-recs-card" style="display:none">
+          <div class="result-header">
+            <h4>Recommendations <span id="hdr-recs-count" style="color:var(--text-mute);font-weight:400"></span></h4>
+            <button class="btn btn-secondary" id="hdr-recs-toggle">Show More Info</button>
+          </div>
+          <div id="hdr-recs" style="display:none"></div>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    // securityheaders.com scoring: 6 core headers, grade dropped per missing.
+    // A+ requires all present AND strong HSTS + safe CSP.
+    const checks = [
+      { name: 'Strict-Transport-Security', desc: 'Forces HTTPS' },
+      { name: 'Content-Security-Policy',   desc: 'Mitigates XSS / data injection' },
+      { name: 'X-Frame-Options',           desc: 'Mitigates clickjacking' },
+      { name: 'X-Content-Type-Options',    desc: 'Should be "nosniff"' },
+      { name: 'Referrer-Policy',           desc: 'Controls referrer info' },
+      { name: 'Permissions-Policy',        desc: 'Restricts browser features' },
+    ];
+    const leaks = ['Server', 'X-Powered-By', 'X-AspNet-Version', 'X-AspNetMvc-Version', 'Via'];
+
+    // ===== Recommendation database =====
+    const RECS = {
+      'Strict-Transport-Security': {
+        what: 'HSTS forces browsers to use HTTPS for all future connections, preventing protocol downgrade and SSL stripping attacks.',
+        fix: 'Strict-Transport-Security: max-age=31536000; includeSubDomains; preload',
+        notes: 'Use a max-age of at least 1 year (31536000 seconds). Add "preload" only if you intend to submit to the HSTS preload list.',
+        refs: [
+          ['MDN - Strict-Transport-Security', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security'],
+          ['OWASP HSTS Cheat Sheet', 'https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html'],
+          ['HSTS Preload List', 'https://hstspreload.org/'],
+        ]
+      },
+      'Content-Security-Policy': {
+        what: 'CSP restricts which resources (scripts, styles, frames, etc.) the browser is allowed to load, mitigating XSS and data injection.',
+        fix: "Content-Security-Policy: default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        notes: "Avoid 'unsafe-inline' and 'unsafe-eval'. Prefer nonces or hashes for inline scripts. Always set frame-ancestors to also cover clickjacking.",
+        refs: [
+          ['MDN - Content-Security-Policy', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy'],
+          ['OWASP CSP Cheat Sheet', 'https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html'],
+          ['CSP Evaluator (Google)', 'https://csp-evaluator.withgoogle.com/'],
+        ]
+      },
+      'X-Frame-Options': {
+        what: 'Prevents your page from being rendered inside an <iframe> on another origin, mitigating clickjacking attacks.',
+        fix: 'X-Frame-Options: DENY',
+        notes: 'Use DENY unless you specifically need framing on the same origin (then use SAMEORIGIN). Modern alternative: "frame-ancestors \'none\'" inside CSP.',
+        refs: [
+          ['MDN - X-Frame-Options', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options'],
+          ['OWASP Clickjacking Defense Cheat Sheet', 'https://cheatsheetseries.owasp.org/cheatsheets/Clickjacking_Defense_Cheat_Sheet.html'],
+        ]
+      },
+      'X-Content-Type-Options': {
+        what: 'Prevents the browser from MIME-sniffing a response away from the declared Content-Type, blocking some XSS and content-confusion attacks.',
+        fix: 'X-Content-Type-Options: nosniff',
+        notes: 'The only valid value is "nosniff". Anything else is treated as missing.',
+        refs: [
+          ['MDN - X-Content-Type-Options', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options'],
+        ]
+      },
+      'Referrer-Policy': {
+        what: 'Controls how much referrer information is sent with cross-origin requests, preventing leakage of sensitive URLs / tokens.',
+        fix: 'Referrer-Policy: strict-origin-when-cross-origin',
+        notes: 'For maximum privacy use "no-referrer". "strict-origin-when-cross-origin" is the modern default and a good balance.',
+        refs: [
+          ['MDN - Referrer-Policy', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy'],
+          ['Web.dev - Referrer-Policy', 'https://web.dev/articles/referrer-best-practices'],
+        ]
+      },
+      'Permissions-Policy': {
+        what: 'Allows or denies access to powerful browser features (camera, microphone, geolocation, etc.) for the page and any embedded content.',
+        fix: 'Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()',
+        notes: 'Disable everything you don\'t use. Replaces the older Feature-Policy header.',
+        refs: [
+          ['MDN - Permissions-Policy', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy'],
+          ['W3C Permissions Policy Spec', 'https://www.w3.org/TR/permissions-policy/'],
+        ]
+      },
+      'Information-Leak': {
+        what: 'Headers like Server, X-Powered-By, X-AspNet-Version reveal the server software and version, helping attackers fingerprint your stack and find known CVEs.',
+        fix: 'Remove or obfuscate these headers in your web server / framework configuration.',
+        notes: 'Nginx: "server_tokens off;" - Apache: "ServerTokens Prod" + "ServerSignature Off" - Express: "app.disable(\'x-powered-by\')" - IIS: remove via web.config.',
+        refs: [
+          ['OWASP Secure Headers Project', 'https://owasp.org/www-project-secure-headers/'],
+          ['Nginx server_tokens', 'https://nginx.org/en/docs/http/ngx_http_core_module.html#server_tokens'],
+        ]
+      },
+      'Cookie-Flags': {
+        what: 'Cookies missing HttpOnly, Secure, or SameSite are vulnerable to theft via XSS, MITM over HTTP, and CSRF.',
+        fix: 'Set-Cookie: session=abc; HttpOnly; Secure; SameSite=Lax; Path=/',
+        notes: 'HttpOnly = blocks JS access (anti-XSS). Secure = HTTPS only. SameSite=Lax (or Strict) = anti-CSRF. Use SameSite=None only if you really need cross-site cookies, and always with Secure.',
+        refs: [
+          ['MDN - Set-Cookie', 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie'],
+          ['OWASP Session Management Cheat Sheet', 'https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html'],
+        ]
+      },
+    };
+
+    const renderRec = (title, statusText, rec) => {
+      const refsHtml = rec.refs.map(([t, u]) => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener">${escapeHtml(t)}</a>`).join('');
+      return `
+        <div class="rec">
+          <div class="rec-head">
+            <span class="rec-title">${escapeHtml(title)}</span>
+            <span class="h-status h-fail">${escapeHtml(statusText)}</span>
+          </div>
+          <div class="rec-body">
+            <p class="rec-what">${escapeHtml(rec.what)}</p>
+            <div class="rec-section-label">Recommended fix</div>
+            <div class="rec-code">${escapeHtml(rec.fix)}</div>
+            <p class="rec-notes">${escapeHtml(rec.notes)}</p>
+            <div class="rec-section-label">References</div>
+            <div class="rec-refs">${refsHtml}</div>
+          </div>
+        </div>
+      `;
+    };
+
+    $('#hdr-analyze').addEventListener('click', () => {
+      const raw = $('#hdr-input').value;
+      if (!raw) return toast('Paste some headers');
+      const headers = {};
+      raw.split(/\r?\n/).forEach(line => {
+        const m = line.match(/^([^:]+):\s*(.*)$/);
+        if (m) headers[m[1].trim().toLowerCase()] = m[2].trim();
+      });
+
+      const out = $('#hdr-output');
+      out.innerHTML = '';
+
+      let presentCount = 0;
+      let cspWarn = false;
+      let hstsWarn = false;
+      let xctoWarn = false;
+      const issuesList = []; // for recommendations
+
+      checks.forEach(c => {
+        const val = headers[c.name.toLowerCase()];
+        let status, statusText, detail;
+        if (val) {
+          status = 'h-pass'; statusText = 'PRESENT'; detail = val;
+          presentCount++;
+          if (c.name === 'X-Content-Type-Options' && val.toLowerCase() !== 'nosniff') {
+            status = 'h-warn'; statusText = 'WEAK'; xctoWarn = true;
+            issuesList.push({ key: c.name, title: c.name, status: 'WEAK' });
+          }
+          if (c.name === 'Strict-Transport-Security') {
+            const m = val.match(/max-age=(\d+)/i);
+            const age = m ? parseInt(m[1]) : 0;
+            if (age < 31536000 || !/includeSubDomains/i.test(val)) {
+              status = 'h-warn'; statusText = 'WEAK';
+              detail += ' (needs max-age ≥ 31536000 + includeSubDomains for A+)';
+              hstsWarn = true;
+              issuesList.push({ key: c.name, title: c.name, status: 'WEAK' });
+            }
+          }
+          if (c.name === 'Content-Security-Policy' && /unsafe-inline|unsafe-eval/i.test(val)) {
+            status = 'h-warn'; statusText = 'WEAK';
+            detail += ' (uses unsafe-inline / unsafe-eval)';
+            cspWarn = true;
+            issuesList.push({ key: c.name, title: c.name, status: 'WEAK' });
+          }
+        } else {
+          status = 'h-fail';
+          statusText = 'MISSING';
+          detail = c.desc;
+          issuesList.push({ key: c.name, title: c.name, status: 'MISSING' });
+        }
+        const row = el('div', { class: 'header-row' });
+        row.innerHTML = `
+          <span class="h-name">${escapeHtml(c.name)}</span>
+          <span class="h-detail">${escapeHtml(detail)}</span>
+          <span class="h-status ${status}">${statusText}</span>
+        `;
+        out.appendChild(row);
+      });
+
+      // Information leaks - affect grade
+      let leakCount = 0;
+      const leaksFound = [];
+      leaks.forEach(name => {
+        const val = headers[name.toLowerCase()];
+        if (val) {
+          leakCount++;
+          leaksFound.push(name);
+          const row = el('div', { class: 'header-row' });
+          row.innerHTML = `
+            <span class="h-name">${escapeHtml(name)}</span>
+            <span class="h-detail">Information disclosure: ${escapeHtml(val)}</span>
+            <span class="h-status h-warn">LEAK</span>
+          `;
+          out.appendChild(row);
+        }
+      });
+      if (leakCount) {
+        issuesList.push({ key: 'Information-Leak', title: `Information leak: ${leaksFound.join(', ')}`, status: 'LEAK' });
+      }
+
+      // Cookie flags - affect grade (count each missing flag)
+      let cookieMissCount = 0;
+      const cookieIssues = [];
+      const setCookies = raw.split(/\r?\n/).filter(l => /^set-cookie:/i.test(l));
+      setCookies.forEach(c => {
+        const flags = ['HttpOnly', 'Secure', 'SameSite'];
+        const missing = flags.filter(f => !new RegExp(f, 'i').test(c));
+        if (missing.length) {
+          cookieMissCount += missing.length;
+          cookieIssues.push(missing.join(', '));
+          const row = el('div', { class: 'header-row' });
+          row.innerHTML = `
+            <span class="h-name">Set-Cookie</span>
+            <span class="h-detail">Missing flags: ${missing.join(', ')}</span>
+            <span class="h-status h-warn">WEAK</span>
+          `;
+          out.appendChild(row);
+        }
+      });
+      if (cookieMissCount) {
+        const uniq = [...new Set(cookieIssues.flatMap(s => s.split(', ')))];
+        issuesList.push({ key: 'Cookie-Flags', title: `Cookie flags missing: ${uniq.join(', ')}`, status: 'WEAK' });
+      }
+
+      // ===== Grade 1: Security Headers (securityheaders.com style) =====
+      const missingCount = checks.length - presentCount;
+      const order = ['A+', 'A', 'B', 'C', 'D', 'E', 'F'];
+      let idx;
+      if (missingCount === 0) idx = 1;        // A
+      else if (missingCount === 1) idx = 2;   // B
+      else if (missingCount === 2) idx = 3;   // C
+      else if (missingCount === 3) idx = 4;   // D
+      else if (missingCount === 4) idx = 5;   // E
+      else idx = 6;                           // F
+      // A+: all 6 present AND strong HSTS AND safe CSP AND nosniff valid
+      if (idx === 1 && !hstsWarn && !cspWarn && !xctoWarn) idx = 0;
+      const grade = order[idx];
+
+      const labels = {
+        'A+': 'Outstanding - all headers configured strongly',
+        'A':  'Excellent - all main headers present',
+        'B':  'Good - one important header missing',
+        'C':  'Average - two important headers missing',
+        'D':  'Poor - three important headers missing',
+        'E':  'Bad - four important headers missing',
+        'F':  'Failing - five or more headers missing',
+      };
+      const gradeKey = grade === 'A+' ? 'Aplus' : grade;
+      const gradeEl = $('#hdr-grade');
+      gradeEl.textContent = grade;
+      gradeEl.className = 'grade-letter grade-' + gradeKey;
+      $('#hdr-grade-label').textContent = labels[grade];
+      $('#hdr-grade-score').textContent = `${presentCount} / ${checks.length} core headers present`;
+      const bar = $('#hdr-grade-bar');
+      const pct = grade === 'A+' ? 100 : Math.round((presentCount / checks.length) * 100);
+      bar.style.width = pct + '%';
+      bar.className = 'grade-bar-fill grade-bar-' + gradeKey;
+
+      // ===== Grade 2: Hardening & Hygiene (info leaks + cookie flags) =====
+      const issues = leakCount + cookieMissCount;
+      let grade2;
+      if (issues === 0) grade2 = 'A';
+      else if (issues <= 3) grade2 = 'B';
+      else grade2 = 'C';
+      const labels2 = {
+        'A':  'Clean - no leaks or weak cookies',
+        'B':  'Good - minor hygiene issues',
+        'C':  'Poor - multiple leaks / weak cookies',
+      };
+      const grade2Key = grade2 === 'A+' ? 'Aplus' : grade2;
+      const g2 = $('#hdr-grade2');
+      g2.textContent = grade2;
+      g2.className = 'grade-letter grade-' + grade2Key;
+      $('#hdr-grade2-label').textContent = labels2[grade2];
+      const issueLabel = issues === 0 ? 'No issues found'
+        : `${issues} issue${issues > 1 ? 's' : ''} (${leakCount} leak${leakCount === 1 ? '' : 's'}, ${cookieMissCount} cookie flag${cookieMissCount === 1 ? '' : 's'})`;
+      $('#hdr-grade2-score').textContent = issueLabel;
+      const bar2 = $('#hdr-grade2-bar');
+      const pct2 = Math.max(0, 100 - issues * 12);
+      bar2.style.width = pct2 + '%';
+      bar2.className = 'grade-bar-fill grade-bar-' + grade2Key;
+
+      $('#hdr-grade-card').style.display = 'block';
+
+      $('#hdr-results').style.display = 'block';
+
+      // ===== Recommendations =====
+      const recsContainer = $('#hdr-recs');
+      const recsCard = $('#hdr-recs-card');
+      const recsToggle = $('#hdr-recs-toggle');
+      if (issuesList.length === 0) {
+        recsCard.style.display = 'none';
+      } else {
+        recsContainer.innerHTML = issuesList
+          .map(i => RECS[i.key] ? renderRec(i.title, i.status, RECS[i.key]) : '')
+          .join('');
+        $('#hdr-recs-count').textContent = `(${issuesList.length} issue${issuesList.length > 1 ? 's' : ''})`;
+        recsContainer.style.display = 'none';
+        recsToggle.textContent = 'Show More Info';
+        recsCard.style.display = 'block';
+      }
+    });
+
+    $('#hdr-recs-toggle').addEventListener('click', () => {
+      const c = $('#hdr-recs');
+      const visible = c.style.display !== 'none';
+      c.style.display = visible ? 'none' : 'block';
+      $('#hdr-recs-toggle').textContent = visible ? 'Show More Info' : 'Hide More Info';
+    });
+
+    // ===== Fetch from URL (experimental) =====
+    // Uses api.hackertarget.com/httpheaders which returns the raw HTTP response
+    // headers as plain text and supports CORS. We then drop the result into the
+    // existing textarea and trigger the existing analyze flow - so if this
+    // experimental fetch breaks, the manual paste path is untouched.
+    const setStatus = (msg, isErr) => {
+      const el = $('#hdr-fetch-status');
+      el.textContent = msg;
+      el.style.color = isErr ? 'var(--danger)' : 'var(--text-mute)';
+    };
+
+    $('#hdr-fetch').addEventListener('click', async () => {
+      const raw = $('#hdr-url').value.trim();
+      if (!raw) return setStatus('Enter a domain or URL', true);
+
+      // Normalize: strip scheme, strip path, keep just host (hackertarget wants a host)
+      let target = raw.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').trim();
+      if (!target) return setStatus('Invalid URL', true);
+
+      setStatus(`Fetching headers for ${target}...`);
+      const btn = $('#hdr-fetch');
+      btn.disabled = true;
+      try {
+        const r = await fetch(`https://api.hackertarget.com/httpheaders/?q=${encodeURIComponent(target)}`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const text = (await r.text()).trim();
+        if (!text || /error|api count exceeded|invalid/i.test(text.split('\n')[0])) {
+          throw new Error(text || 'No headers returned');
+        }
+        $('#hdr-input').value = text;
+        setStatus(`Fetched ${text.split(/\r?\n/).length} lines - analyzing...`);
+        $('#hdr-analyze').click();
+      } catch (e) {
+        setStatus('Fetch failed: ' + e.message + ' - paste the headers manually below', true);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+};
+
+// ===== 6. DNS LOOKUP =====
+TOOLS['dns-lookup'] = {
+  title: 'DNS Lookup',
+  desc: 'Look up any DNS record type quickly over encrypted DNS over HTTPS.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">DNS Query</div>
+          <div class="field-row">
+            <div class="field">
+              <label>Domain</label>
+              <input type="text" id="dns-domain" placeholder="example.com">
+            </div>
+            <div class="field">
+              <label>Record Type</label>
+              <select id="dns-type">
+                <option>A</option><option>AAAA</option><option>CNAME</option>
+                <option>MX</option><option>TXT</option><option>NS</option>
+                <option>SOA</option><option>CAA</option><option>SRV</option><option>PTR</option>
+                <option value="ALL">ALL</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" id="dns-lookup">Lookup</button>
+        </div>
+        <div class="card" id="dns-results" style="display:none">
+          <div class="result-header"><h4>Records</h4></div>
+          <div class="result-box" id="dns-output"></div>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    const lookup = async (domain, type) => {
+      const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=${type}`, {
+        headers: { 'Accept': 'application/dns-json' }
+      });
+      return r.json();
+    };
+    $('#dns-lookup').addEventListener('click', async () => {
+      const d = $('#dns-domain').value.trim();
+      const t = $('#dns-type').value;
+      if (!d) return toast('Enter a domain');
+      const out = $('#dns-output');
+      out.textContent = 'Querying...';
+      $('#dns-results').style.display = 'block';
+
+      try {
+        const types = t === 'ALL' ? ['A','AAAA','CNAME','MX','TXT','NS','SOA','CAA'] : [t];
+        const results = {};
+        for (const tp of types) {
+          const data = await lookup(d, tp);
+          if (data.Answer) results[tp] = data.Answer;
+        }
+        let str = '';
+        Object.entries(results).forEach(([tp, recs]) => {
+          str += `=== ${tp} ===\n`;
+          recs.forEach(r => str += `  ${r.name}  ${r.TTL}  ${r.data}\n`);
+          str += '\n';
+        });
+        out.textContent = str || 'No records found.';
+      } catch (e) {
+        out.textContent = 'Error: ' + e.message;
+      }
+    });
+  }
+};
+
+// ===== 7. URL PARSER =====
+TOOLS['url-parser'] = {
+  title: 'URL Parser',
+  desc: 'Decompose any URL into its scheme, host, path, query, and fragment.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">URL</div>
+          <div class="field">
+            <input type="text" id="up-input" placeholder="https://user:pass@example.com:8080/path?key=value#frag">
+          </div>
+          <button class="btn" id="up-parse">Parse</button>
+        </div>
+        <div class="card" id="up-results" style="display:none">
+          <div class="card-title">Components</div>
+          <dl class="info-grid" id="up-output"></dl>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    $('#up-parse').addEventListener('click', () => {
+      const v = $('#up-input').value.trim();
+      if (!v) return toast('Enter a URL');
+      try {
+        const u = new URL(v);
+        const out = $('#up-output');
+        const parts = {
+          'Protocol': u.protocol,
+          'Username': u.username || '(none)',
+          'Password': u.password || '(none)',
+          'Hostname': u.hostname,
+          'Port': u.port || '(default)',
+          'Pathname': u.pathname,
+          'Search': u.search || '(none)',
+          'Hash': u.hash || '(none)',
+          'Origin': u.origin,
+        };
+        out.innerHTML = '';
+        Object.entries(parts).forEach(([k, val]) => {
+          out.innerHTML += `<dt>${k}</dt><dd>${escapeHtml(val)}</dd>`;
+        });
+        if (u.search) {
+          const params = new URLSearchParams(u.search);
+          out.innerHTML += `<dt style="grid-column:1/-1;margin-top:8px;color:var(--accent)">Query Parameters</dt>`;
+          for (const [k, val] of params) {
+            out.innerHTML += `<dt>${escapeHtml(k)}</dt><dd>${escapeHtml(val)}</dd>`;
+          }
+        }
+        $('#up-results').style.display = 'block';
+      } catch (e) {
+        toast('Invalid URL');
+      }
+    });
+  }
+};
+
+// ===== 8. IP / DOMAIN INFO =====
+TOOLS['ip-info'] = {
+  title: 'IP / Domain Info',
+  desc: 'Look up geolocation, network, and ASN details for an IP or domain.',
+  render() {
+    return `
+      <div class="tool">
+        <div class="card">
+          <div class="card-title">Target</div>
+          <div class="field">
+            <label>IP address or domain</label>
+            <input type="text" id="ipi-input" placeholder="8.8.8.8 or example.com">
+          </div>
+          <button class="btn" id="ipi-lookup">Lookup</button>
+        </div>
+        <div class="card" id="ipi-results" style="display:none">
+          <div class="card-title">Info</div>
+          <dl class="info-grid" id="ipi-output"></dl>
+        </div>
+      </div>
+    `;
+  },
+  init() {
+    // If user passes a domain, resolve it via Cloudflare DoH first.
+    const resolveToIp = async (host) => {
+      if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(host) || host.includes(':')) return host;
+      const r = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=A`, {
+        headers: { 'Accept': 'application/dns-json' }
+      });
+      const d = await r.json();
+      const a = (d.Answer || []).find(x => x.type === 1);
+      if (!a) throw new Error('Could not resolve domain to IP');
+      return a.data;
+    };
+
+    // Try multiple CORS-friendly providers as fallbacks.
+    const providers = [
+      {
+        name: 'ipapi.co',
+        url: ip => `https://ipapi.co/${ip}/json/`,
+        parse: d => {
+          if (d.error) throw new Error(d.reason || 'lookup failed');
+          return {
+            'IP': d.ip, 'Version': d.version,
+            'Country': d.country_name ? `${d.country_name} (${d.country_code})` : null,
+            'Region': d.region, 'City': d.city, 'Postal': d.postal,
+            'Latitude': d.latitude, 'Longitude': d.longitude, 'Timezone': d.timezone,
+            'ISP': d.org, 'ASN': d.asn,
+          };
+        }
+      },
+      {
+        name: 'ipwho.is',
+        url: ip => `https://ipwho.is/${ip}`,
+        parse: d => {
+          if (d.success === false) throw new Error(d.message || 'lookup failed');
+          return {
+            'IP': d.ip, 'Type': d.type,
+            'Country': d.country ? `${d.country} (${d.country_code})` : null,
+            'Region': d.region, 'City': d.city,
+            'Latitude': d.latitude, 'Longitude': d.longitude,
+            'Timezone': d.timezone?.id, 'ISP': d.connection?.isp,
+            'ASN': d.connection?.asn, 'Org': d.connection?.org,
+          };
+        }
+      },
+    ];
+
+    $('#ipi-lookup').addEventListener('click', async () => {
+      const v = $('#ipi-input').value.trim();
+      if (!v) return toast('Enter an IP or domain');
+      const out = $('#ipi-output');
+      out.innerHTML = '<dt>Loading...</dt><dd></dd>';
+      $('#ipi-results').style.display = 'block';
+
+      let ip;
+      try {
+        ip = await resolveToIp(v);
+      } catch (e) {
+        out.innerHTML = `<dt>Error</dt><dd>${escapeHtml(e.message)}</dd>`;
+        return;
+      }
+
+      let lastErr;
+      for (const p of providers) {
+        try {
+          const r = await fetch(p.url(ip));
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const d = await r.json();
+          const fields = p.parse(d);
+          out.innerHTML = '';
+          if (v !== ip) out.innerHTML += `<dt>Resolved</dt><dd>${escapeHtml(v)} → ${escapeHtml(ip)}</dd>`;
+          Object.entries(fields).forEach(([k, val]) => {
+            if (val != null && val !== '') out.innerHTML += `<dt>${k}</dt><dd>${escapeHtml(String(val))}</dd>`;
+          });
+          out.innerHTML += `<dt style="color:var(--text-mute)">Source</dt><dd style="color:var(--text-mute)">${p.name}</dd>`;
+          return;
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      out.innerHTML = `<dt>Error</dt><dd>All providers failed: ${escapeHtml(lastErr?.message || 'unknown')}</dd>`;
+    });
+  }
+};
+
