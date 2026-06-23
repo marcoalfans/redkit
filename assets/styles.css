@@ -986,9 +986,17 @@ textarea {
 .mg-chain { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 8px; }
 .mg-op { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; background: var(--accent-dim); color: var(--accent); padding: 3px 8px; border-radius: 6px; }
 .mg-arr { color: var(--text-mute); }
-.mg-conf { margin-left: auto; font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+.mg-conf { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
 .mg-result { margin: 0; max-height: 170px; overflow: auto; }
 .mg-empty { color: var(--text-mute); font-size: 13px; padding: 8px 2px; }
+.mg-info { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 10px; }
+.mg-chip { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--bg-elev2); color: var(--text-dim); border: 1px solid var(--border); }
+.mg-chip-op { background: var(--accent-dim); color: var(--accent); border-color: transparent; }
+.mg-chip-warn { background: rgba(210, 153, 34, 0.16); color: #d29922; border-color: transparent; }
+.mg-chip-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
+.mg-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--accent); color: #fff; text-transform: uppercase; letter-spacing: 0.6px; }
+.mg-confbar { height: 3px; border-radius: 3px; background: var(--bg-elev2); overflow: hidden; margin-bottom: 8px; }
+.mg-conffill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
 
 /* ===== Reverse Shell Generator (revshells-style) ===== */
 .rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
