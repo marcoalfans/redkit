@@ -390,7 +390,7 @@ const MAGIC_OPS = [
 const magicSearch = (input) => {
   const results = [], seen = new Set();
   const walk = (str, depth, chain) => {
-    if (depth > 3 || results.length > 150) return;
+    if (depth > 8 || results.length > 400) return;
     for (const op of MAGIC_OPS) {
       if (chain.length > 0 && /ROT/.test(op.label)) continue; // ROT ciphers only make sense at the top level
       let out;
