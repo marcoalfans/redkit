@@ -975,6 +975,9 @@ textarea {
 .tc-out.tc-err { color: var(--accent); }
 .tc-swap { align-self: center; flex-shrink: 0; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-elev2); color: var(--text-dim); cursor: pointer; transition: transform 0.25s, border-color 0.15s, color 0.15s; }
 .tc-swap:hover { border-color: var(--accent); color: var(--accent); transform: rotate(180deg); }
+.tc-head-btns { display: inline-flex; gap: 6px; }
+.tc-stat { margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--text-mute); min-height: 13px; letter-spacing: 0.3px; }
+.hexdump { overflow-x: auto; white-space: pre; font-family: 'JetBrains Mono', monospace; font-size: 12px; line-height: 1.55; margin: 0; color: var(--text); }
 @media (max-width: 760px) { .tc-panes { grid-template-columns: 1fr; } .tc-swap { transform: rotate(90deg); margin: 2px auto; } .tc-swap:hover { transform: rotate(270deg); } }
 
 /* ===== Magic detector ===== */
