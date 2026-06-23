@@ -2,17 +2,20 @@
 // ===== CLASSIC CIPHERS =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Encrypt and decrypt classic ciphers including ROT13, Caesar, Atbash, and reverse.',
+  desc: 'Encrypt and decrypt classic ciphers including ROT13, Caesar, Atbash, Vigenère, and reverse.',
   render() {
     return `
       <div class="tool">
         ${card('Input', `
           ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
           ${field('Caesar shift (for Caesar cipher)', `<input type="number" id="cip-shift" value="13">`)}
+          ${field('Vigenère key (for Vigenère cipher)', `<input type="text" id="cip-key" placeholder="e.g. SECRET" autocomplete="off" spellcheck="false">`)}
           <div class="btn-row">
             <button class="btn" data-cmd="rot13">ROT13</button>
             <button class="btn" data-cmd="caesar">Caesar</button>
             <button class="btn" data-cmd="atbash">Atbash</button>
+            <button class="btn" data-cmd="vig-enc">Vigenère Encrypt</button>
+            <button class="btn" data-cmd="vig-dec">Vigenère Decrypt</button>
             <button class="btn" data-cmd="reverse">Reverse</button>
           </div>
         `)}
@@ -29,6 +32,19 @@ TOOLS['cipher'] = {
       const base = c <= 'Z' ? 65 : 97;
       return String.fromCharCode(25 - (c.charCodeAt(0) - base) + base);
     });
+    // Vigenère: key cycles over alphabetic chars only; non-letters pass through and don't advance the key
+    const vigenere = (s, key, decrypt) => {
+      key = (key || '').replace(/[^a-z]/gi, '').toUpperCase();
+      if (!key) return s;
+      let ki = 0;
+      return s.replace(/[a-z]/gi, c => {
+        const base = c <= 'Z' ? 65 : 97;
+        const k = key.charCodeAt(ki % key.length) - 65;
+        ki++;
+        const shift = decrypt ? 26 - k : k;
+        return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
+      });
+    };
     $$('[data-cmd]', $('#cip-input').closest('.card')).forEach(b => {
       b.addEventListener('click', () => {
         const cmd = b.dataset.cmd;
@@ -38,6 +54,8 @@ TOOLS['cipher'] = {
         if (cmd === 'rot13') r = caesar(txt, 13);
         else if (cmd === 'caesar') r = caesar(txt, n);
         else if (cmd === 'atbash') r = atbash(txt);
+        else if (cmd === 'vig-enc') r = vigenere(txt, $('#cip-key').value, false);
+        else if (cmd === 'vig-dec') r = vigenere(txt, $('#cip-key').value, true);
         else if (cmd === 'reverse') r = txt.split('').reverse().join('');
         $('#cip-output').textContent = r;
         $('#cip-results').style.display = 'block';
