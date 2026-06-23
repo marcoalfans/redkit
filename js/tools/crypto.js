@@ -195,6 +195,46 @@ const base85Decode = (str) => {
   return new TextDecoder().decode(new Uint8Array(bytes));
 };
 
+// ===== BASE45 (RFC 9285) — used by EU Digital COVID certificates =====
+const B45_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
+const base45Encode = (str) => {
+  const bytes = new TextEncoder().encode(str);
+  let out = '';
+  for (let i = 0; i < bytes.length; i += 2) {
+    if (i + 1 < bytes.length) {
+      let n = bytes[i] * 256 + bytes[i + 1];           // 2 bytes → 3 base45 chars
+      const c = n % 45; n = (n - c) / 45; const d = n % 45; const e = (n - d) / 45;
+      out += B45_ALPHABET[c] + B45_ALPHABET[d] + B45_ALPHABET[e];
+    } else {
+      let n = bytes[i];                                 // 1 byte → 2 base45 chars
+      const c = n % 45; const d = (n - c) / 45;
+      out += B45_ALPHABET[c] + B45_ALPHABET[d];
+    }
+  }
+  return out;
+};
+const base45Decode = (str) => {
+  const vals = [...str.replace(/\s+/g, '')].map(ch => {
+    const v = B45_ALPHABET.indexOf(ch);
+    if (v < 0) throw new Error('invalid base45 character');
+    return v;
+  });
+  const bytes = [];
+  for (let i = 0; i < vals.length;) {
+    const rem = vals.length - i;
+    if (rem >= 3) {
+      const n = vals[i] + vals[i + 1] * 45 + vals[i + 2] * 2025;
+      if (n > 0xffff) throw new Error('invalid base45 group');
+      bytes.push((n >> 8) & 0xff, n & 0xff); i += 3;
+    } else if (rem === 2) {
+      const n = vals[i] + vals[i + 1] * 45;
+      if (n > 0xff) throw new Error('invalid base45 tail');
+      bytes.push(n & 0xff); i += 2;
+    } else throw new Error('invalid base45 length');
+  }
+  return new TextDecoder().decode(new Uint8Array(bytes));
+};
+
 // ===== BINARY =====
 const binaryEncode = (str) =>
   Array.from(new TextEncoder().encode(str))
@@ -251,6 +291,7 @@ const hexDec = s => {
 const CODECS = {
   base64: { codeLabel: 'Base64', enc: b64Enc, dec: b64Dec },
   base32: { codeLabel: 'Base32', enc: base32Encode, dec: base32Decode },
+  base45: { codeLabel: 'Base45', enc: base45Encode, dec: base45Decode },
   base58: { codeLabel: 'Base58', enc: base58Encode, dec: base58Decode },
   base85: { codeLabel: 'Base85 / ASCII85', enc: base85Encode, dec: base85Decode },
   url:    { codeLabel: 'URL', enc: encodeURIComponent, dec: decodeURIComponent },
@@ -261,10 +302,10 @@ const CODECS = {
 };
 
 // ----- Combined Base tool (Base64/32/58/85 in one) -----
-const BASE_TYPES = [['base64', 'Base64'], ['base32', 'Base32'], ['base58', 'Base58'], ['base85', 'Base85 / ASCII85']];
+const BASE_TYPES = [['base64', 'Base64'], ['base32', 'Base32'], ['base45', 'Base45'], ['base58', 'Base58'], ['base85', 'Base85 / ASCII85']];
 TOOLS['base'] = {
   title: 'Base Encoding',
-  desc: 'Encode and decode text across Base64, Base32, Base58, and Base85 in one place.',
+  desc: 'Encode and decode text across Base64, Base32, Base45, Base58, and Base85 in one place.',
   render: () => transcoderTemplate('base', {
     typeSelect: `<select id="base-type">${BASE_TYPES.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`,
   }),
@@ -383,6 +424,7 @@ const MAGIC_OPS = [
   { label: 'HTML Decode', test: s => /&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/.test(s), run: htmlDec },
   { label: 'From Base58', test: s => /^[1-9A-HJ-NP-Za-km-z]{6,}$/.test(s.replace(/\s+/g, '')), run: base58Decode },
   { label: 'From Base85', test: s => { const t = s.replace(/\s+/g, ''); return /^[\x21-\x75]{5,}$/.test(t) && /[a-z]/i.test(t) && /[!-/:-@[-`]/.test(t); }, run: base85Decode },
+  { label: 'From Base45', test: s => { const t = s.replace(/\s+/g, ''); return t.length >= 4 && t.length % 3 !== 1 && /^[0-9A-Z $%*+\-.\/:]+$/.test(t) && /[ $%*+\-.\/:]/.test(t); }, run: base45Decode },
   { label: 'From Morse',  test: s => /^[.\-/\s]{3,}$/.test(s) && /[.\-]/.test(s), run: morseDecode },
   { label: 'ROT13',       test: s => { const a = (s.match(/[a-z]/gi) || []).length; return a >= 3 && a / s.length > 0.6; }, run: rot13 },
   { label: 'ROT47',       test: s => { const t = s.replace(/\s/g, ''); if (t.length < 6) return false; const p = (t.match(/[!-~]/g) || []).length; return /\s/.test(s.trim()) && p / t.length > 0.95 && /[!-/:-@[-`{-~]/.test(t); }, run: rot47 },
