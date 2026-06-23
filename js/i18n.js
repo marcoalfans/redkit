@@ -16,7 +16,7 @@
     'Look up any DNS record type quickly over encrypted DNS over HTTPS.': 'Cari semua jenis record DNS dengan cepat melalui DNS over HTTPS yang terenkripsi.',
     'Decompose any URL into its scheme, host, path, query, and fragment.': 'Uraikan URL apa pun menjadi scheme, host, path, query, dan fragment-nya.',
     'Look up geolocation, network, and ASN details for an IP or domain.': 'Cari detail geolokasi, jaringan, dan ASN dari sebuah IP atau domain.',
-    'Encode and decode text across Base64, Base32, Base45, Base58, and Base85 in one place.': 'Encode dan decode teks dengan Base64, Base32, Base45, Base58, dan Base85 dalam satu tempat.',
+    'Encode and decode text across Base32, Base36, Base45, Base58, Base62, Base64, and Base85 in one place.': 'Encode dan decode teks dengan Base32, Base36, Base45, Base58, Base62, Base64, dan Base85 dalam satu tempat.',
     'Decode and encode URL percent-encoding, with double/triple/quadruple layers for WAF bypass.': 'Decode dan encode URL percent-encoding, plus lapisan ganda/tiga/empat untuk bypass WAF.',
     'Layered encoding': 'Encoding berlapis',
     'Layered decoding': 'Decoding berlapis',

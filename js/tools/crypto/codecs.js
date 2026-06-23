@@ -237,6 +237,40 @@ const base45Decode = (str) => {
   return new TextDecoder().decode(new Uint8Array(bytes));
 };
 
+// ===== BASE36 / BASE62 (generic big-integer base, like Base58) =====
+const bigBaseEncode = (str, alphabet) => {
+  const base = BigInt(alphabet.length);
+  const bytes = new TextEncoder().encode(str);
+  if (!bytes.length) return '';
+  let n = 0n;
+  for (const b of bytes) n = n * 256n + BigInt(b);
+  let out = '';
+  while (n > 0n) { out = alphabet[Number(n % base)] + out; n /= base; }
+  for (const b of bytes) { if (b === 0) out = alphabet[0] + out; else break; } // preserve leading zero bytes
+  return out;
+};
+const bigBaseDecode = (str, alphabet) => {
+  const base = BigInt(alphabet.length);
+  str = str.replace(/\s/g, '');
+  if (!str) return '';
+  let n = 0n;
+  for (const c of str) {
+    const idx = alphabet.indexOf(c);
+    if (idx === -1) throw new Error('Invalid character: ' + c);
+    n = n * base + BigInt(idx);
+  }
+  const bytes = [];
+  while (n > 0n) { bytes.unshift(Number(n & 0xffn)); n >>= 8n; }
+  for (const c of str) { if (c === alphabet[0]) bytes.unshift(0); else break; }
+  return new TextDecoder().decode(new Uint8Array(bytes));
+};
+const B36_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const B62_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const base36Encode = (s) => bigBaseEncode(s, B36_ALPHABET);
+const base36Decode = (s) => bigBaseDecode(s.toUpperCase(), B36_ALPHABET); // Base36 is case-insensitive
+const base62Encode = (s) => bigBaseEncode(s, B62_ALPHABET);
+const base62Decode = (s) => bigBaseDecode(s, B62_ALPHABET);
+
 // ===== BINARY =====
 const binaryEncode = (str) =>
   Array.from(new TextEncoder().encode(str))
@@ -291,10 +325,12 @@ const hexDec = s => {
 };
 
 const CODECS = {
-  base64: { codeLabel: 'Base64', enc: b64Enc, dec: b64Dec },
   base32: { codeLabel: 'Base32', enc: base32Encode, dec: base32Decode },
+  base36: { codeLabel: 'Base36', enc: base36Encode, dec: base36Decode },
   base45: { codeLabel: 'Base45', enc: base45Encode, dec: base45Decode },
   base58: { codeLabel: 'Base58', enc: base58Encode, dec: base58Decode },
+  base62: { codeLabel: 'Base62', enc: base62Encode, dec: base62Decode },
+  base64: { codeLabel: 'Base64', enc: b64Enc, dec: b64Dec },
   base85: { codeLabel: 'Base85 / ASCII85', enc: base85Encode, dec: base85Decode },
   url:    { codeLabel: 'URL', enc: encodeURIComponent, dec: decodeURIComponent },
   html:   { codeLabel: 'HTML Entities', enc: htmlEnc, dec: htmlDec },
