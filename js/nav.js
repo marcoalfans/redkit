@@ -39,13 +39,13 @@ const EXAMPLES = {
   'url-parser': () => { exFill('up-input', 'https://user:p%40ss@admin.example.com:8443/dashboard/report?id=42&redirect=https%3A%2F%2Fevil.com%2Fsteal#settings'); exClick('up-parse'); },
   'cmd-builder': () => { exClickText('curl'); exFill('cu-url', 'https://target.com/api/login'); exFill('cu-method', 'POST'); exFill('cu-ct', 'application/json'); exFill('cu-data', '{"user":"admin","pass":"admin"}'); },
 
-  // ---- Crypto / Encoding ----
-  'base': () => { exFill('base-type', 'base64'); exFill('base-src', 'admin:S3cr3tP@ss!'); },
-  'url-encode': () => { exFill('urlc-src', "https://x.com/search?q=<script>alert(1)</script>&next=a b"); },
-  'html-encode': () => { exFill('htm-src', '<img src=x onerror=alert(document.cookie)>'); },
-  'hex': () => { exFill('hex-src', 'PWNED'); },
-  'binary': () => { exFill('bin-src', 'Hi!'); },
-  'morse': () => { exFill('morse-src', 'SOS HELP'); },
+  // ---- Crypto / Encoding (decode-first: examples are encoded data) ----
+  'base': () => { exFill('base-type', 'base64'); exFill('base-src', 'YWRtaW46UzNjcjN0UEBzcyE='); },
+  'url-encode': () => { exFill('urlc-src', 'https%3A%2F%2Fx.com%2F%3Fq%3D%3Cscript%3Ealert(1)%3C%2Fscript%3E%26next%3Da%20b'); },
+  'html-encode': () => { exFill('htm-src', '&lt;img src=x onerror=alert(document.cookie)&gt;'); },
+  'hex': () => { exFill('hex-src', '50574e4544'); },
+  'binary': () => { exFill('bin-src', '01001000 01101001 00100001'); },
+  'morse': () => { exFill('morse-src', '... --- ... / .... . .-.. .--.'); },
   'magic': () => { exFill('magic-in', 'ZmxhZ3tyZWRraXRfbWFnaWN9'); },
   'unicode': () => { exFill('uni-in', 'pаypаl.com'); },
   'timestamp': () => { exFill('ts-in', '1700000000'); },
