@@ -2,7 +2,7 @@
 // ===== CLASSIC CIPHERS =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Encrypt and decrypt classic ciphers including ROT13, Caesar, Atbash, Vigenère, and reverse.',
+  desc: 'Encrypt and decrypt classic ciphers — ROT13, Caesar, Atbash, Vigenère (with auto-crack), and reverse.',
   render() {
     return `
       <div class="tool">
@@ -16,6 +16,7 @@ TOOLS['cipher'] = {
             <button class="btn" data-cmd="atbash">Atbash</button>
             <button class="btn" data-cmd="vig-enc">Vigenère Encrypt</button>
             <button class="btn" data-cmd="vig-dec">Vigenère Decrypt</button>
+            <button class="btn" data-cmd="vig-crack">Vigenère Crack</button>
             <button class="btn" data-cmd="reverse">Reverse</button>
           </div>
         `)}
@@ -45,6 +46,43 @@ TOOLS['cipher'] = {
         return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
       });
     };
+    // --- Vigenère auto-crack: key length via Index of Coincidence, key letters via chi-squared vs English ---
+    const ENG = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074];
+    const indexOfCoincidence = (s) => {
+      const c = new Array(26).fill(0);
+      for (const ch of s) c[ch.charCodeAt(0) - 65]++;
+      const n = s.length;
+      if (n < 2) return 0;
+      let sum = 0; for (let i = 0; i < 26; i++) sum += c[i] * (c[i] - 1);
+      return sum / (n * (n - 1));
+    };
+    const bestShift = (coset) => {
+      let best = 0, bestChi = Infinity;
+      for (let s = 0; s < 26; s++) {
+        const c = new Array(26).fill(0);
+        for (const ch of coset) c[(ch.charCodeAt(0) - 65 - s + 26) % 26]++;
+        let chi = 0; for (let i = 0; i < 26; i++) { const e = ENG[i] / 100 * coset.length; if (e > 0) chi += (c[i] - e) ** 2 / e; }
+        if (chi < bestChi) { bestChi = chi; best = s; }
+      }
+      return best;
+    };
+    const coset = (letters, L, i) => { let cs = ''; for (let j = i; j < letters.length; j += L) cs += letters[j]; return cs; };
+    const crackVigenere = (cipher) => {
+      const letters = cipher.toUpperCase().replace(/[^A-Z]/g, '');
+      if (letters.length < 20) return null;
+      const maxLen = Math.min(20, Math.floor(letters.length / 2));
+      const scored = [];
+      for (let L = 1; L <= maxLen; L++) {
+        let total = 0; for (let i = 0; i < L; i++) total += indexOfCoincidence(coset(letters, L, i));
+        scored.push([L, total / L]);
+      }
+      const above = scored.filter(([, v]) => v >= 0.058);            // smallest length that looks English-like (random IC ≈ 0.038)
+      const len = above.length ? above[0][0] : scored.reduce((a, b) => b[1] > a[1] ? b : a)[0];
+      let key = '';
+      for (let i = 0; i < len; i++) key += String.fromCharCode(65 + bestShift(coset(letters, len, i)));
+      return { key, len, ic: scored.find(([L]) => L === len)[1] };
+    };
+
     $$('[data-cmd]', $('#cip-input').closest('.card')).forEach(b => {
       b.addEventListener('click', () => {
         const cmd = b.dataset.cmd;
@@ -56,6 +94,11 @@ TOOLS['cipher'] = {
         else if (cmd === 'atbash') r = atbash(txt);
         else if (cmd === 'vig-enc') r = vigenere(txt, $('#cip-key').value, false);
         else if (cmd === 'vig-dec') r = vigenere(txt, $('#cip-key').value, true);
+        else if (cmd === 'vig-crack') {
+          const res = crackVigenere(txt);
+          if (!res) r = '⚠ Need at least ~20 letters of ciphertext to auto-crack.';
+          else { $('#cip-key').value = res.key; r = `Key: ${res.key}  ·  length ${res.len}  ·  IC ${res.ic.toFixed(4)}\n\n${vigenere(txt, res.key, true)}`; }
+        }
         else if (cmd === 'reverse') r = txt.split('').reverse().join('');
         $('#cip-output').textContent = r;
         $('#cip-results').style.display = 'block';
