@@ -57,6 +57,7 @@
     'Domain (e.g., example.com)': 'Domain (mis. example.com)',
     'Domain or URL': 'Domain atau URL',
     'Encoding': 'Encoding',
+    'Converters & Calculators': 'Konverter & Kalkulator',
     'Filename': 'Nama File',
     'Impact': 'Dampak',
     'IP address or domain': 'Alamat IP atau domain',

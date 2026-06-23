@@ -21,6 +21,7 @@
         <button class="rk-tab" data-cat="crypto">Crypto</button>
         <button class="rk-tab" data-cat="payloads">Payloads</button>
         <button class="rk-tab" data-cat="reporting">Reporting</button>
+        <button class="rk-tab" data-cat="bench">Bench</button>
     </nav>
     <div class="rk-header-right">
       <a href="https://marcoalfans.github.io/" class="rk-back">←<span class="rk-back-label"> portfolio</span></a>
@@ -60,9 +61,6 @@
           <button class="nav-item" data-tool="hex">Hex Encode/Decode</button>
           <button class="nav-item" data-tool="binary">Binary Encode/Decode</button>
           <button class="nav-item" data-tool="morse">Morse Code</button>
-          <button class="nav-item" data-tool="unicode">Unicode / Homoglyph</button>
-          <button class="nav-item" data-tool="timestamp">Timestamp Converter</button>
-          <button class="nav-item" data-tool="chmod">Chmod Calculator</button>
           <button class="nav-item" data-tool="ps-encode">PowerShell Encoder</button>
         </div>
         <div class="nav-section" data-cat="crypto">
@@ -88,6 +86,7 @@
           <button class="nav-item" data-tool="path-traversal">Path Traversal / LFI Helper</button>
           <button class="nav-item" data-tool="idor-helper">IDOR Helper & Patterns</button>
           <button class="nav-item" data-tool="forbidden-bypass">403 Bypass Helper</button>
+          <button class="nav-item" data-tool="unicode">Unicode / Homoglyph</button>
           <button class="nav-item" data-tool="open-redirect">Open Redirect Helper</button>
           <button class="nav-item" data-tool="csrf-bypass">CSRF Bypass Techniques</button>
           <button class="nav-item" data-tool="ssrf-helper">SSRF Helper</button>
@@ -99,6 +98,11 @@
           <button class="nav-item" data-tool="3.1">CVSS 3.1 Calculator</button>
           <button class="nav-item" data-tool="4.0">CVSS 4.0 Calculator</button>
           <button class="nav-item" data-tool="report-template">Report Template</button>
+        </div>
+        <div class="nav-section" data-cat="bench">
+          <div class="nav-title">Converters & Calculators</div>
+          <button class="nav-item" data-tool="timestamp">Timestamp Converter</button>
+          <button class="nav-item" data-tool="chmod">Chmod Calculator</button>
           <button class="nav-item" data-tool="notationer">Notationer</button>
         </div>
       </nav>
@@ -150,15 +154,18 @@
   <script src="js/tools/crypto/hashing.js"></script>
   <script src="js/tools/crypto/jwt.js"></script>
   <script src="js/tools/crypto/ciphers.js"></script>
-  <script src="js/tools/crypto/text.js"></script>
   <script src="js/tools/payloads/generators.js"></script>
   <script src="js/tools/payloads/library.js"></script>
   <script src="js/tools/payloads/web.js"></script>
   <script src="js/tools/payloads/api.js"></script>
   <script src="js/tools/payloads/revshell.js"></script>
   <script src="js/tools/payloads/injection.js"></script>
+  <script src="js/tools/payloads/unicode.js"></script>
   <script src="js/tools/reporting/cvss.js"></script>
   <script src="js/tools/reporting/report.js"></script>
+  <script src="js/tools/bench/timestamp.js"></script>
+  <script src="js/tools/bench/chmod.js"></script>
+  <script src="js/tools/bench/notationer.js"></script>
   <script src="js/nav.js"></script>
   <script src="js/shell.js"></script>
   <script src="js/mascot.js" defer></script>
