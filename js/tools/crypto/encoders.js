@@ -1,9 +1,9 @@
 // RedKit · crypto/encoders.js (split from crypto.js)
-// ----- Combined Base tool (Base32/36/45/58/62/64/85 in one, ordered by radix) -----
-const BASE_TYPES = [['base32', 'Base32'], ['base36', 'Base36'], ['base45', 'Base45'], ['base58', 'Base58'], ['base62', 'Base62'], ['base64', 'Base64'], ['base85', 'Base85 / ASCII85']];
+// ----- Combined Base tool (Base16/32/36/45/58/62/64/85/91 in one, ordered by radix) -----
+const BASE_TYPES = [['base16', 'Base16 (Hex)'], ['base32', 'Base32'], ['base36', 'Base36'], ['base45', 'Base45'], ['base58', 'Base58'], ['base62', 'Base62'], ['base64', 'Base64'], ['base85', 'Base85 / ASCII85'], ['base91', 'Base91']];
 TOOLS['base'] = {
   title: 'Base Encoding',
-  desc: 'Encode and decode text across Base32, Base36, Base45, Base58, Base62, Base64, and Base85 in one place.',
+  desc: 'Encode and decode text across Base16, Base32, Base36, Base45, Base58, Base62, Base64, Base85, and Base91 in one place.',
   render: () => transcoderTemplate('base', {
     typeSelect: `<select id="base-type">${BASE_TYPES.map(([v, l]) => `<option value="${v}"${v === 'base64' ? ' selected' : ''}>${l}</option>`).join('')}</select>`,
   }),

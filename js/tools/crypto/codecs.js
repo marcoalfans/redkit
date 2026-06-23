@@ -271,6 +271,41 @@ const base36Decode = (s) => bigBaseDecode(s.toUpperCase(), B36_ALPHABET); // Bas
 const base62Encode = (s) => bigBaseEncode(s, B62_ALPHABET);
 const base62Decode = (s) => bigBaseDecode(s, B62_ALPHABET);
 
+// ===== BASE91 (basE91 by Joachim Henke) =====
+const B91_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
+const base91Encode = (str) => {
+  const data = new TextEncoder().encode(str);
+  let b = 0, n = 0, out = '';
+  for (let i = 0; i < data.length; i++) {
+    b |= data[i] << n; n += 8;
+    if (n > 13) {
+      let v = b & 8191;
+      if (v > 88) { b >>= 13; n -= 13; } else { v = b & 16383; b >>= 14; n -= 14; }
+      out += B91_ALPHABET[v % 91] + B91_ALPHABET[(v / 91) | 0];
+    }
+  }
+  if (n) { out += B91_ALPHABET[b % 91]; if (n > 7 || b > 90) out += B91_ALPHABET[(b / 91) | 0]; }
+  return out;
+};
+const base91Decode = (str) => {
+  let v = -1, b = 0, n = 0; const out = [];
+  for (const ch of str) {
+    if (/\s/.test(ch)) continue;
+    const c = B91_ALPHABET.indexOf(ch);
+    if (c === -1) throw new Error('Invalid base91 character: ' + ch);
+    if (v < 0) { v = c; }
+    else {
+      v += c * 91;
+      b |= v << n;
+      n += (v & 8191) > 88 ? 13 : 14;
+      do { out.push(b & 255); b >>= 8; n -= 8; } while (n > 7);
+      v = -1;
+    }
+  }
+  if (v >= 0) out.push((b | v << n) & 255);
+  return new TextDecoder().decode(new Uint8Array(out));
+};
+
 // ===== BINARY =====
 const binaryEncode = (str) =>
   Array.from(new TextEncoder().encode(str))
@@ -325,6 +360,7 @@ const hexDec = s => {
 };
 
 const CODECS = {
+  base16: { codeLabel: 'Base16 (Hex)', enc: hexEnc, dec: hexDec },
   base32: { codeLabel: 'Base32', enc: base32Encode, dec: base32Decode },
   base36: { codeLabel: 'Base36', enc: base36Encode, dec: base36Decode },
   base45: { codeLabel: 'Base45', enc: base45Encode, dec: base45Decode },
@@ -332,6 +368,7 @@ const CODECS = {
   base62: { codeLabel: 'Base62', enc: base62Encode, dec: base62Decode },
   base64: { codeLabel: 'Base64', enc: b64Enc, dec: b64Dec },
   base85: { codeLabel: 'Base85 / ASCII85', enc: base85Encode, dec: base85Decode },
+  base91: { codeLabel: 'Base91', enc: base91Encode, dec: base91Decode },
   url:    { codeLabel: 'URL', enc: encodeURIComponent, dec: decodeURIComponent },
   html:   { codeLabel: 'HTML Entities', enc: htmlEnc, dec: htmlDec },
   hex:    { codeLabel: 'Hex', enc: hexEnc, dec: hexDec },
