@@ -31,7 +31,7 @@ const transcoderTemplate = (id, opts = {}) => `
 // downward instead of scrolling inside it); CSS min-height stays the floor.
 const autosize = (el) => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; };
 
-const wireTranscoder = (id, getCodec) => {
+const wireTranscoder = (id, getCodec, onConvert) => {
   const src = $(`#${id}-src`), dst = $(`#${id}-dst`), ll = $(`#${id}-llabel`), rl = $(`#${id}-rlabel`);
   let dir = 'enc';   // 'enc' = left(Text) → right(encoded);  'dec' = left(encoded) → right(Text)
   const relabel = () => {
@@ -47,6 +47,7 @@ const wireTranscoder = (id, getCodec) => {
       catch (e) { dst.value = '⚠ ' + (e.message || 'invalid input'); dst.classList.add('tc-err'); }
     }
     autosize(src); autosize(dst);
+    if (onConvert) onConvert(dir, input);
   };
   src.addEventListener('input', convert);
   $(`#${id}-swap`).addEventListener('click', () => {
@@ -58,6 +59,30 @@ const wireTranscoder = (id, getCodec) => {
   const typeSel = $(`#${id}-type`);
   if (typeSel) typeSel.addEventListener('change', () => { relabel(); convert(); });
   relabel(); convert();
+};
+
+// URL tool: show the input encoded/decoded 2-4 times below the single (x1) result.
+// Useful for double/triple URL-encoding WAF bypasses.
+const urlLayers = (dir, s) => {
+  const cardEl = $('#urlc-layers-card'), box = $('#urlc-layers');
+  if (!cardEl) return;
+  if (!s) { cardEl.style.display = 'none'; return; }
+  $('#urlc-layers-title').textContent = dir === 'enc' ? 'Multiple URL-encoding' : 'Repeated URL-decoding';
+  const fn = dir === 'enc' ? encodeURIComponent : decodeURIComponent;
+  const rows = [];
+  let cur = s, ok = true;
+  try { cur = fn(cur); } catch (e) { ok = false; } // x1 (already shown in the main pane)
+  for (let n = 2; ok && n <= 4; n++) {
+    const prev = cur;
+    try { cur = fn(cur); } catch (e) { rows.push([n, '⚠ ' + (e.message || 'invalid'), true]); break; }
+    if (cur === prev) break; // fully decoded — no further change
+    rows.push([n, cur, false]);
+  }
+  if (!rows.length) { cardEl.style.display = 'none'; return; }
+  box.innerHTML = rows.map(([n, v, err]) =>
+    `<div class="header-row"><span class="h-name">x${n}</span><span class="h-detail mono" style="font-family:'JetBrains Mono',monospace;color:var(--text)">${escapeHtml(v)}</span>${err ? '' : `<button class="btn btn-ghost" data-copy="${escapeHtml(v)}">Copy</button>`}</div>`).join('');
+  wireCopyAll(box);
+  cardEl.style.display = 'block';
 };
 
 // ===== BASE32 (RFC 4648) =====
@@ -242,7 +267,7 @@ TOOLS['base'] = {
 };
 
 // ----- Single-scheme transcoder tools -----
-TOOLS['url-encode']  = { title: 'URL Encode/Decode',  desc: 'Encode and decode URL percent-encoding as you type.',       render: () => transcoderTemplate('urlc'),  init: () => wireTranscoder('urlc', () => CODECS.url) };
+TOOLS['url-encode']  = { title: 'URL Encode/Decode',  desc: 'Encode and decode URL percent-encoding, with double/triple/quadruple layers for WAF bypass.', render: () => transcoderTemplate('urlc') + `<div class="tool"><div class="card" id="urlc-layers-card" style="display:none"><div class="card-title" id="urlc-layers-title">Multiple URL-encoding</div><div id="urlc-layers"></div></div></div>`, init: () => wireTranscoder('urlc', () => CODECS.url, urlLayers) };
 TOOLS['html-encode'] = { title: 'HTML Encode/Decode', desc: 'Encode and decode HTML entities for safe markup and payloads.',           render: () => transcoderTemplate('htm'),   init: () => wireTranscoder('htm', () => CODECS.html) };
 TOOLS['hex']         = { title: 'Hex Encode/Decode',  desc: 'Convert text to hexadecimal bytes and back.',       render: () => transcoderTemplate('hex'),   init: () => wireTranscoder('hex', () => CODECS.hex) };
 TOOLS['binary']      = { title: 'Binary Encode/Decode', desc: 'Convert text to 8-bit binary and back.',          render: () => transcoderTemplate('bin'),   init: () => wireTranscoder('bin', () => CODECS.binary) };
