@@ -16,11 +16,11 @@ js/
                         const TOOLS = {}        ← loaded FIRST
   i18n.js               EN/ID dictionary + translator
   data/                 cvss-tips.en.js, cvss-tips.id.js, cvss4.js, rsg-data.js
-  tools/
-    recon.js            Recon & OSINT tools
-    crypto.js           Encoding + hashing tools
-    payloads.js         Payloads & web exploitation tools
-    reporting.js        CVSS, report template, notationer
+  tools/                each category is a folder of small files (loaded in listed order)
+    recon/              dorks, discovery, headers, network, builders
+    crypto/             codecs (shared infra), encoders, magic, hashing, jwt, ciphers, text
+    payloads/           generators, library (shared infra), web, api, revshell, injection
+    reporting/          cvss, report
     _template.js        copy-paste starter (NOT loaded)
   nav.js                EXAMPLES + loadTool          ← loaded LAST (before shell.js)
   shell.js              router, search, theme + language toggles
@@ -28,13 +28,20 @@ js/
 ```
 
 Load order matters only at the boundaries: `core.js` (defines `TOOLS`) must be
-first, and `nav.js` (defines `loadTool`) after every `tools/*.js`. Everything
-else is referenced at runtime, so file order between tool files is free.
+first, and `nav.js` (defines `loadTool`) after every `tools/**/*.js`. Tool
+definitions reference helpers at runtime, so file order is mostly free — the one
+rule is that shared infra evaluated at top level must load before its dependents:
+within `crypto/`, `codecs.js` (defines the codec primitives + `CODECS`/`BASE_TYPES`,
+which other files capture) loads first; within `payloads/`, `library.js` (the
+`renderPayloadLibrary`/`initPayloadLibrary` helpers) loads before the libraries
+that use them. Each file is registered as its own `<script>` in `index.html`.
 
 ## Steps
 
 1. **Register the tool.** Copy the block in `js/tools/_template.js` into the
-   category file it belongs to. Pick a unique kebab-case `key`
+   file under the category folder it belongs to (e.g. `js/tools/crypto/text.js`),
+   or add a new file there and register it as a `<script>` in `index.html`.
+   Pick a unique kebab-case `key`
    (`TOOLS['my-tool']`) and unique element ids.
 
 2. **Add the nav button** in `index.html`, inside the matching
