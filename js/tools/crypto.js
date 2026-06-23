@@ -214,7 +214,8 @@ const base45Encode = (str) => {
   return out;
 };
 const base45Decode = (str) => {
-  const vals = [...str.replace(/\s+/g, '')].map(ch => {
+  // NOTE: space (0x20) is a valid Base45 data character, so only strip line breaks/tabs (paste artifacts), never spaces
+  const vals = [...str.replace(/[\r\n\t]/g, '')].map(ch => {
     const v = B45_ALPHABET.indexOf(ch);
     if (v < 0) throw new Error('invalid base45 character');
     return v;
@@ -406,10 +407,10 @@ const printableScore = (s) => {
   const words = ['the ', 'and ', 'for ', 'http', 'flag', 'www.', '://', 'password', 'admin', 'user', 'login', 'token', 'secret', 'https', 'select', 'union'];
   let hits = 0; for (const w of words) if (low.includes(w)) hits++;
   score += Math.min(hits, 4) * 0.08;
-  if (/^https?:\/\//i.test(s.trim())) score += 0.25;
   if (/[a-z0-9_]+\{[^}]{2,}\}/i.test(s)) score += 0.4;   // flag{...}
   const sp = spaces / n; if (sp > 0.04 && sp < 0.25) score += 0.05;
   if (letters / n > 0.5) score += 0.05;
+  if (sniffType(s)) score += 0.5;   // recognized structured output (URL, Email, IPv4, JSON, JWT, PEM, …) → likely the answer
   return score;
 };
 const MAGIC_OPS = [
@@ -424,7 +425,7 @@ const MAGIC_OPS = [
   { label: 'HTML Decode', test: s => /&(#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);/.test(s), run: htmlDec },
   { label: 'From Base58', test: s => /^[1-9A-HJ-NP-Za-km-z]{6,}$/.test(s.replace(/\s+/g, '')), run: base58Decode },
   { label: 'From Base85', test: s => { const t = s.replace(/\s+/g, ''); return /^[\x21-\x75]{5,}$/.test(t) && /[a-z]/i.test(t) && /[!-/:-@[-`]/.test(t); }, run: base85Decode },
-  { label: 'From Base45', test: s => { const t = s.replace(/\s+/g, ''); return t.length >= 4 && t.length % 3 !== 1 && /^[0-9A-Z $%*+\-.\/:]+$/.test(t) && /[ $%*+\-.\/:]/.test(t); }, run: base45Decode },
+  { label: 'From Base45', test: s => { const t = s.replace(/[\r\n\t]/g, ''); return t.length >= 4 && t.length % 3 !== 1 && /^[0-9A-Z $%*+\-.\/:]+$/.test(t) && /[ $%*+\-.\/:]/.test(t); }, run: base45Decode },
   { label: 'From Morse',  test: s => /^[.\-/\s]{3,}$/.test(s) && /[.\-]/.test(s), run: morseDecode },
   { label: 'ROT13',       test: s => { const a = (s.match(/[a-z]/gi) || []).length; return a >= 3 && a / s.length > 0.6; }, run: rot13 },
   { label: 'ROT47',       test: s => { const t = s.replace(/\s/g, ''); if (t.length < 6) return false; const p = (t.match(/[!-~]/g) || []).length; return /\s/.test(s.trim()) && p / t.length > 0.95 && /[!-/:-@[-`{-~]/.test(t); }, run: rot47 },
