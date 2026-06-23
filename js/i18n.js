@@ -26,6 +26,7 @@
     'Convert text to 8-bit binary and back.': 'Ubah teks menjadi biner 8-bit dan sebaliknya.',
     'Convert text to and from International Morse code.': 'Ubah teks dari dan ke kode Morse internasional.',
     'Auto-detect and recursively decode nested encodings, with entropy analysis and output-type detection.': 'Deteksi otomatis dan decode encoding bertingkat secara rekursif, dengan analisis entropi dan deteksi tipe output.',
+    'max depth': 'kedalaman maks',
     'Generate MD5, SHA-1, SHA-256, SHA-512, and more from any input.': 'Hasilkan MD5, SHA-1, SHA-256, SHA-512, dan lainnya dari input apa pun.',
     'Identify an unknown hash by its length, character set, and format.': 'Identifikasi hash yang tidak diketahui berdasarkan panjang, kumpulan karakter, dan formatnya.',
     'Decode, edit, and re-sign JSON Web Tokens, including alg none and weak-secret attacks.': 'Decode, ubah, dan tanda tangani ulang JSON Web Token, termasuk serangan alg none dan secret lemah.',

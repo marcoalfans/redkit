@@ -75,10 +75,10 @@ const MAGIC_OPS = [
   { label: 'ROT13',       test: s => { const a = (s.match(/[a-z]/gi) || []).length; return a >= 3 && a / s.length > 0.6; }, run: rot13 },
   { label: 'ROT47',       test: s => { const t = s.replace(/\s/g, ''); if (t.length < 6) return false; const p = (t.match(/[!-~]/g) || []).length; return /\s/.test(s.trim()) && p / t.length > 0.95 && /[!-/:-@[-`{-~]/.test(t); }, run: rot47 },
 ];
-const magicSearch = (input) => {
+const magicSearch = (input, maxDepth = 8) => {
   const results = [], seen = new Set();
   const walk = (str, depth, chain) => {
-    if (depth > 8 || results.length > 400) return;
+    if (depth > maxDepth || results.length > 400) return;
     for (const op of MAGIC_OPS) {
       if (chain.length > 0 && /ROT/.test(op.label)) continue; // ROT ciphers only make sense at the top level
       let out;
@@ -104,7 +104,7 @@ TOOLS['magic'] = {
   render: () => `
     <div class="tool">
       ${card('Input', field('Paste encoded / obfuscated data', `<textarea id="magic-in" class="tc-area" placeholder="e.g. ZmxhZ3tyZWRraXRfbWFnaWN9" autocomplete="off" spellcheck="false"></textarea>`) + `<div id="magic-info" class="mg-info" data-noi18n></div>`)}
-      ${card('', resultHead('Detected candidates') + `<div id="magic-out"></div>`)}
+      ${card('', resultHead('Detected candidates', `<label class="mg-depth" title="How many nested decode layers to search">max depth <select id="magic-depth">${[1, 2, 3, 4, 5, 6, 8, 10, 12].map(d => `<option value="${d}"${d === 8 ? ' selected' : ''}>${d}</option>`).join('')}</select></label>`) + `<div id="magic-out"></div>`)}
     </div>`,
   init() {
     const box = $('#magic-out'), info = $('#magic-info');
@@ -121,7 +121,7 @@ TOOLS['magic'] = {
         (printableScore(v) > 1.12 ? `<span class="mg-chip mg-chip-warn" title="The input itself reads as plain text — decode candidates below may be spurious">input already looks readable</span>` : '') +
         (matched.length ? `<span class="mg-chip-label">matches:</span>` + matched.map(m => `<span class="mg-chip mg-chip-op">${escapeHtml(m)}</span>`).join('')
                         : `<span class="mg-chip-label">no encoding pattern matched the input</span>`);
-      const res = magicSearch(v);
+      const res = magicSearch(v, parseInt($('#magic-depth').value, 10) || 8);
       if (!res.length) { box.innerHTML = '<div class="mg-empty">No nested decoding found — the input may be plaintext, encrypted, or compressed. Try the Base / Hex tools manually.</div>'; return; }
       box.innerHTML = res.map((r, i) => {
         const conf = Math.max(4, Math.min(100, Math.round(r.score * 55)));
@@ -139,6 +139,7 @@ TOOLS['magic'] = {
       $$('.mg-copy', box).forEach(b => b.addEventListener('click', () => copy(res[+b.dataset.i].output)));
     };
     let t; $('#magic-in').addEventListener('input', () => { clearTimeout(t); t = setTimeout(run, 160); });
+    $('#magic-depth').addEventListener('change', run);
     run();
   },
 };

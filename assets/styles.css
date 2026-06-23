@@ -995,6 +995,8 @@ textarea {
 .mg-chip-warn { background: rgba(210, 153, 34, 0.16); color: #d29922; border-color: transparent; }
 .mg-chip-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-mute); }
 .mg-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: var(--accent); color: #fff; text-transform: uppercase; letter-spacing: 0.6px; }
+.mg-depth { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 6px; }
+.mg-depth select { padding: 3px 7px; font-size: 11px; }
 .mg-confbar { height: 3px; border-radius: 3px; background: var(--bg-elev2); overflow: hidden; margin-bottom: 8px; }
 .mg-conffill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
 
