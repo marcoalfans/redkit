@@ -2,21 +2,17 @@
 // ===== CLASSIC CIPHERS =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Encrypt and decrypt classic ciphers — ROT13, Caesar, Atbash, Vigenère (with auto-crack), and reverse.',
+  desc: 'Encrypt and decrypt classic ciphers — ROT13, Caesar, Atbash, and reverse.',
   render() {
     return `
       <div class="tool">
         ${card('Input', `
           ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
           ${field('Caesar shift (for Caesar cipher)', `<input type="number" id="cip-shift" value="13">`)}
-          ${field('Vigenère key (for Vigenère cipher)', `<input type="text" id="cip-key" placeholder="e.g. SECRET" autocomplete="off" spellcheck="false">`)}
           <div class="btn-row">
             <button class="btn" data-cmd="rot13">ROT13</button>
             <button class="btn" data-cmd="caesar">Caesar</button>
             <button class="btn" data-cmd="atbash">Atbash</button>
-            <button class="btn" data-cmd="vig-enc">Vigenère Encrypt</button>
-            <button class="btn" data-cmd="vig-dec">Vigenère Decrypt</button>
-            <button class="btn" data-cmd="vig-crack">Vigenère Crack</button>
             <button class="btn" data-cmd="reverse">Reverse</button>
           </div>
         `)}
@@ -33,7 +29,46 @@ TOOLS['cipher'] = {
       const base = c <= 'Z' ? 65 : 97;
       return String.fromCharCode(25 - (c.charCodeAt(0) - base) + base);
     });
-    // Vigenère: key cycles over alphabetic chars only; non-letters pass through and don't advance the key
+    $$('[data-cmd]', $('#cip-input').closest('.card')).forEach(b => {
+      b.addEventListener('click', () => {
+        const cmd = b.dataset.cmd;
+        const txt = $('#cip-input').value;
+        const n = parseInt($('#cip-shift').value) || 0;
+        let r;
+        if (cmd === 'rot13') r = caesar(txt, 13);
+        else if (cmd === 'caesar') r = caesar(txt, n);
+        else if (cmd === 'atbash') r = atbash(txt);
+        else if (cmd === 'reverse') r = txt.split('').reverse().join('');
+        $('#cip-output').textContent = r;
+        $('#cip-results').style.display = 'block';
+      });
+    });
+    wireCopy('cip-copy', () => $('#cip-output').textContent);
+  }
+};
+
+// ===== VIGENÈRE CIPHER (encrypt / decrypt / auto-crack) =====
+TOOLS['vigenere'] = {
+  title: 'Vigenère Cipher',
+  desc: 'Encrypt, decrypt, and auto-crack the Vigenère cipher — keyless cryptanalysis via Index of Coincidence and chi-squared frequency analysis.',
+  render() {
+    return `
+      <div class="tool">
+        ${card('Input', `
+          ${field('', `<textarea id="vg-input" placeholder="enter text..."></textarea>`)}
+          ${field('Key (leave blank and use Auto-Crack to recover it)', `<input type="text" id="vg-key" placeholder="e.g. SECRET" autocomplete="off" spellcheck="false">`)}
+          <div class="btn-row">
+            <button class="btn" data-cmd="enc">Encrypt</button>
+            <button class="btn" data-cmd="dec">Decrypt</button>
+            <button class="btn" data-cmd="crack">Auto-Crack</button>
+          </div>
+        `)}
+        ${card('', resultHead('Output', ghostBtn('vg-copy')) + `<div class="result-box" id="vg-output"></div>`, { id: 'vg-results', hidden: true })}
+      </div>
+    `;
+  },
+  init() {
+    // key cycles over alphabetic chars only; non-letters pass through and don't advance the key; case preserved
     const vigenere = (s, key, decrypt) => {
       key = (key || '').replace(/[^a-z]/gi, '').toUpperCase();
       if (!key) return s;
@@ -46,7 +81,7 @@ TOOLS['cipher'] = {
         return String.fromCharCode((c.charCodeAt(0) - base + shift) % 26 + base);
       });
     };
-    // --- Vigenère auto-crack: key length via Index of Coincidence, key letters via chi-squared vs English ---
+    // --- auto-crack: key length via Index of Coincidence, key letters via chi-squared vs English ---
     const ENG = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074];
     const indexOfCoincidence = (s) => {
       const c = new Array(26).fill(0);
@@ -83,28 +118,22 @@ TOOLS['cipher'] = {
       return { key, len, ic: scored.find(([L]) => L === len)[1] };
     };
 
-    $$('[data-cmd]', $('#cip-input').closest('.card')).forEach(b => {
+    $$('[data-cmd]', $('#vg-input').closest('.card')).forEach(b => {
       b.addEventListener('click', () => {
-        const cmd = b.dataset.cmd;
-        const txt = $('#cip-input').value;
-        const n = parseInt($('#cip-shift').value) || 0;
+        const cmd = b.dataset.cmd, txt = $('#vg-input').value;
         let r;
-        if (cmd === 'rot13') r = caesar(txt, 13);
-        else if (cmd === 'caesar') r = caesar(txt, n);
-        else if (cmd === 'atbash') r = atbash(txt);
-        else if (cmd === 'vig-enc') r = vigenere(txt, $('#cip-key').value, false);
-        else if (cmd === 'vig-dec') r = vigenere(txt, $('#cip-key').value, true);
-        else if (cmd === 'vig-crack') {
+        if (cmd === 'enc') r = vigenere(txt, $('#vg-key').value, false);
+        else if (cmd === 'dec') r = vigenere(txt, $('#vg-key').value, true);
+        else if (cmd === 'crack') {
           const res = crackVigenere(txt);
           if (!res) r = '⚠ Need at least ~20 letters of ciphertext to auto-crack.';
-          else { $('#cip-key').value = res.key; r = `Key: ${res.key}  ·  length ${res.len}  ·  IC ${res.ic.toFixed(4)}\n\n${vigenere(txt, res.key, true)}`; }
+          else { $('#vg-key').value = res.key; r = `Key: ${res.key}  ·  length ${res.len}  ·  IC ${res.ic.toFixed(4)}\n\n${vigenere(txt, res.key, true)}`; }
         }
-        else if (cmd === 'reverse') r = txt.split('').reverse().join('');
-        $('#cip-output').textContent = r;
-        $('#cip-results').style.display = 'block';
+        $('#vg-output').textContent = r;
+        $('#vg-results').style.display = 'block';
       });
     });
-    wireCopy('cip-copy', () => $('#cip-output').textContent);
+    wireCopy('vg-copy', () => $('#vg-output').textContent);
   }
 };
 

