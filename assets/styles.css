@@ -1011,6 +1011,9 @@ textarea {
 .cz-text { font-size: 12.5px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cz-flag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); }
 .af-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* hover-for-help labels (Nmap / curl builder) */
+.cb-tip { border-bottom: 1px dotted var(--text-mute); cursor: help; }
+.pe-chk[data-tip] { cursor: help; }
 /* compact "what is this" callout (distinct from the boxed cards) */
 .explainer { font-size: 12px; line-height: 1.55; color: var(--text-dim); background: var(--accent-dim); border-left: 2px solid var(--accent); border-radius: 0 7px 7px 0; padding: 8px 12px; margin-bottom: 16px; }
 .explainer-q { display: block; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent); margin-bottom: 3px; }

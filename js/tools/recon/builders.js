@@ -20,38 +20,39 @@ TOOLS['cmd-builder'] = {
       </div>`;
   },
   init() {
-    const chk = (id, label, on) => `<label class="pe-chk"><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
+    const chk = (id, label, on, t) => `<label class="pe-chk"${t ? ` data-tip="${escapeHtml(t)}"` : ''}><input type="checkbox" id="${id}"${on ? ' checked' : ''}> ${label}</label>`;
+    const tip = (label, t) => `<span class="cb-tip" data-tip="${escapeHtml(t)}">${label}</span>`; // dotted-underline label with a hover tooltip
     const v = id => ($('#' + id) ? $('#' + id).value.trim() : '');
     const c = id => !!($('#' + id) && $('#' + id).checked);
 
     const NMAP = {
       form: () => `
-        ${field('Target(s)', `<input type="text" id="nm-target" value="scanme.nmap.org" placeholder="host, CIDR, or 10.0.0.1-50">`)}
+        ${field(tip('Target(s)', 'Hosts to scan. Accepts a hostname, an IP, a CIDR like 10.0.0.0/24, or a range like 10.0.0.1-50. Separate several with spaces.'), `<input type="text" id="nm-target" value="scanme.nmap.org" placeholder="host, CIDR, or 10.0.0.1-50">`)}
         <div class="field-row">
-          ${field('Scan type', `<select id="nm-scan">
+          ${field(tip('Scan type', 'How Nmap probes ports. SYN is the fast default, connect works without root, UDP scans UDP services, Ping only checks if hosts are up, ACK maps firewall rules.'), `<select id="nm-scan">
             <option value="-sS">TCP SYN (-sS)</option>
             <option value="-sT">TCP connect (-sT)</option>
             <option value="-sU">UDP (-sU)</option>
             <option value="-sn">Ping / host discovery (-sn)</option>
             <option value="-sA">TCP ACK (-sA)</option>
           </select>`)}
-          ${field('Ports', `<select id="nm-ports">
+          ${field(tip('Ports', 'Which ports to scan. The default covers the top 1000 most common ports.'), `<select id="nm-ports">
             <option value="">Default (top 1000)</option>
             <option value="--top-ports 100">Top 100</option>
             <option value="-F">Fast 100 (-F)</option>
             <option value="-p-">All 65535 (-p-)</option>
           </select>`)}
         </div>
-        ${field('Custom ports (overrides above)', `<input type="text" id="nm-pcustom" placeholder="e.g. 22,80,443,8000-8100">`)}
+        ${field(tip('Custom ports (overrides above)', 'Exact ports to scan, overriding the dropdown. Example: 22,80,443,8000-8100.'), `<input type="text" id="nm-pcustom" placeholder="e.g. 22,80,443,8000-8100">`)}
         <div class="field"><label>Options</label><div class="pe-flags">
-          ${chk('nm-sv', '-sV version', true)}${chk('nm-o', '-O OS')}${chk('nm-a', '-A aggressive')}${chk('nm-sc', '-sC default scripts')}
-          ${chk('nm-open', '--open', true)}${chk('nm-pn', '-Pn no ping')}${chk('nm-n', '-n no DNS')}${chk('nm-v', '-v verbose', true)}
+          ${chk('nm-sv', '-sV version', true, 'Probe open ports to identify the running service and its version.')}${chk('nm-o', '-O OS', false, 'Guess the target operating system from its network fingerprint.')}${chk('nm-a', '-A aggressive', false, 'Turn on OS detection, version detection, default scripts, and traceroute together.')}${chk('nm-sc', '-sC default scripts', false, 'Run the default set of safe scripts against open ports.')}
+          ${chk('nm-open', '--open', true, 'Show only open ports and hide closed or filtered ones.')}${chk('nm-pn', '-Pn no ping', false, 'Skip host discovery and assume the target is online. Useful when ping is blocked.')}${chk('nm-n', '-n no DNS', false, 'Do not resolve hostnames. This speeds up the scan.')}${chk('nm-v', '-v verbose', true, 'Print more detail while the scan runs.')}
         </div></div>
         <div class="field-row">
-          ${field('Timing', `<select id="nm-timing"><option>-T2</option><option>-T3</option><option selected>-T4</option><option>-T5</option></select>`)}
-          ${field('NSE script', `<input type="text" id="nm-script" placeholder="e.g. vuln, http-title">`)}
+          ${field(tip('Timing', 'Scan speed. Higher is faster but noisier and less reliable. T4 is a good default, T2 is stealthier.'), `<select id="nm-timing"><option>-T2</option><option>-T3</option><option selected>-T4</option><option>-T5</option></select>`)}
+          ${field(tip('NSE script', 'Run Nmap Scripting Engine scripts by name or category, such as vuln or http-title.'), `<input type="text" id="nm-script" placeholder="e.g. vuln, http-title">`)}
         </div>
-        ${field('Output basename (-oA)', `<input type="text" id="nm-out" placeholder="writes name.nmap / .gnmap / .xml">`)}
+        ${field(tip('Output basename (-oA)', 'Save the results to three files at once: name.nmap, name.gnmap, and name.xml.'), `<input type="text" id="nm-out" placeholder="writes name.nmap / .gnmap / .xml">`)}
       `,
       build: () => {
         const parts = ['nmap'];
@@ -76,31 +77,31 @@ TOOLS['cmd-builder'] = {
 
     const CURL = {
       form: () => `
-        ${field('URL', `<input type="text" id="cu-url" placeholder="https://target.com/api/login">`)}
+        ${field(tip('URL', 'The full address to request, including https:// and any path or query string.'), `<input type="text" id="cu-url" placeholder="https://target.com/api/login">`)}
         <div class="field-row">
-          ${field('Method', `<select id="cu-method">${['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map(m => `<option>${m}</option>`).join('')}</select>`)}
-          ${field('Content-Type', `<select id="cu-ct">
+          ${field(tip('Method', 'HTTP verb to send. GET reads, POST sends data, PUT and PATCH update, DELETE removes.'), `<select id="cu-method">${['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'].map(m => `<option>${m}</option>`).join('')}</select>`)}
+          ${field(tip('Content-Type', 'Format of the request body. JSON and form-urlencoded are the most common.'), `<select id="cu-ct">
             <option value="">(none)</option>
             <option value="application/json">application/json</option>
             <option value="application/x-www-form-urlencoded">x-www-form-urlencoded</option>
             <option value="multipart/form-data">multipart/form-data</option>
           </select>`)}
         </div>
-        ${field('Body / data (-d)', `<textarea id="cu-data" rows="3" placeholder='{"user":"admin","pass":"x"}'></textarea>`)}
-        ${field('Extra headers (one per line: Key: Value)', `<textarea id="cu-headers" rows="2" placeholder="X-Api-Key: abc123"></textarea>`)}
+        ${field(tip('Body / data (-d)', 'Payload sent with the request. This switches curl to POST unless you pick another method.'), `<textarea id="cu-data" rows="3" placeholder='{"user":"admin","pass":"x"}'></textarea>`)}
+        ${field(tip('Extra headers (one per line: Key: Value)', 'Extra request headers, one per line, written as Name: value.'), `<textarea id="cu-headers" rows="2" placeholder="X-Api-Key: abc123"></textarea>`)}
         <div class="field-row">
-          ${field('Authorization (Bearer)', `<input type="text" id="cu-auth" placeholder="token, adds Authorization: Bearer ...">`)}
-          ${field('Cookie (-b)', `<input type="text" id="cu-cookie" placeholder="session=...">`)}
+          ${field(tip('Authorization (Bearer)', 'A bearer token. This adds an Authorization: Bearer header for you.'), `<input type="text" id="cu-auth" placeholder="token, adds Authorization: Bearer ...">`)}
+          ${field(tip('Cookie (-b)', 'Cookies to send with the request, for example session=abc123.'), `<input type="text" id="cu-cookie" placeholder="session=...">`)}
         </div>
         <div class="field-row">
-          ${field('User-Agent', `<input type="text" id="cu-ua" placeholder="Mozilla/5.0 ...">`)}
-          ${field('Proxy (-x)', `<input type="text" id="cu-proxy" placeholder="http://127.0.0.1:8080 (Burp)">`)}
+          ${field(tip('User-Agent', 'Override the User-Agent string the server sees.'), `<input type="text" id="cu-ua" placeholder="Mozilla/5.0 ...">`)}
+          ${field(tip('Proxy (-x)', 'Send the request through a proxy, for example Burp on http://127.0.0.1:8080.'), `<input type="text" id="cu-proxy" placeholder="http://127.0.0.1:8080 (Burp)">`)}
         </div>
         <div class="field"><label>Options</label><div class="pe-flags">
-          ${chk('cu-k', '-k insecure')}${chk('cu-l', '-L follow', true)}${chk('cu-i', '-i include')}${chk('cu-s', '-s silent')}
-          ${chk('cu-v', '-v verbose')}${chk('cu-comp', '--compressed')}${chk('cu-g', '-G data as query')}
+          ${chk('cu-k', '-k insecure', false, 'Skip TLS certificate verification. Handy for self-signed or intercepted HTTPS.')}${chk('cu-l', '-L follow', true, 'Follow HTTP redirects automatically.')}${chk('cu-i', '-i include', false, 'Include the response headers in the output.')}${chk('cu-s', '-s silent', false, 'Hide the progress meter and error messages.')}
+          ${chk('cu-v', '-v verbose', false, 'Show the full request and response, including headers, for debugging.')}${chk('cu-comp', '--compressed', false, 'Ask for and decode gzip or deflate compressed responses.')}${chk('cu-g', '-G data as query', false, 'Send the data fields in the URL query string instead of the body.')}
         </div></div>
-        ${field('Output file (-o)', `<input type="text" id="cu-out" placeholder="e.g. resp.json">`)}
+        ${field(tip('Output file (-o)', 'Save the response body to a file instead of printing it.'), `<input type="text" id="cu-out" placeholder="e.g. resp.json">`)}
       `,
       build: () => {
         const parts = ['curl'];
