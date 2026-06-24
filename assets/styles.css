@@ -1000,6 +1000,18 @@ textarea {
 .mg-confbar { height: 3px; border-radius: 3px; background: var(--bg-elev2); overflow: hidden; margin-bottom: 8px; }
 .mg-conffill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s; }
 
+/* ===== Caesar / Affine ciphers ===== */
+.cz-enc { display: inline-flex; gap: 8px; align-items: center; }
+.cz-enc input { width: 90px; }
+.cz-row { display: grid; grid-template-columns: 54px 1fr auto; gap: 10px; align-items: center; padding: 3px 8px; border-radius: 6px; }
+.cz-row:hover { background: var(--bg-elev2); }
+.cz-best { background: var(--accent-dim); }
+.cz-shift { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.cz-best .cz-shift { color: var(--accent); font-weight: 700; }
+.cz-text { font-size: 12.5px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cz-flag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); }
+.af-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
 /* ===== Reverse Shell Generator (revshells-style) ===== */
 .rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
 .rsg-conn-fields { display: flex; flex-direction: column; gap: 12px; }

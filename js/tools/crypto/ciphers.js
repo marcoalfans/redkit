@@ -1,17 +1,28 @@
 // RedKit · crypto/ciphers.js (split from crypto.js)
-// ===== CLASSIC CIPHERS =====
+// ===== shared English-frequency scoring (lower chi-squared = more English-like) =====
+const ENG_FREQ = [8.167, 1.492, 2.782, 4.253, 12.702, 2.228, 2.015, 6.094, 6.966, 0.153, 0.772, 4.025, 2.406, 6.749, 7.507, 1.929, 0.095, 5.987, 6.327, 9.056, 2.758, 0.978, 2.360, 0.150, 1.974, 0.074];
+const chiSqEng = (text) => {
+  const c = new Array(26).fill(0); let n = 0;
+  for (const ch of text) { const i = (ch.charCodeAt(0) | 32) - 97; if (i >= 0 && i < 26) { c[i]++; n++; } }
+  if (!n) return Infinity;
+  let chi = 0; for (let i = 0; i < 26; i++) { const e = ENG_FREQ[i] / 100 * n; chi += (c[i] - e) ** 2 / e; }
+  return chi;
+};
+const caesarShift = (s, n) => s.replace(/[a-z]/gi, c => {
+  const base = c <= 'Z' ? 65 : 97;
+  return String.fromCharCode((c.charCodeAt(0) - base + (n % 26) + 26) % 26 + base);
+});
+
+// ===== CLASSIC CIPHERS (keyless transforms) =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Encrypt and decrypt classic ciphers — ROT13, Caesar, Atbash, and reverse.',
+  desc: 'Quick keyless transforms — Atbash and reverse.',
   render() {
     return `
       <div class="tool">
         ${card('Input', `
           ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
-          ${field('Caesar shift (for Caesar cipher)', `<input type="number" id="cip-shift" value="13">`)}
           <div class="btn-row">
-            <button class="btn" data-cmd="rot13">ROT13</button>
-            <button class="btn" data-cmd="caesar">Caesar</button>
             <button class="btn" data-cmd="atbash">Atbash</button>
             <button class="btn" data-cmd="reverse">Reverse</button>
           </div>
@@ -21,29 +32,112 @@ TOOLS['cipher'] = {
     `;
   },
   init() {
-    const caesar = (s, n) => s.replace(/[a-z]/gi, c => {
-      const base = c <= 'Z' ? 65 : 97;
-      return String.fromCharCode((c.charCodeAt(0) - base + n + 26) % 26 + base);
-    });
     const atbash = s => s.replace(/[a-z]/gi, c => {
       const base = c <= 'Z' ? 65 : 97;
       return String.fromCharCode(25 - (c.charCodeAt(0) - base) + base);
     });
     $$('[data-cmd]', $('#cip-input').closest('.card')).forEach(b => {
       b.addEventListener('click', () => {
-        const cmd = b.dataset.cmd;
         const txt = $('#cip-input').value;
-        const n = parseInt($('#cip-shift').value) || 0;
-        let r;
-        if (cmd === 'rot13') r = caesar(txt, 13);
-        else if (cmd === 'caesar') r = caesar(txt, n);
-        else if (cmd === 'atbash') r = atbash(txt);
-        else if (cmd === 'reverse') r = txt.split('').reverse().join('');
-        $('#cip-output').textContent = r;
+        $('#cip-output').textContent = b.dataset.cmd === 'atbash' ? atbash(txt) : txt.split('').reverse().join('');
         $('#cip-results').style.display = 'block';
       });
     });
     wireCopy('cip-copy', () => $('#cip-output').textContent);
+  }
+};
+
+// ===== CAESAR / ROT (live brute-force of all 26 shifts + English auto-detect) =====
+TOOLS['caesar'] = {
+  title: 'Caesar / ROT',
+  desc: 'Caesar shift (ROT-N) with live brute-force of all 26 rotations and English auto-detection — covers ROT13 and every shift.',
+  render() {
+    return `
+      <div class="tool">
+        ${card('Input', `
+          ${field('', `<textarea id="cz-input" placeholder="paste ciphertext to auto-crack, or text to encrypt..."></textarea>`)}
+          ${field('Encrypt with a specific shift', `<span class="cz-enc"><input type="number" id="cz-shift" value="3" min="0" max="25"><button class="btn" id="cz-enc-btn">Encrypt</button></span>`)}
+        `)}
+        ${card('', resultHead('Encrypted', ghostBtn('cz-enc-copy')) + `<div class="result-box" id="cz-enc-out"></div>`, { id: 'cz-enc-card', hidden: true })}
+        ${card('', resultHead('Brute-force — all 26 rotations (likely plaintext highlighted)') + `<div id="cz-brute"></div>`)}
+      </div>
+    `;
+  },
+  init() {
+    const brute = () => {
+      const inp = $('#cz-input'), box = $('#cz-brute');
+      if (!inp || !box) return; // tool was navigated away before the debounced call fired
+      const txt = inp.value;
+      if (!txt) { box.innerHTML = '<div class="mg-empty">Type or paste text to see all 26 rotations.</div>'; return; }
+      let best = 0, bestChi = Infinity; const rows = [];
+      for (let n = 0; n < 26; n++) { const dec = caesarShift(txt, -n); const chi = chiSqEng(dec); if (chi < bestChi) { bestChi = chi; best = n; } rows.push([n, dec]); }
+      box.innerHTML = rows.map(([n, dec]) =>
+        `<div class="cz-row${n === best ? ' cz-best' : ''}"><span class="cz-shift">ROT${n}</span><span class="cz-text mono" data-copy="${escapeHtml(dec)}">${escapeHtml(dec)}</span>${n === best ? '<span class="cz-flag">likely</span>' : ''}</div>`).join('');
+      wireCopyAll(box);
+    };
+    let t; $('#cz-input').addEventListener('input', () => { clearTimeout(t); t = setTimeout(brute, 140); });
+    $('#cz-enc-btn').addEventListener('click', () => {
+      const n = ((parseInt($('#cz-shift').value) || 0) % 26 + 26) % 26;
+      $('#cz-enc-out').textContent = caesarShift($('#cz-input').value, n);
+      $('#cz-enc-card').style.display = 'block';
+    });
+    wireCopy('cz-enc-copy', () => $('#cz-enc-out').textContent);
+    brute();
+  }
+};
+
+// ===== AFFINE CIPHER  E(x) = (a·x + b) mod 26 =====
+TOOLS['affine'] = {
+  title: 'Affine Cipher',
+  desc: 'Encrypt, decrypt, and brute-force the affine cipher E(x) = (a·x + b) mod 26, with English auto-detection.',
+  render() {
+    const aOpts = [1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25].map(a => `<option>${a}</option>`).join('');
+    return `
+      <div class="tool">
+        ${card('Input', `
+          ${field('', `<textarea id="af-input" placeholder="enter text..."></textarea>`)}
+          <div class="af-keys">
+            ${field('Key a (coprime with 26)', `<select id="af-a">${aOpts}</select>`)}
+            ${field('Key b (0–25)', `<input type="number" id="af-b" value="0" min="0" max="25">`)}
+          </div>
+          <div class="btn-row">
+            <button class="btn" data-cmd="enc">Encrypt</button>
+            <button class="btn" data-cmd="dec">Decrypt</button>
+            <button class="btn" data-cmd="crack">Auto-Crack</button>
+          </div>
+        `)}
+        ${card('', resultHead('Output', ghostBtn('af-copy')) + `<div class="result-box" id="af-output"></div>`, { id: 'af-results', hidden: true })}
+      </div>
+    `;
+  },
+  init() {
+    const A_VALS = [1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25];
+    const modinv = (a) => { for (let t = 1; t < 26; t++) if ((a * t) % 26 === 1) return t; return 1; };
+    const affine = (s, a, b, dec) => {
+      const ai = modinv(a);
+      return s.replace(/[a-z]/gi, c => {
+        const base = c <= 'Z' ? 65 : 97, x = c.charCodeAt(0) - base;
+        const y = dec ? (ai * (((x - b) % 26) + 26)) % 26 : (a * x + b) % 26;
+        return String.fromCharCode(y + base);
+      });
+    };
+    const crack = (txt) => {
+      let best = null, bestChi = Infinity;
+      for (const a of A_VALS) for (let b = 0; b < 26; b++) { const dec = affine(txt, a, b, true); const chi = chiSqEng(dec); if (chi < bestChi) { bestChi = chi; best = { a, b, dec }; } }
+      return best;
+    };
+    const out = $('#af-output');
+    $$('[data-cmd]', $('#af-input').closest('.card')).forEach(btn => btn.addEventListener('click', () => {
+      const cmd = btn.dataset.cmd, txt = $('#af-input').value;
+      const a = parseInt($('#af-a').value) || 1, b = ((parseInt($('#af-b').value) || 0) % 26 + 26) % 26;
+      let r;
+      if (cmd === 'enc') r = affine(txt, a, b, false);
+      else if (cmd === 'dec') r = affine(txt, a, b, true);
+      else { if (!txt.replace(/[^a-z]/gi, '')) r = '⚠ Enter some ciphertext to brute-force.'; else { const c = crack(txt); $('#af-a').value = c.a; $('#af-b').value = c.b; r = `Key a=${c.a}, b=${c.b}\n\n${c.dec}`; } }
+      out.textContent = r;
+      $('#af-results').style.display = 'block';
+    }));
+    wireCopy('af-copy', () => out.textContent);
   }
 };
 
