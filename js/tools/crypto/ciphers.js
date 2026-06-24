@@ -16,10 +16,16 @@ const caesarShift = (s, n) => s.replace(/[a-z]/gi, c => {
 // ===== CLASSIC CIPHERS (keyless transforms) =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Quick keyless transforms — Atbash and reverse.',
+  desc: 'Atbash (reverses the alphabet, A↔Z) and text reverse — symmetric keyless transforms.',
   render() {
     return `
       <div class="tool">
+        ${card('What these do', `
+          <p class="cipher-note">Atbash reverses the alphabet — A becomes Z, B becomes Y, C becomes X, and so on. It is symmetric, so running it twice returns the original. (Originally a Hebrew cipher.)</p>
+          <pre class="atbash-map mono" data-noi18n>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+Z Y X W V U T S R Q P O N M L K J I H G F E D C B A</pre>
+          <p class="cipher-note">Reverse simply flips the order of the characters — "hello" becomes "olleh". It is not a real cipher, just a quick transform.</p>
+        `)}
         ${card('Input', `
           ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
           <div class="btn-row">
