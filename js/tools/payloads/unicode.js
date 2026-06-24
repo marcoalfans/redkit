@@ -1,6 +1,6 @@
 // RedKit · payloads/unicode.js
 // ===== UNICODE / HOMOGLYPH / PUNYCODE =====
-// Punycode (RFC 3492) — self-contained, used for IDN encode/decode.
+// Punycode (RFC 3492), self-contained, used for IDN encode/decode.
 const punycode = (() => {
   const maxInt = 2147483647, base = 36, tMin = 1, tMax = 26, skew = 38, damp = 700, initialBias = 72, initialN = 128, delim = '-';
   const baseMinusTMin = base - tMin;
@@ -163,7 +163,7 @@ TOOLS['unicode'] = {
       const vars = homoglyphVariants(seed);
       if (!vars.length) return '<div class="mg-empty">No homoglyphs available for these characters (try a-z, 0-9).</div>';
       return `
-        <div class="uni-summary"><span>${vars.length} lookalike${vars.length > 1 ? 's' : ''} of <b>${escapeHtml(seed)}</b> — visually similar, different codepoints</span></div>
+        <div class="uni-summary"><span>${vars.length} lookalike${vars.length > 1 ? 's' : ''} of <b>${escapeHtml(seed)}</b>, visually similar, different codepoints</span></div>
         <div class="payload-list">
           ${vars.map(v => {
             let puny = ''; try { puny = punycode.toASCII(v); } catch (e) { puny = '(invalid)'; }

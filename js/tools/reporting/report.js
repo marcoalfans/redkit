@@ -52,8 +52,8 @@ TOOLS['report-template'] = {
                 <option value="4.0">CVSS 4.0</option>
               </select>`)}
             ${field('CVSS Vector', `<input type="text" id="rt-vector" placeholder="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H">`)}
-            ${field('Score', `<div class="rt-out-box"><span class="rt-score" id="rt-score">—</span></div>`)}
-            ${field('Severity', `<div class="rt-out-box"><span class="severity-badge sev-none" id="rt-sevbadge">—</span></div>`)}
+            ${field('Score', `<div class="rt-out-box"><span class="rt-score" id="rt-score">N/A</span></div>`)}
+            ${field('Severity', `<div class="rt-out-box"><span class="severity-badge sev-none" id="rt-sevbadge">N/A</span></div>`)}
           </div>
           ${field('Affected URL(s)', `<div id="rt-urls">
               <div class="rt-url-row">
@@ -93,7 +93,7 @@ TOOLS['report-template'] = {
       raw.replace(/^CVSS:[0-9.]+\//i, '').split('/').forEach(p => { const a = p.split(':'); if (a[0] && a[1]) sel[a[0].trim().toUpperCase()] = a[1].trim().toUpperCase(); });
       const score = ver === '4.0' ? calcCVSS40(sel) : calcCVSS31(sel);
       const scoreEl = $('#rt-score'), badge = $('#rt-sevbadge');
-      if (score == null || isNaN(score)) { scoreEl.textContent = '—'; scoreEl.style.color = 'var(--text-mute)'; badge.className = 'severity-badge sev-none'; badge.textContent = '—'; return; }
+      if (score == null || isNaN(score)) { scoreEl.textContent = 'N/A'; scoreEl.style.color = 'var(--text-mute)'; badge.className = 'severity-badge sev-none'; badge.textContent = 'N/A'; return; }
       const [cls, label] = severityFromScore(score);
       scoreEl.textContent = score.toFixed(1);
       scoreEl.style.color = SEV_COLOR[cls] || 'var(--text-mute)';
@@ -125,7 +125,7 @@ TOOLS['report-template'] = {
       const severity = $('#rt-sevbadge').textContent;
       const ver = $('#rt-cvssver').value;
       const vector = $('#rt-vector').value.trim();
-      const sevLine = (severity && severity !== '—') ? `${severity}${score !== '—' ? ` — CVSS ${ver} ${score}` : ''}` : 'N/A';
+      const sevLine = (severity && severity !== 'N/A') ? `${severity}${score !== 'N/A' ? `, CVSS ${ver} ${score}` : ''}` : 'N/A';
       const multi = (cls) => { const a = $$(cls).map(i => i.value.trim()).filter(Boolean); return a.length === 0 ? 'N/A' : a.length === 1 ? a[0] : a.map(x => '- ' + x).join('\n'); };
       const urlOut = multi('.rt-url');
       const refOut = multi('.rt-ref');
@@ -179,9 +179,9 @@ ${fields.poc}
     $('#rt-clear').addEventListener('click', () => {
       ['rt-name','rt-vector','rt-desc','rt-impact','rt-rem','rt-poc'].forEach(id => $(`#${id}`).value = '');
       ['#rt-urls','#rt-refs'].forEach(sel => { const box = $(sel); Array.from(box.children).slice(1).forEach(r => r.remove()); box.querySelector('input').value = ''; });
-      $('#rt-score').textContent = '—';
+      $('#rt-score').textContent = 'N/A';
       $('#rt-sevbadge').className = 'severity-badge sev-none';
-      $('#rt-sevbadge').textContent = '—';
+      $('#rt-sevbadge').textContent = 'N/A';
     });
     wireCopy('rt-copy', () => $('#rt-output').textContent);
     $('#rt-dl').addEventListener('click', () => {

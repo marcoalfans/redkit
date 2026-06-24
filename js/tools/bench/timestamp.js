@@ -30,7 +30,7 @@ const tsRelative = (ms) => {
     for (const [u, per] of units) if (abs >= per || u === 'second') return rtf.format(Math.round(diff / per), u);
   } catch (e) { return ''; }
 };
-const tsInTz = (d, tz) => { try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'long', timeZone: tz }).format(d); } catch (e) { return '—'; } };
+const tsInTz = (d, tz) => { try { return new Intl.DateTimeFormat(undefined, { dateStyle: 'full', timeStyle: 'long', timeZone: tz }).format(d); } catch (e) { return 'N/A'; } };
 const tsIsoWeek = (d) => { const t = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())); const day = t.getUTCDay() || 7; t.setUTCDate(t.getUTCDate() + 4 - day); const ys = new Date(Date.UTC(t.getUTCFullYear(), 0, 1)); return { week: Math.ceil(((t - ys) / 864e5 + 1) / 7), year: t.getUTCFullYear() }; };
 const tsDayOfYear = (d) => Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 0)) / 864e5);
 

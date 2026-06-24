@@ -7,7 +7,7 @@
 // NAVIGATION
 // ============================================================
 // ============================================================
-// Per-tool EXAMPLES — feature-specific sample inputs (not generic defaults)
+// Per-tool EXAMPLES, feature-specific sample inputs (not generic defaults)
 // ============================================================
 // accepts a bare id ("gd-domain") or a full CSS selector (".rt-url", "#x")
 const exFill = (idOrSel, val) => {

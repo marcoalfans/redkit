@@ -21,7 +21,7 @@ const transcoderTemplate = (id, opts = {}) => `
         </div>
         <button class="tc-swap" id="${id}-swap" title="Swap direction"><i class="fas fa-right-left"></i></button>
         <div class="tc-pane">
-          <div class="tc-head"><span class="tc-label" id="${id}-rlabel">—</span><span class="tc-head-btns"><button class="btn btn-ghost tc-copy" id="${id}-dl">Download</button><button class="btn btn-ghost tc-copy" id="${id}-copy">Copy</button></span></div>
+          <div class="tc-head"><span class="tc-label" id="${id}-rlabel">N/A</span><span class="tc-head-btns"><button class="btn btn-ghost tc-copy" id="${id}-dl">Download</button><button class="btn btn-ghost tc-copy" id="${id}-copy">Copy</button></span></div>
           <textarea id="${id}-dst" class="tc-area tc-out" readonly placeholder="result…" spellcheck="false"></textarea>
           <div class="tc-stat" id="${id}-rstat"></div>
         </div>
@@ -196,7 +196,7 @@ const base85Decode = (str) => {
   return new TextDecoder().decode(new Uint8Array(bytes));
 };
 
-// ===== BASE45 (RFC 9285) — used by EU Digital COVID certificates =====
+// ===== BASE45 (RFC 9285), used by EU Digital COVID certificates =====
 const B45_ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:';
 const base45Encode = (str) => {
   const bytes = new TextEncoder().encode(str);

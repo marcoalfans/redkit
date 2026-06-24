@@ -239,7 +239,7 @@
     'MOST LIKELY': 'PALING MUNGKIN',
     'Possible Hash Types': 'Kemungkinan Jenis Hash',
 
-    // Security header analyzer — badges, grades, descriptions
+    // Security header analyzer, badges, grades, descriptions
     'Security Headers': 'Header Keamanan',
     'PRESENT': 'ADA',
     'MISSING': 'HILANG',
@@ -377,7 +377,7 @@
   const getLang = () => localStorage.getItem('lang') || 'en';
   const setLang = (l) => { localStorage.setItem('lang', l); document.documentElement.setAttribute('data-lang', l); };
 
-  // never translate raw output/code panes — their text is user/decoded data that
+  // never translate raw output/code panes, their text is user/decoded data that
   // could coincidentally equal a dictionary key and get corrupted.
   const SKIP = '.result-box, pre, code, [data-noi18n]';
   const inSkip = (node) => { const e = node.nodeType === 1 ? node : node.parentElement; return !!(e && e.closest && e.closest(SKIP)); };
@@ -389,7 +389,7 @@
 
   const translateNode = (root) => {
     if (getLang() !== 'id' || !root) return;
-    // assign only when the value actually changes — keeps the characterData
+    // assign only when the value actually changes, keeps the characterData
     // observer loop-free (a translated value is never a dictionary key).
     if (root.nodeType === 3) { if (!inSkip(root)) setText(root); return; }
     if (root.nodeType !== 1) return;

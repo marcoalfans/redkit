@@ -1,5 +1,5 @@
 /* ============================================================
-   RedKit - NEW TOOL TEMPLATE  (reference only — NOT loaded)
+   RedKit - NEW TOOL TEMPLATE  (reference only, NOT loaded)
    ------------------------------------------------------------
    To add a tool, copy the block below into the right category
    file (js/tools/recon|crypto|payloads|reporting.js), rename the

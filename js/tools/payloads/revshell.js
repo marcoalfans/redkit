@@ -32,7 +32,7 @@ TOOLS['revshell'] = {
           <div class="rsg-grid">
             <div class="rsg-list" id="rsg-list"></div>
             <div class="rsg-outwrap">
-              <div class="result-header"><h4 id="rsg-name">—</h4>${ghostBtn('rsg-copy')}</div>
+              <div class="result-header"><h4 id="rsg-name">N/A</h4>${ghostBtn('rsg-copy')}</div>
               <pre class="not-pre mono" id="rsg-out"></pre>
             </div>
           </div>
@@ -66,7 +66,7 @@ TOOLS['revshell'] = {
         && (!q || it.name.toLowerCase().includes(q)));
     };
     const renderOut = () => {
-      if (!selected) { $('#rsg-name').textContent = '—'; $('#rsg-out').textContent = ''; return; }
+      if (!selected) { $('#rsg-name').textContent = 'N/A'; $('#rsg-out').textContent = ''; return; }
       $('#rsg-name').textContent = selected.name;
       $('#rsg-out').textContent = encode(selected.command);
     };

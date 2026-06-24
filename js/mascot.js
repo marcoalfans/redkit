@@ -1,5 +1,5 @@
 /* ============================================================
-   RedKit Agent — drop-in pixel mascot for the sidebar
+   RedKit Agent, drop-in pixel mascot for the sidebar
    Usage:
      1) Put a container below your <nav>:  <div id="rk-mascot"></div>
      2) Load this file:  <script src="agent.js" defer></script>
@@ -48,7 +48,7 @@
   const FRAME_REST=HEAD_BODY.concat(LEGS_STAND), FRAME_ANGRY=ANGRY_HEAD.concat(LEGS_STAND);
   const SPR_W=16, SPR_H=17;
 
-  // ---------- laptop held while resting (screen faces the mascot — we see the lid back) ----------
+  // ---------- laptop held while resting (screen faces the mascot, we see the lid back) ----------
   const LAPTOP = [
     "EEEEEEEEE",
     "EKKKKKKKE",
@@ -225,7 +225,7 @@
     }
     cv.addEventListener("click", () => triggerAngry(performance.now()));
 
-    // (mascot always animates — decorative element, ignores prefers-reduced-motion)
+    // (mascot always animates, decorative element, ignores prefers-reduced-motion)
 
     // resize handling (animated path)
     if (window.ResizeObserver) new ResizeObserver(() => { fit(); computeRest(); }).observe(wrap);

@@ -55,7 +55,7 @@ const download = (filename, content, mime = 'text/plain') => {
 };
 
 // ============================================================
-// UI BUILDERS — shared markup helpers used by every tool.
+// UI BUILDERS, shared markup helpers used by every tool.
 // See js/tools/_template.js for how to use them in a new tool.
 // ============================================================
 

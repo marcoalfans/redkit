@@ -21,7 +21,7 @@ TOOLS['hash'] = {
       const out = $('#hash-output');
       out.innerHTML = '';
       if (typeof CryptoJS === 'undefined') {
-        out.innerHTML = '<div class="header-row"><span class="h-detail">Hash library failed to load — check your connection and retry.</span></div>';
+        out.innerHTML = '<div class="header-row"><span class="h-detail">Hash library failed to load, check your connection and retry.</span></div>';
         $('#hash-results').style.display = 'block';
         return;
       }

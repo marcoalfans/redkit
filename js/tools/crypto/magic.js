@@ -1,5 +1,5 @@
 // RedKit · crypto/magic.js (split from crypto.js)
-// ===== MAGIC — auto-detect encoding(s), CyberChef-style =====
+// ===== MAGIC, auto-detect encoding(s), CyberChef-style =====
 const rot13 = s => s.replace(/[a-zA-Z]/g, c => { const b = c <= 'Z' ? 65 : 97; return String.fromCharCode((c.charCodeAt(0) - b + 13) % 26 + b); });
 const rot47 = s => s.replace(/[!-~]/g, c => String.fromCharCode(33 + (c.charCodeAt(0) - 33 + 47) % 94));
 const b64urlDec = s => b64Dec(s.replace(/-/g, '+').replace(/_/g, '/'));
@@ -13,7 +13,7 @@ const jwtDecode = (s) => {
   const dec = x => b64Dec(x.replace(/-/g, '+').replace(/_/g, '/'));
   return JSON.stringify({ header: JSON.parse(dec(parts[0])), payload: JSON.parse(dec(parts[1])) }, null, 2);
 };
-// Shannon entropy (bits/char) — low ≈ plain text, ~4 ≈ base64/hex, ~7.5+ ≈ encrypted/compressed
+// Shannon entropy (bits/char), low ≈ plain text, ~4 ≈ base64/hex, ~7.5+ ≈ encrypted/compressed
 const shannonEntropy = (s) => {
   if (!s) return 0;
   const f = {}; for (const c of s) f[c] = (f[c] || 0) + 1;
@@ -113,16 +113,16 @@ TOOLS['magic'] = {
       if (!v) { info.innerHTML = ''; box.innerHTML = '<div class="mg-empty">Waiting for input…</div>'; return; }
       // input analysis: size, entropy, and which top-level ops match
       const ent = shannonEntropy(v);
-      const entHint = ent < 3.5 ? 'low / repetitive' : ent < 5 ? 'text / hex range' : ent < 6.2 ? 'base64 range' : 'high — random/encrypted?';
+      const entHint = ent < 3.5 ? 'low / repetitive' : ent < 5 ? 'text / hex range' : ent < 6.2 ? 'base64 range' : 'high, random/encrypted?';
       const matched = MAGIC_OPS.filter(op => !/ROT/.test(op.label) && (() => { try { return op.test(v); } catch (e) { return false; } })()).map(op => op.label);
       info.innerHTML =
         `<span class="mg-chip">${[...v].length} chars</span>` +
-        `<span class="mg-chip" title="Shannon entropy — bits per character">entropy ${ent.toFixed(2)} · ${entHint}</span>` +
-        (printableScore(v) > 1.12 ? `<span class="mg-chip mg-chip-warn" title="The input itself reads as plain text — decode candidates below may be spurious">input already looks readable</span>` : '') +
+        `<span class="mg-chip" title="Shannon entropy, bits per character">entropy ${ent.toFixed(2)} · ${entHint}</span>` +
+        (printableScore(v) > 1.12 ? `<span class="mg-chip mg-chip-warn" title="The input itself reads as plain text, decode candidates below may be spurious">input already looks readable</span>` : '') +
         (matched.length ? `<span class="mg-chip-label">matches:</span>` + matched.map(m => `<span class="mg-chip mg-chip-op">${escapeHtml(m)}</span>`).join('')
                         : `<span class="mg-chip-label">no encoding pattern matched the input</span>`);
       const res = magicSearch(v, parseInt($('#magic-depth').value, 10) || 8);
-      if (!res.length) { box.innerHTML = '<div class="mg-empty">No nested decoding found — the input may be plaintext, encrypted, or compressed. Try the Base / Hex tools manually.</div>'; return; }
+      if (!res.length) { box.innerHTML = '<div class="mg-empty">No nested decoding found, the input may be plaintext, encrypted, or compressed. Try the Base / Hex tools manually.</div>'; return; }
       box.innerHTML = res.map((r, i) => {
         const conf = Math.max(4, Math.min(100, Math.round(r.score * 55)));
         const out = escapeHtml(r.output.length > 600 ? r.output.slice(0, 600) + '…' : r.output);

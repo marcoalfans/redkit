@@ -199,7 +199,7 @@ const CVSS40_METRICS = {
   SA: { name: 'Subsequent Availability', opts: [['H','High'],['L','Low'],['N','None']] },
 };
 
-// CVSS 4.0 — official FIRST.org base scoring (bundled in cvss4.js from FIRSTdotorg/cvss-v4-calculator)
+// CVSS 4.0, official FIRST.org base scoring (bundled in cvss4.js from FIRSTdotorg/cvss-v4-calculator)
 const calcCVSS40 = (sel) => (window.calcCVSS40Official ? window.calcCVSS40Official(sel) : null);
 
 TOOLS['4.0'] = {

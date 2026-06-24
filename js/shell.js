@@ -30,7 +30,7 @@
           const n = sections.filter(s => s.dataset.cat === cat).reduce((a, s) => a + s.querySelectorAll('.nav-item').length, 0);
           return '<button class="welcome-item" data-go="' + cat + '"><div class="welcome-info"><h3>' + label + '</h3><p>' + n + ' tools</p></div></button>';
         }).join('');
-        return '<div class="welcome"><div class="welcome-card"><h1>RedKit</h1><p>Pentest &amp; Red Team Toolkit — pick a category to get started.</p><div class="welcome-grid">' + cards + '</div></div></div>';
+        return '<div class="welcome"><div class="welcome-card"><h1>RedKit</h1><p>Pentest &amp; Red Team Toolkit, pick a category to get started.</p><div class="welcome-grid">' + cards + '</div></div></div>';
       }
       function showHome() {
         items.forEach(n => n.classList.remove('active'));
@@ -62,7 +62,7 @@
         if (sidebar) sidebar.classList.remove('open');
       }));
 
-      // ----- deep-link routing (#/<tool>) — single entry point into loadTool -----
+      // ----- deep-link routing (#/<tool>), single entry point into loadTool -----
       function hashKey() { const m = location.hash.match(/^#\/([\w.-]+)/); return m ? m[1] : null; }
       function route() {
         const key = hashKey();
