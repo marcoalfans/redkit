@@ -16,16 +16,16 @@ const caesarShift = (s, n) => s.replace(/[a-z]/gi, c => {
 // ===== CLASSIC CIPHERS (keyless transforms) =====
 TOOLS['cipher'] = {
   title: 'Classic Ciphers',
-  desc: 'Atbash (reverses the alphabet, A↔Z) and text reverse — symmetric keyless transforms.',
+  desc: 'Atbash (reverses the alphabet, A↔Z) and text reverse. Symmetric keyless transforms.',
   render() {
     return `
       <div class="tool">
-        ${card('What these do', `
-          <p class="cipher-note">Atbash reverses the alphabet — A becomes Z, B becomes Y, C becomes X, and so on. It is symmetric, so running it twice returns the original. (Originally a Hebrew cipher.)</p>
+        <div class="explainer">
+          <span class="explainer-q">What do these do?</span>
+          <span class="explainer-body">Atbash reverses the alphabet, so A becomes Z, B becomes Y, C becomes X, and so on (it is symmetric, so running it twice returns the original). Reverse just flips the character order, so "hello" becomes "olleh".</span>
           <pre class="atbash-map mono" data-noi18n>A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
 Z Y X W V U T S R Q P O N M L K J I H G F E D C B A</pre>
-          <p class="cipher-note">Reverse simply flips the order of the characters — "hello" becomes "olleh". It is not a real cipher, just a quick transform.</p>
-        `)}
+        </div>
         ${card('Input', `
           ${field('', `<textarea id="cip-input" placeholder="enter text..."></textarea>`)}
           <div class="btn-row">
@@ -56,16 +56,20 @@ Z Y X W V U T S R Q P O N M L K J I H G F E D C B A</pre>
 // ===== CAESAR / ROT (live brute-force of all 26 shifts + English auto-detect) =====
 TOOLS['caesar'] = {
   title: 'Caesar / ROT',
-  desc: 'Caesar shift (ROT-N) with live brute-force of all 26 rotations and English auto-detection — covers ROT13 and every shift.',
+  desc: 'Caesar shift (ROT-N) with live brute-force of all 26 rotations and English auto-detection. Covers ROT13 and every shift.',
   render() {
     return `
       <div class="tool">
+        <div class="explainer">
+          <span class="explainer-q">What is the Caesar cipher?</span>
+          <span class="explainer-body">It shifts every letter forward by a fixed number of places. ROT13 is a Caesar shift of 13. This tool tries all 26 shifts at once and highlights the one that reads most like English, so you can crack it without knowing the shift.</span>
+        </div>
         ${card('Input', `
           ${field('', `<textarea id="cz-input" placeholder="paste ciphertext to auto-crack, or text to encrypt..."></textarea>`)}
           ${field('Encrypt with a specific shift', `<span class="cz-enc"><input type="number" id="cz-shift" value="3" min="0" max="25"><button class="btn" id="cz-enc-btn">Encrypt</button></span>`)}
         `)}
         ${card('', resultHead('Encrypted', ghostBtn('cz-enc-copy')) + `<div class="result-box" id="cz-enc-out"></div>`, { id: 'cz-enc-card', hidden: true })}
-        ${card('', resultHead('Brute-force — all 26 rotations (likely plaintext highlighted)') + `<div id="cz-brute"></div>`)}
+        ${card('', resultHead('Brute-force: all 26 rotations (likely plaintext highlighted)') + `<div id="cz-brute"></div>`)}
       </div>
     `;
   },
@@ -100,6 +104,10 @@ TOOLS['affine'] = {
     const aOpts = [1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25].map(a => `<option>${a}</option>`).join('');
     return `
       <div class="tool">
+        <div class="explainer">
+          <span class="explainer-q">What is the affine cipher?</span>
+          <span class="explainer-body">It maps each letter x (0 to 25) to (a times x plus b) mod 26, using two keys. The key a must be coprime with 26 so the mapping can be reversed. Press Auto-Crack to try every valid key and keep the most English-looking result.</span>
+        </div>
         ${card('Input', `
           ${field('', `<textarea id="af-input" placeholder="enter text..."></textarea>`)}
           <div class="af-keys">
@@ -150,10 +158,14 @@ TOOLS['affine'] = {
 // ===== VIGENÈRE CIPHER (encrypt / decrypt / auto-crack) =====
 TOOLS['vigenere'] = {
   title: 'Vigenère Cipher',
-  desc: 'Encrypt, decrypt, and auto-crack the Vigenère cipher — keyless cryptanalysis via Index of Coincidence and chi-squared frequency analysis.',
+  desc: 'Encrypt, decrypt, and auto-crack the Vigenère cipher. Keyless cryptanalysis via Index of Coincidence and chi-squared frequency analysis.',
   render() {
     return `
       <div class="tool">
+        <div class="explainer">
+          <span class="explainer-q">What is the Vigenère cipher?</span>
+          <span class="explainer-body">It shifts each letter by a different amount taken from a repeating keyword, so the same letter can encrypt differently. That makes it much stronger than a Caesar cipher. Leave the key blank and press Auto-Crack to recover it from the ciphertext alone.</span>
+        </div>
         ${card('Input', `
           ${field('', `<textarea id="vg-input" placeholder="enter text..."></textarea>`)}
           ${field('Key (leave blank and use Auto-Crack to recover it)', `<input type="text" id="vg-key" placeholder="e.g. SECRET" autocomplete="off" spellcheck="false">`)}

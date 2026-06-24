@@ -1011,9 +1011,11 @@ textarea {
 .cz-text { font-size: 12.5px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cz-flag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); }
 .af-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.cipher-note { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin: 0 0 10px; }
-.cipher-note:last-child { margin-bottom: 0; }
-.atbash-map { font-size: 12.5px; line-height: 1.8; color: var(--text); background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin: 0 0 12px; overflow-x: auto; letter-spacing: 1.5px; }
+/* compact "what is this" callout (distinct from the boxed cards) */
+.explainer { font-size: 12px; line-height: 1.55; color: var(--text-dim); background: var(--accent-dim); border-left: 2px solid var(--accent); border-radius: 0 7px 7px 0; padding: 8px 12px; margin-bottom: 16px; }
+.explainer-q { display: block; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent); margin-bottom: 3px; }
+.explainer-body { display: block; }
+.atbash-map { display: inline-block; font-size: 11.5px; line-height: 1.7; color: var(--text); background: var(--code-bg); border: 1px solid var(--border); border-radius: 7px; padding: 7px 10px; margin: 8px 0 0; overflow-x: auto; letter-spacing: 1.5px; }
 
 /* ===== Reverse Shell Generator (revshells-style) ===== */
 .rsg-top { display: grid; grid-template-columns: 240px 1fr; gap: 18px; margin-bottom: 18px; align-items: stretch; }
