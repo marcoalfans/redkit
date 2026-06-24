@@ -20,6 +20,7 @@
         <button class="rk-tab" data-cat="recon">Recon</button>
         <button class="rk-tab" data-cat="crypto">Crypto</button>
         <button class="rk-tab" data-cat="payloads">Payloads</button>
+        <button class="rk-tab" data-cat="privesc">Privesc</button>
         <button class="rk-tab" data-cat="reporting">Reporting</button>
         <button class="rk-tab" data-cat="bench">Bench</button>
     </nav>
@@ -99,6 +100,10 @@
           <button class="nav-item" data-tool="graphql-helper">GraphQL Helper</button>
           <button class="nav-item" data-tool="jwt-attacks">JWT Attack Helper</button>
         </div>
+        <div class="nav-section" data-cat="privesc">
+          <div class="nav-title">Privilege Escalation</div>
+          <button class="nav-item" data-tool="gtfobins">GTFOBins (Linux)</button>
+        </div>
         <div class="nav-section" data-cat="reporting">
           <div class="nav-title">Reporting</div>
           <button class="nav-item" data-tool="3.1">CVSS 3.1 Calculator</button>
@@ -147,6 +152,7 @@
   <script src="js/data/cvss4.js"></script>
   <script src="js/data/rsg-data.js"></script>
   <script src="js/data/http-ref-data.js"></script>
+  <script src="js/data/gtfobins-data.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/core.js"></script>
   <script src="js/tools/recon/dorks.js"></script>
@@ -169,6 +175,7 @@
   <script src="js/tools/payloads/unicode.js"></script>
   <script src="js/tools/reporting/cvss.js"></script>
   <script src="js/tools/reporting/report.js"></script>
+  <script src="js/tools/privesc/gtfobins.js"></script>
   <script src="js/tools/bench/timestamp.js"></script>
   <script src="js/tools/bench/chmod.js"></script>
   <script src="js/tools/bench/notationer.js"></script>
